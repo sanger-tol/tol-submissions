@@ -94,7 +94,8 @@ def process_pending_dtol_samples():
                 build_submission_xml(str(sour['_id']), release=True)
                 accessions = submit_biosample(str(sour['_id']), Source(), submission['_id'], type="source")
                 print(accessions)
-                specimen_accession = Source().get_specimen_biosample(sam["SPECIMEN_ID"])[0].get("biosampleAccession", "")
+                specimen_accession = Source().get_specimen_biosample(sam["SPECIMEN_ID"])[0].get("biosampleAccession",
+                                                                                                "")
 
             if not specimen_accession:
                 Submission().make_dtol_status_pending(submission['_id'])

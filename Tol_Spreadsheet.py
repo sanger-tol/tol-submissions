@@ -23,7 +23,7 @@ from COPO.web.apps.web_copo.lookup import dtol_lookups as lookup
 from COPO.web.apps.web_copo.lookup import lookup as lk
 from COPO.web.apps.web_copo.lookup.lookup import SRA_SETTINGS
 from COPO.web.apps.web_copo.schemas.utils.data_utils import json_to_pytype
-from Tol_Helpers import make_tax_from_sample
+from COPO.web.apps.web_copo.utils.dtol.Dtol_Helpers import make_tax_from_sample
 from COPO.web.apps.web_copo.utils.dtol.tol_validators import optional_field_dtol_validators as optional_validators
 from COPO.web.apps.web_copo.utils.dtol.tol_validators import required_field_dtol_validators as required_validators
 from COPO.web.apps.web_copo.utils.dtol.tol_validators import taxon_validators
@@ -56,10 +56,10 @@ class DtolSpreadsheet:
     def __init__(self, file=None):
         self.req = ThreadLocal.get_current_request()
         self.profile_id = self.req.session.get("profile_id", None)
-        # sample_images = Path(settings.MEDIA_ROOT) / "sample_images"
-        # display_images = Path(settings.MEDIA_ROOT) / "img" / "sample_images"
-        # self.these_images = sample_images / self.profile_id
-        # self.display_images = display_images / self.profile_id
+        sample_images = Path(settings.MEDIA_ROOT) / "sample_images"
+        display_images = Path(settings.MEDIA_ROOT) / "img" / "sample_images"
+        self.these_images = sample_images / self.profile_id
+        self.display_images = display_images / self.profile_id
         self.data = None
         self.required_field_validators = list()
         self.optional_field_validators = list()
@@ -76,13 +76,12 @@ class DtolSpreadsheet:
         else:
             self.sample_data = self.req.session.get("sample_data", "")
 
-        # type of project
-        # t = Profile().get_type(self.profile_id)
-        # if "ASG" in t:
-        #     self.type = "ASG"
-        # else:
-        #     self.type = "DTOL"
-        self.type = "TOL"
+        # get type of manifest
+        t = Profile().get_type(self.profile_id)
+        if "ASG" in t:
+            self.type = "ASG"
+        else:
+            self.type = "DTOL"
 
         # create list of required validators
         required = dict(globals().items())["required_validators"]
@@ -96,7 +95,7 @@ class DtolSpreadsheet:
             element = getattr(optional, element_name)
             if inspect.isclass(element) and issubclass(element, TolValidtor) and not element.__name__ == "TolValidtor":
                 self.optional_field_validators.append(element)
-        # create list of optional validators
+        # create list of taxon validators
         optional = dict(globals().items())["taxon_validators"]
         for element_name in dir(optional):
             element = getattr(optional, element_name)
@@ -146,7 +145,7 @@ class DtolSpreadsheet:
                 errors, flag = v(profile_id=self.profile_id, fields=self.fields, data=self.data,
                                  errors=errors, flag=flag).validate()
 
-            # get list of DTOL fields from schemas
+            # get list of all DTOL fields from schemas
             self.fields = jp.match(
                 '$.properties[?(@.specifications[*] == ' + self.type.lower() + ')].versions[0]', s)
 
@@ -311,7 +310,7 @@ class DtolSpreadsheet:
         image_data = request.session.get("image_specimen_match", [])
         for p in range(1, len(sample_data)):
             s = (map_to_dict(sample_data[0], sample_data[p]))
-            s["sample_type"] = "dtol"
+            s["sample_type"] = self.type.lower()
             s["tol_project"] = self.type
             s["biosample_accession"] = []
             s["manifest_id"] = manifest_id
@@ -339,7 +338,7 @@ class DtolSpreadsheet:
                     DataFile().insert_sample_id(df["_id"], sampl["_id"])
                     break;
 
-            uri = request.build_absolute_uri('/')
+        uri = request.build_absolute_uri('/')
         profile_id = request.session["profile_id"]
         profile = Profile().get_record(profile_id)
         title = profile["title"]
