@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  title: Tree of Life Submissions API
+  description: API for ToL Submissions
+  contact:
+    email: tol-platforms@sanger.ac.uk
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://0.0.0.0:8080/api/v1
+tags:
+- name: users
+  description: Submitting
+- name: auth
+  description: Authorisation
+paths:
+  /submissions/test:
+    get:
+      tags:
+      - users
+      summary: Return a test
+      description: |
+        Return test
+      operationId: return_test
+      responses:
+        "200":
+          description: test data
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.users_controller
+  /auth/login:
+    get:
+      tags:
+      - auth
+      summary: Get the Elixir login URL
+      description: |
+        Get the URL for logging in to Elixir
+      operationId: login
+      responses:
+        "200":
+          description: details of Elixir login URL
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    loginUrl:
+                      type: string
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/token:
+    post:
+      tags:
+      - auth
+      summary: Get an Elixir authorisation token
+      description: |
+        Get the URL for logging in to Elixir
+      operationId: get_token_from_callback
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                state:
+                  type: string
+      responses:
+        "200":
+          description: authorisation token from Elixir
+          content:
+            application/json:
+              schema:
+                  type: object
+                  properties:
+                    token:
+                      type: string
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+  /auth/profile:
+    post:
+      tags:
+      - auth
+      summary: Get a user profile
+      description: |
+        Get the URL for logging in to Elixir
+      operationId: create_user_profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: user
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/User'
+        "400":
+          description: bad input parameter
+      x-openapi-router-controller: swagger_server.controllers.auth_controller
+components:
+  schemas:
+    User:
+      required:
+        - name
+        - email
+        - organisation
+        - roles
+      type: object
+      properties:
+        name:
+          type: string
+          example: "A User"
+        email:
+          type: string
+          example: "user@example.com"
+        organisation:
+          type: string
+          example: "Research Inc"
+        roles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Role'
+      example:
+        name: "A User"
+        email: "user@example.com"
+        organisation: "Research Inc"
+        roles:
+    Role:
+      required:
+        - role
+      type: object
+      properties:
+        role:
+          type: string
+          example: "creator"
+      example:
+        role: "creator"
+    ErrorMessageList:
+      required:
+        - errors
+      type: object
+      properties:
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorMessage'
+    ErrorMessage:
+      required:
+        - message
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Something has gone wrong"
+      example:
+        message: "Something has gone wrong"
+  securitySchemes:
+    ApiKeyAuth:        # name for the security scheme
+      type: apiKey
+      in: header       # can be "header", "query" or "cookie"
+      name: api-key    # name of the header, query parameter or cookie
+      x-apikeyInfoFunc: swagger_server.controllers.auth_controller.apikey_auth
+# security:
+#   - ApiKeyAuth: []     # 2) Apply the API key globally to all operations
+  

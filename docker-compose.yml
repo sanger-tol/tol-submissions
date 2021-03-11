@@ -1,0 +1,77 @@
+# This is used for local development only
+version: '3.1'
+
+services:
+  submissions-db:
+    image: postgres:11
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+    ports:
+      - 5434:5432
+
+  submissions-api:
+    build: submissions-api/.
+    image: submissions-api
+    #command: python3 -m swagger_server
+    environment:
+      - DB_URI
+      - ELIXIR_CLIENT_ID
+      - ELIXIR_CLIENT_SECRET
+      - ELIXIR_REDIRECT_URI
+      - ELIXIR_JWK
+      - MAIL_SENDER
+      - MAIL_SENDER_NAME
+      - MAIL_USERNAME_SMTP
+      - MAIL_PASSWORD_SMTP
+      - MAIL_HOST
+      - MAIL_PORT
+    ports:
+      - 8081:8080
+
+  submissions-ui:
+    build:
+      context: submissions-ui/.
+      dockerfile: Dockerfile.dev
+    image: submissions-ui
+    #command: python3 -m swagger_server
+    stdin_open: true
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 3003:3000
+    volumes:
+      - './submissions-ui/app:/usr/src/app'
+      - '/usr/src/app/node_modules'
+    
+  submissions-api-test:
+    image: submissions-api
+    command: dockerize
+        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:8080 -timeout 10s
+        bash -c "pip3 install tox; tox"
+    environment:
+      - DB_URI
+      - ELIXIR_CLIENT_ID
+      - ELIXIR_CLIENT_SECRET
+      - ELIXIR_REDIRECT_URI
+      - ELIXIR_JWK
+      - MAIL_SENDER
+      - MAIL_SENDER_NAME
+      - MAIL_USERNAME_SMTP
+      - MAIL_PASSWORD_SMTP
+      - MAIL_HOST
+      - MAIL_PORT
+    depends_on:
+      - submissions-db
+      - submissions-api
+
+  submissions-ui-test:
+    image: submissions-ui
+    command: yarn test
+    stdin_open: true
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - './submissions-ui/app:/usr/src/app'
+      - '/usr/src/app/node_modules'

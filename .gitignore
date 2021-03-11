@@ -1,0 +1,11 @@
+.tox/
+venv/
+build/
+dist/
+instance/
+__pycache__
+swagger_server.egg-info/
+__init__.pyc
+launch.json
+.env.uat
+.env.prod
