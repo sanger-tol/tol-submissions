@@ -9,27 +9,55 @@ info:
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
-  - url: http://0.0.0.0:8080/api/v1
+  - url: http://0.0.0.0:8081/api/v1
 tags:
 - name: users
   description: Submitting
 - name: auth
   description: Authorisation
 paths:
-  /submissions/test:
-    get:
+  /submit-manifest:
+    post:
+      security:
+        - ApiKeyAuth: []
       tags:
       - users
-      summary: Return a test
+      summary: Submit an excel manifest
       description: |
-        Return test
-      operationId: return_test
+        Submits an excel manifest and offers option to download manifest with accession numbers filled in
+      operationId: submit_manifest
+      parameters:
+        - name: sampleColumnHeading
+          in: query
+          description: the column heading of the column containing the sample id
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              x-body-name: excelFile
+              type: object
+              properties:
+                excelFile:
+                  type: string
+                  format: binary
+              required:
+                - excelFile
       responses:
         "200":
-          description: test data
+          description: An Excel file, with the accession numbers filled in
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
         "400":
-          description: bad input parameter
-      x-openapi-router-controller: swagger_server.controllers.users_controller
+          description: manifest has not submitted
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /auth/login:
     get:
       tags:

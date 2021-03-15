@@ -32,23 +32,17 @@ class BaseTestCase(TestCase):
                                      api_key="AnyThingBecAuseThIsIsATEST567890")
         db.session.add(self.user2)
         self.user3 = SubmissionsUser(user_id=300,
-                                     name="test_user_creator",
-                                     email="test_user_creator@sanger.ac.uk",
+                                     name="test_user_submitter",
+                                     email="test_user_submitter@sanger.ac.uk",
                                      organisation="Sanger Institute",
                                      api_key="AnyThingBecAuseThIsIsATEST24680")
-        self.user4 = SubmissionsUser(user_id=400,
-                                     name="test_user_requester2",
-                                     email="test_user_requester2@sanger.ac.uk",
-                                     organisation="Sanger Institute",
-                                     api_key="AnyThingBecAuseThIsIsATEST13579")
         db.session.add(self.user1)
         db.session.add(self.user2)
         db.session.add(self.user3)
-        db.session.add(self.user4)
         self.role = SubmissionsRole(role="admin")
         self.role.user = self.user2
         db.session.add(self.role)
-        self.role = SubmissionsRole(role="creator")
+        self.role = SubmissionsRole(role="submitter")
         self.role.user = self.user3
         db.session.add(self.role)
         db.session.commit()
