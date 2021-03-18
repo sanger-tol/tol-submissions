@@ -16,7 +16,7 @@ tags:
 - name: auth
   description: Authorisation
 paths:
-  /submit-manifest:
+  /manifests/excel:
     post:
       security:
         - ApiKeyAuth: []
