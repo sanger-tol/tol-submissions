@@ -73,18 +73,16 @@ test-api:
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
-    POSTGRES_DB: submissions
-    POSTGRES_USER: runner
-    POSTGRES_PASSWORD: runner
-    POSTGRES_HOST_AUTH_METHOD: trust
-    DB_URI: postgresql://runner:runner@db/submissions
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker swarm init
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
     - sleep 60
+    - docker service ls
+    - docker service ps submissions
     - docker service logs submissions_submissions-api
+    - docker service logs submissions_submissions-db
     - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
 
 test-ui:
