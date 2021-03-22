@@ -1,8 +1,8 @@
 {
-  "name": "tolid-ui",
+  "name": "submissions-ui",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://tolid-api:8080",
+  "proxy": "http://submissions-api:8080",
   "dependencies": {
     "@emotion/react": "^11.1.5",
     "@emotion/styled": "^11.1.5",

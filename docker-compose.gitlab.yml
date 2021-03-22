@@ -5,7 +5,7 @@ services:
     image: $CI_REGISTRY_IMAGE/submissions-api:$CI_COMMIT_SHA
     restart: always
     networks:
-      - tolid
+      - submissions
     deploy:
       replicas: 1
     env_file:
@@ -16,7 +16,7 @@ services:
     image: $CI_REGISTRY_IMAGE/submissions-ui:$CI_COMMIT_SHA
     restart: always
     networks:
-      - tolid
+      - submissions
     deploy:
       replicas: 1
     env_file:

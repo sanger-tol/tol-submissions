@@ -17,7 +17,7 @@ setup(
     name=NAME,
     version=VERSION,
     description="Tree of Life public name API",
-    author_email="tolid-help@sanger.ac.uk",
+    author_email="tol-platforms@sanger.ac.uk",
     url="",
     keywords=["Swagger", "Tree of Life public name API"],
     install_requires=REQUIRES,

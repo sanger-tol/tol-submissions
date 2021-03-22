@@ -17,7 +17,7 @@ FROM nginx:alpine
 COPY nginx/* /etc/nginx/
 
 ## Remove default nginx index page
-RUN rm -rf /var/www/tolid-ui/*
+RUN rm -rf /var/www/submissions-ui/*
 
 # Copy from the stage 1
 COPY --from=builder /workspace/build/ /var/www/submissions-ui/
