@@ -64,7 +64,7 @@ build-ui-test:
 
 test-api:
   tags:
-    - packer-autoscale-theta-beta
+    - autoscale
   image: $DOCKER_IMAGE
   stage: test
   services:
