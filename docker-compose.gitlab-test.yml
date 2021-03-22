@@ -1,7 +1,7 @@
 # Additional deployment details for testing in CI/CD (includes temporary database)
 version: '3'
 services: 
-  tolid-db:
+  submissions-db:
     image: postgres:11
     env_file:
       - ${ENV_FILE}
