@@ -11,11 +11,42 @@ info:
 servers:
   - url: http://0.0.0.0:8081/api/v1
 tags:
-- name: users
+- name: submitters
   description: Submitting
 - name: auth
   description: Authorisation
 paths:
+  /manifests:
+    post:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Submit a JSON manifest
+      description: |
+        Submits an manifest in JSON format
+      operationId: submit_manifest_json
+      requestBody:
+        description: Manifest to add
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Manifest'
+      responses:
+        "200":
+          description: manifest created
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manifest'
+                x-content-type: application/json
+        "400":
+          description: invalid input, object invalid, or item already exists
+        "403":
+          description: user not authorised to use this function
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /manifests/excel:
     post:
       security:
@@ -140,6 +171,121 @@ paths:
       x-openapi-router-controller: swagger_server.controllers.auth_controller
 components:
   schemas:
+    Manifest:
+      required:
+        - manifestId
+        - samples
+      type: object
+      properties:
+        manifestId:
+          type: string
+          example: manifest12345
+        samples:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sample'
+      example:
+        manifestId: manfest12345
+        samples:
+          - sampleId: sample1
+            taxonomyId: 6344
+            specimenId: SAN000100
+    Sample:
+      required:
+        - sampleId
+        - taxonomyId
+        - specimenId
+      type: object
+      properties:
+        sampleId:
+          type: string
+          example: sample1
+        taxonomyId:
+          type: integer
+          example: 6344
+        scientificName:
+          type: string
+          example: Arenicola marina
+        commonName:
+          type: string
+          example: lugworm
+        specimenId:
+          type: string
+          example: SAN000100
+        biosampleId:
+          type: string
+          example: SAMEA12345678
+        lifestage:
+          type: string
+          example: ADULT
+        sex:
+          type: string
+          example: FEMALE
+        organismPart:
+          type: string
+          example: MUSCLE
+        GAL:
+          type: string
+          example: SANGER INSTITUTE
+        GALSampleId:
+          type: string
+          example: SAN000100
+        collectedBy:
+          type: string
+          example: ALEX COLLECTOR
+        collectorAffiliation:
+          type: string
+          example: THE COLLECTOR INSTITUTE
+        dateOfCollection:
+          type: string
+          example: 2020-09-01
+        collectionLocation:
+          type: string
+          example: UK | DARK FOREST
+        decimalLatitude:
+          type: string
+          example: +50.12345678
+        decimalLongitude:
+          type: string
+          example: -1.98765432
+        habitat:
+          type: string
+          example: Woodland
+        identifiedBy:
+          type: string
+          example: JO IDENTIFIER
+        identifierAffiliation:
+          type: string
+          example: THE IDENTIFIER INSTITUTE
+        voucherId:
+          type: string
+          example: voucher1
+        tolId:
+          type: string
+          example: wuAreMari1
+      example:
+        sampleId: sample1
+        taxonomyId: 6344
+        scientificName: Arenicola marina
+        commonName: lugworm
+        specimenId: SAN000100
+        biosampleId: SAMEA12345678
+        lifestage: ADULT
+        sex: FEMALE
+        organismPart: MUSCLE
+        GAL: SANGER INSTITUTE
+        GALSampleId: SAN000100
+        collectedBy: ALEX COLLECTOR
+        collectorAffiliation: THE COLLECTOR INSTITUTE
+        dateOfCollection: 2020-09-01
+        collectionLocation: UK | DARK FOREST
+        decimalLatitude: +50.12345678
+        decimalLongitude: -1.98765432
+        habitat: Woodland
+        identifiedBy: JO IDENTIFIER
+        identifierAffiliation: THE IDENTIFIER INSTITUTE
+        voucherId: voucher1
+        tolId: wuAreMari1
     User:
       required:
         - name

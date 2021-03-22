@@ -162,8 +162,8 @@ class TestAuthController(BaseTestCase):
     # The real version of this does a call to the Elixir service. We mock that call here
     @responses.activate
     def test_profile_existing_user(self):
-        mock_response_from_elixir = {'email': 'test_user_creator@sanger.ac.uk',
-                                     'name': 'test_user_creator'}
+        mock_response_from_elixir = {'email': 'test_user_submitter@sanger.ac.uk',
+                                     'name': 'test_user_submitter'}
         responses.add(responses.GET, 'https://login.elixir-czech.org/oidc/userinfo',
                       json=mock_response_from_elixir, status=200)
 
@@ -174,10 +174,10 @@ class TestAuthController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        expect = {'email': 'test_user_creator@sanger.ac.uk',
-                  'name': 'test_user_creator',
+        expect = {'email': 'test_user_submitter@sanger.ac.uk',
+                  'name': 'test_user_submitter',
                   'organisation': 'Sanger Institute',
-                  'roles': [{"role": "creator"}]}
+                  'roles': [{"role": "submitter"}]}
         self.assertEquals(expect, response.json)
 
 

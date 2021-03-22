@@ -7,7 +7,8 @@ import os
 from swagger_server.encoder import JSONEncoder
 
 from swagger_server.model import db, \
-    SubmissionsUser, SubmissionsRole, SubmissionsState
+    SubmissionsUser, SubmissionsRole, SubmissionsState, \
+    SubmissionsManifest, SubmissionsSample
 
 
 class BaseTestCase(TestCase):
@@ -48,10 +49,14 @@ class BaseTestCase(TestCase):
         db.session.commit()
 
     def tearDown(self):
+        db.session.query(SubmissionsSample).delete()
+        db.session.query(SubmissionsManifest).delete()
         db.session.query(SubmissionsRole).delete()
         db.session.query(SubmissionsUser).delete()
         db.session.query(SubmissionsState).delete()
         db.session.commit()
+        db.session.remove()
+        db.drop_all()
 
     def create_app(self):
         logging.getLogger('connexion.operation').setLevel('ERROR')

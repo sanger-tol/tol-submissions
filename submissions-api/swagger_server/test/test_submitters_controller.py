@@ -6,112 +6,166 @@ from swagger_server.test import BaseTestCase
 
 class TestSubmittersController(BaseTestCase):
 
-    def test_submit_manifest(self):
+    def test_submit_manifest_json(self):
         # No authorisation token given
         body = []
         response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
             method='POST',
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
+
         # Invalid authorisation token given
         body = []
         response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
             method='POST',
             headers={"api-key": "12345678"},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        # Excel file missing
-        data = {}
+        # Body empty
+        body = {}
         response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert400(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Not a submitter
+        body = {'manifestId': 'manifest1234',
+                'samples': [
+                    {'sampleId': 'sample5678',
+                     'specimenId': 'specimen9876',
+                     'taxonomyId': 6344}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
             method='POST',
             headers={"api-key": self.user1.api_key},
-            data=data)
-        self.assert400(response,
+            json=body)
+        self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        # Excel file with no taxon ID, specimen ID, ToLID column
-        file = open('swagger_server/test/test-manifest-no-columns.xlsx', 'rb')
-        data = {
-            'excelFile': (file, 'test_file.xlsx'),
-        }
-        expected = {'errors': [{'message': 'Cannot find Taxon ID column'},
-                               {'message': 'Cannot find Specimen ID column'},
-                               {'message': 'Cannot find ToLID column'}]}
+        # Correct, minimal JSON
+        body = {'manifestId': 'manifest1234',
+                'samples': [
+                    {'sampleId': 'sample5678',
+                     'specimenId': 'specimen9876',
+                     'taxonomyId': 6344}
+                ]}
         response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
             method='POST',
             headers={"api-key": self.user3.api_key},
-            data=data)
-        file.close()
-        self.assert400(response,
+            json=body)
+        self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 'manifest1234',
+                    'samples': [
+                        {'sampleId': 'sample5678',
+                         'specimenId': 'specimen9876',
+                         'taxonomyId': 6344,
+                         'scientificName': None,
+                         'commonName': None,
+                         'biosampleId': None,
+                         'lifestage': None,
+                         'sex': None,
+                         'organismPart': None,
+                         'GAL': None,
+                         'GALSampleId': None,
+                         'collectedBy': None,
+                         'collectorAffiliation': None,
+                         'dateOfCollection': None,
+                         'collectionLocation': None,
+                         'decimalLatitude': None,
+                         'decimalLongitude': None,
+                         'habitat': None,
+                         'identifiedBy': None,
+                         'identifierAffiliation': None,
+                         'voucherId': None,
+                         'tolId': None}
+                    ]}
         self.assertEquals(expected, response.json)
 
-        # Excel file with errors
-        file = open('swagger_server/test/test-manifest-with-errors.xlsx', 'rb')
-        data = {
-            'excelFile': (file, 'test_file.xlsx'),
-        }
-        expected = {'errors':
-                    [{'message': 'Row 2: Expecting Arenicola marina, got Homo sapiens'},
-                     {'message': 'Row 3: Taxon ID 9999999 cannot be found'},
-                     {'message': 'Row 4: Genus only for Arenicola sp., not assigning ToLID'}]}
+        # Submit again - should get error
+        body = {'manifestId': 'manifest1234',
+                'samples': [
+                    {'sampleId': 'sample5678',
+                     'specimenId': 'specimen9876',
+                     'taxonomyId': 6344}
+                ]}
         response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
             method='POST',
             headers={"api-key": self.user3.api_key},
-            data=data)
-        file.close()
+            json=body)
         self.assert400(response,
                        'Response body is : ' + response.data.decode('utf-8'))
-        self.assertEquals(expected, response.json)
 
-        # User not a submitter
-        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
-        data = {
-            'excelFile': (file, 'test_file.xlsx'),
-        }
+        # Correct, full JSON
+        body = {'manifestId': 'manifest2345',
+                'samples': [
+                    {'sampleId': 'sample6789',
+                     'specimenId': 'specimen9876',
+                     'taxonomyId': 6344,
+                     'scientificName': 'Arenicola marina',
+                     'commonName': 'lugworm',
+                     'biosampleId': 'SAMEA12345678',
+                     'lifestage': 'ADULT',
+                     'sex': 'FEMALE',
+                     'organismPart': 'MUSCLE',
+                     'GAL': 'SANGER INSTITUTE',
+                     'GALSampleId': 'SAN000100',
+                     'collectedBy': 'ALEX COLLECTOR',
+                     'collectorAffiliation': 'THE COLLECTOR INSTITUTE',
+                     'dateOfCollection': '2020-09-01',
+                     'collectionLocation': 'UK | DARK FOREST',
+                     'decimalLatitude': '+50.12345678',
+                     'decimalLongitude': '-1.98765432',
+                     'habitat': 'Woodland',
+                     'identifiedBy': 'JO IDENTIFIER',
+                     'identifierAffiliation': 'THE IDENTIFIER INSTITUTE',
+                     'voucherId': 'voucher1',
+                     'tolId': 'wuAreMari1'}
+                ]}
         response = self.client.open(
-            '/api/v2/validate-manifest',
-            method='POST',
-            headers={"api-key": self.user1.api_key},
-            data=data)
-        file.close()
-        self.assert403(response, 'Not received a 403 response')
-
-        # Excel file correct
-        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
-        data = {
-            'excelFile': (file, 'test_file.xlsx'),
-        }
-        response = self.client.open(
-            '/api/v1/submit-manifest',
+            '/api/v1/manifests',
             method='POST',
             headers={"api-key": self.user3.api_key},
-            data=data)
-        file.close()
-        self.assert200(response, 'Not received a 200 response')
-        self.assertEquals('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                          response.content_type)
-
-        # Save as Excel file
-        file = open('swagger_server/test/test-manifest-submitted.xlsx', 'wb')
-        file.write(response.get_data())
-        file.close()
-        # This is where we need to assert that the columns have been filled in
-        # workbook = load_workbook(filename='swagger_server/test/test-manifest-submitted.xlsx')
-        # sheet = workbook.active
-        # (taxon_id_column, specimen_id_column, scientific_name_column, tol_id_column) = \
-        #    find_columns(sheet, "scientific_name")
-        # self.assertEquals('wuAreMari3', sheet.cell(row=2, column=tol_id_column).value)
-        # self.assertEquals('wuAreMari4', sheet.cell(row=3, column=tol_id_column).value)
-        # self.assertEquals('wuAreMari4', sheet.cell(row=4, column=tol_id_column).value)
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 'manifest2345',
+                    'samples': [
+                        {'sampleId': 'sample6789',
+                         'specimenId': 'specimen9876',
+                         'taxonomyId': 6344,
+                         'scientificName': 'Arenicola marina',
+                         'commonName': 'lugworm',
+                         'biosampleId': None,
+                         'lifestage': 'ADULT',
+                         'sex': 'FEMALE',
+                         'organismPart': 'MUSCLE',
+                         'GAL': 'SANGER INSTITUTE',
+                         'GALSampleId': 'SAN000100',
+                         'collectedBy': 'ALEX COLLECTOR',
+                         'collectorAffiliation': 'THE COLLECTOR INSTITUTE',
+                         'dateOfCollection': '2020-09-01',
+                         'collectionLocation': 'UK | DARK FOREST',
+                         'decimalLatitude': '+50.12345678',
+                         'decimalLongitude': '-1.98765432',
+                         'habitat': 'Woodland',
+                         'identifiedBy': 'JO IDENTIFIER',
+                         'identifierAffiliation': 'THE IDENTIFIER INSTITUTE',
+                         'voucherId': 'voucher1',
+                         'tolId': None}
+                    ]}
+        self.assertEquals(expected, response.json)
 
 
 if __name__ == '__main__':

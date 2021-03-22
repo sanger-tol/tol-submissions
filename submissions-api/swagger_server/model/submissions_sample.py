@@ -3,14 +3,15 @@ from .base import Base, db
 
 class SubmissionsSample(Base):
     __tablename__ = "sample"
-    sample_id = db.Column(db.Integer, primary_key=True)
+    sample_id = db.Column(db.String(), primary_key=True)
     taxonomy_id = db.Column(db.Integer, nullable=False)
-    scientific_name = db.Column(db.String(), nullable=False)
+    scientific_name = db.Column(db.String(), nullable=True)
     common_name = db.Column(db.String(), nullable=True)
     specimen_id = db.Column(db.String(), nullable=False)
     biosample_id = db.Column(db.String(), nullable=True)
-    manifest_id = db.Column(db.Integer, db.ForeignKey('manifest.manifest_id'))
-    manifest = db.relationship("SubmissionsManifest", back_populates="samples", uselist=False, foreign_keys=[manifest_id])
+    manifest_id = db.Column(db.String(), db.ForeignKey('manifest.manifest_id'))
+    manifest = db.relationship("SubmissionsManifest", back_populates="samples",
+                               uselist=False, foreign_keys=[manifest_id])
     lifestage = db.Column(db.String(), nullable=True)
     sex = db.Column(db.String(), nullable=True)
     organism_part = db.Column(db.String(), nullable=True)
@@ -26,6 +27,7 @@ class SubmissionsSample(Base):
     identified_by = db.Column(db.String(), nullable=True)
     identifier_affiliation = db.Column(db.String(), nullable=True)
     voucher_id = db.Column(db.String(), nullable=True)
+    tolid = db.Column(db.String(), nullable=True)
 
     def to_dict(cls):
         return {'sampleId': cls.sample_id,
@@ -38,7 +40,7 @@ class SubmissionsSample(Base):
                 'sex': cls.sex,
                 'organismPart': cls.organism_part,
                 'GAL': cls.GAL,
-                'GALSampleId': cls.GAL_sample_id
+                'GALSampleId': cls.GAL_sample_id,
                 'collectedBy': cls.collected_by,
                 'collectorAffiliation': cls.collector_affiliation,
                 'dateOfCollection': cls.date_of_collection,
@@ -48,4 +50,5 @@ class SubmissionsSample(Base):
                 'habitat': cls.habitat,
                 'identifiedBy': cls.identified_by,
                 'identifierAffiliation': cls.identifier_affiliation,
-                'voucherId': cls.voucher_id}
+                'voucherId': cls.voucher_id,
+                'tolId': cls.tolid}
