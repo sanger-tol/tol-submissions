@@ -27,7 +27,7 @@ class SubmissionsSample(Base):
     identified_by = db.Column(db.String(), nullable=False)
     identifier_affiliation = db.Column(db.String(), nullable=False)
     voucher_id = db.Column(db.String(), nullable=False)
-    height = db.Column(db.String(), nullable=True)
+    elevation = db.Column(db.String(), nullable=True)
     depth = db.Column(db.String(), nullable=True)
     relationship = db.Column(db.String(), nullable=True)
 
@@ -55,7 +55,7 @@ class SubmissionsSample(Base):
                 'IDENTIFIED_BY': cls.identified_by,
                 'IDENTIFIER_AFFILIATION': cls.identifier_affiliation,
                 'VOUCHER_ID': cls.voucher_id,
-                'HEIGHT': cls.height,
+                'ELEVATION': cls.elevation,
                 'DEPTH': cls.depth,
                 'RELATIONSHIP': cls.relationship,
                 'tolId': cls.tolid,

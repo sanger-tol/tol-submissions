@@ -22,9 +22,9 @@ paths:
         - ApiKeyAuth: []
       tags:
       - submitters
-      summary: Submit a JSON manifest
+      summary: Upload a JSON manifest
       description: |
-        Submits an manifest in JSON format
+        Upload a manifest in JSON format
       operationId: submit_manifest_json
       requestBody:
         description: Manifest to add
@@ -38,56 +38,42 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: invalid input, object invalid, or item already exists
         "403":
           description: user not authorised to use this function
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
-  /manifests/excel:
-    post:
+  /manifests/{manifestId}/validate:
+    get:
       security:
         - ApiKeyAuth: []
       tags:
-      - users
-      summary: Submit an excel manifest
+      - submitters
+      summary: Validates a manifest
       description: |
-        Submits an excel manifest and offers option to download manifest with accession numbers filled in
-      operationId: submit_manifest
+        Validates against: ENA checklist, ToLID species, family, genus, order
+      operationId: validate_manifest
       parameters:
-        - name: sampleColumnHeading
-          in: query
-          description: the column heading of the column containing the sample id
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              x-body-name: excelFile
-              type: object
-              properties:
-                excelFile:
-                  type: string
-                  format: binary
-              required:
-                - excelFile
+      - name: manifestId
+        in: path
+        description: a manifest ID (given when manifest created)
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: integer
       responses:
         "200":
-          description: An Excel file, with the accession numbers filled in
+          description: validation results
           content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+            application/json:
               schema:
-                type: string
-                format: binary
+                $ref: '#/components/schemas/ManifestValidationResult'
+                x-content-type: application/json
         "400":
-          description: manifest has not submitted
+          description: bad input parameter
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /auth/login:
     get:
@@ -205,7 +191,7 @@ components:
             IDENTIFIED_BY: JO IDENTIFIER
             IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
             VOUCHER_ID: voucher1
-            HEIGHT: 0
+            ELEVATION: 0
             DEPTH: 100
             RELATIONSHIP: child of SAMEA1234567
     Sample:
@@ -276,10 +262,10 @@ components:
           example: UK | DARK FOREST
         DECIMAL_LATITUDE:
           type: string
-          example: +50.12345678
+          example: "+50.12345678"
         DECIMAL_LONGITUDE:
           type: string
-          example: -1.98765432
+          example: "-1.98765432"
         HABITAT:
           type: string
           example: Woodland
@@ -292,12 +278,12 @@ components:
         VOUCHER_ID:
           type: string
           example: voucher1
-        HEIGHT:
+        ELEVATION:
           type: string
-          example: 1500
+          example: "1500"
         DEPTH:
           type: string
-          example: 100
+          example: "100"
         RELATIONSHIP:
           type: string
           example: host
@@ -321,14 +307,14 @@ components:
         COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
         DATE_OF_COLLECTION: 2020-09-01
         COLLECTION_LOCATION: UK | DARK FOREST
-        DECIMAL_LATITUDE: +50.12345678
-        DECIMAL_LONGITUDE: -1.98765432
+        DECIMAL_LATITUDE: "+50.12345678"
+        DECIMAL_LONGITUDE: "-1.98765432"
         HABITAT: Woodland
         IDENTIFIED_BY: JO IDENTIFIER
         IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
         VOUCHER_ID: voucher1
-        HEIGHT: 0
-        DEPTH: 100
+        HEIGHT: "0"
+        DEPTH: "100"
         RELATIONSHIP: child of SAMEA1234567
         tolId: wuAreMari1
         biosampleId: SAMEA12345678
@@ -368,25 +354,40 @@ components:
           example: "creator"
       example:
         role: "creator"
-    ErrorMessageList:
+    ManifestValidationResult:
       required:
-        - errors
+        - validations
       type: object
       properties:
-        errors:
+        validations:
           type: array
           items:
-            $ref: '#/components/schemas/ErrorMessage'
-    ErrorMessage:
+            $ref: '#/components/schemas/SampleValidationResult'
+    SampleValidationResult:
       required:
+        - row
+        - results
+      type: object
+      properties:
+        row:
+          type: integer
+          example: 1
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SampleFieldValidationResult'
+    SampleFieldValidationResult:
+      required:
+        - field
         - message
       type: object
       properties:
+        field:
+          type: string
+          example: "SPECIMEN_ID"
         message:
           type: string
-          example: "Something has gone wrong"
-      example:
-        message: "Something has gone wrong"
+          example: "Fails regex check"
   securitySchemes:
     ApiKeyAuth:        # name for the security scheme
       type: apiKey

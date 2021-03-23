@@ -58,7 +58,6 @@ class BaseTestCase(TestCase):
         db.session.query(SubmissionsState).delete()
         db.session.commit()
         db.session.remove()
-        db.drop_all()
 
     def create_app(self):
         logging.getLogger('connexion.operation').setLevel('ERROR')

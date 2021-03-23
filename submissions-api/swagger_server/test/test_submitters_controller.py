@@ -99,7 +99,7 @@ class TestSubmittersController(BaseTestCase):
                          'IDENTIFIED_BY': 'JO IDENTIFIER',
                          'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                          'VOUCHER_ID': 'voucher1',
-                         'HEIGHT': None,
+                         'ELEVATION': None,
                          'DEPTH': None,
                          'RELATIONSHIP': None,
                          'tolId': None,
