@@ -47,6 +47,8 @@ class BaseTestCase(TestCase):
         self.role.user = self.user3
         db.session.add(self.role)
         db.session.commit()
+        db.engine.execute("ALTER SEQUENCE manifest_manifest_id_seq RESTART WITH 1;")
+        db.engine.execute("ALTER SEQUENCE sample_sample_id_seq RESTART WITH 1;")
 
     def tearDown(self):
         db.session.query(SubmissionsSample).delete()

@@ -14,39 +14,34 @@ def submit_manifest_json(body=None):  # noqa: E501
     if role is None:
         return jsonify({'detail': "User does not have permission to use this function"}), 403
 
-    manifest = db.session.query(SubmissionsManifest) \
-        .filter(SubmissionsManifest.manifest_id == body["manifestId"]) \
-        .one_or_none()
-    if manifest is not None:
-        return jsonify({'detail': "Manifest already exists"}), 400
-
     manifest = SubmissionsManifest()
-    manifest.manifest_id = body['manifestId']
     db.session.add(manifest)
     for s in body['samples']:
         sample = SubmissionsSample()
         sample.manifest = manifest
-        sample.sample_id = s['sampleId']
-        sample.taxonomy_id = s['taxonomyId']
-        sample.specimen_id = s['specimenId']
-        # The following are the optional fields
-        sample.scientific_name = s.get('scientificName')
-        sample.common_name = s.get('commonName')
-        sample.lifestage = s.get('lifestage')
-        sample.sex = s.get('sex')
-        sample.organism_part = s.get('organismPart')
+        sample.row = s.get('row')
+        sample.specimen_id = s.get('SPECIMEN_ID')
+        sample.taxonomy_id = s.get('TAXON_ID')
+        sample.scientific_name = s.get('SCIENTIFIC_NAME')
+        sample.common_name = s.get('COMMON_NAME')
+        sample.lifestage = s.get('LIFESTAGE')
+        sample.sex = s.get('SEX')
+        sample.organism_part = s.get('ORGANISM_PART')
         sample.GAL = s.get('GAL')
-        sample.GAL_sample_id = s.get('GALSampleId')
-        sample.collected_by = s.get('collectedBy')
-        sample.collector_affiliation = s.get('collectorAffiliation')
-        sample.date_of_collection = s.get('dateOfCollection')
-        sample.collection_location = s.get('collectionLocation')
-        sample.decimal_latitude = s.get('decimalLatitude')
-        sample.decimal_longitude = s.get('decimalLongitude')
-        sample.habitat = s.get('habitat')
-        sample.identified_by = s.get('identifiedBy')
-        sample.identifier_affiliation = s.get('identifierAffiliation')
-        sample.voucher_id = s.get('voucherId')
+        sample.GAL_sample_id = s.get('GAL_SAMPLE_ID')
+        sample.collected_by = s.get('COLLECTED_BY')
+        sample.collector_affiliation = s.get('COLLECTOR_AFFILIATION')
+        sample.date_of_collection = s.get('DATE_OF_COLLECTION')
+        sample.collection_location = s.get('COLLECTION_LOCATION')
+        sample.decimal_latitude = s.get('DECIMAL_LATITUDE')
+        sample.decimal_longitude = s.get('DECIMAL_LONGITUDE')
+        sample.habitat = s.get('HABITAT')
+        sample.identified_by = s.get('IDENTIFIED_BY')
+        sample.identifier_affiliation = s.get('IDENTIFIER_AFFILIATION')
+        sample.voucher_id = s.get('VOUCHER_ID')
+        sample.elevation = s.get('ELEVATION')
+        sample.depth = s.get('DEPTH')
+        sample.relationship = s.get('RELATIONSHIP')
         db.session.add(sample)
         # The following are not added here
         # biosampleId

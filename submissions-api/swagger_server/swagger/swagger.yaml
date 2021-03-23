@@ -173,7 +173,6 @@ components:
   schemas:
     Manifest:
       required:
-        - manifestId
         - samples
       type: object
       properties:
@@ -185,107 +184,154 @@ components:
           items:
             $ref: '#/components/schemas/Sample'
       example:
-        manifestId: manfest12345
         samples:
-          - sampleId: sample1
-            taxonomyId: 6344
-            specimenId: SAN000100
+          - row: 1
+            SPECIMEN_ID: SAN000100
+            TAXON_ID: 6344
+            SCIENTIFIC_NAME: Arenicola marina
+            COMMON_NAME: lugworm
+            LIFESTAGE: ADULT
+            SEX: FEMALE
+            ORGANISM_PART: MUSCLE
+            GAL: SANGER INSTITUTE
+            GAL_SAMPLE_ID: SAN000100
+            COLLECTED_BY: ALEX COLLECTOR
+            COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
+            DATE_OF_COLLECTION: 2020-09-01
+            COLLECTION_LOCATION: UK | DARK FOREST
+            DECIMAL_LATITUDE: +50.12345678
+            DECIMAL_LONGITUDE: -1.98765432
+            HABITAT: Woodland
+            IDENTIFIED_BY: JO IDENTIFIER
+            IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
+            VOUCHER_ID: voucher1
+            HEIGHT: 0
+            DEPTH: 100
+            RELATIONSHIP: child of SAMEA1234567
     Sample:
       required:
-        - sampleId
-        - taxonomyId
-        - specimenId
+        - row
+        - SPECIMEN_ID
+        - TAXON_ID
+        - SCIENTIFIC_NAME
+        - COMMON_NAME
+        - LIFESTAGE
+        - SEX
+        - ORGANISM_PART
+        - GAL
+        - GAL_SAMPLE_ID
+        - COLLECTED_BY
+        - COLLECTOR_AFFILIATION
+        - DATE_OF_COLLECTION
+        - COLLECTION_LOCATION
+        - DECIMAL_LATITUDE
+        - DECIMAL_LONGITUDE
+        - HABITAT
+        - IDENTIFIED_BY
+        - IDENTIFIER_AFFILIATION
+        - VOUCHER_ID
       type: object
       properties:
-        sampleId:
-          type: string
-          example: sample1
-        taxonomyId:
+        row:
           type: integer
-          example: 6344
-        scientificName:
-          type: string
-          example: Arenicola marina
-        commonName:
-          type: string
-          example: lugworm
-        specimenId:
+          example: 1
+        SPECIMEN_ID:
           type: string
           example: SAN000100
-        biosampleId:
+        TAXON_ID:
+          type: integer
+          example: 6344
+        SCIENTIFIC_NAME:
           type: string
-          example: SAMEA12345678
-        lifestage:
+          example: Arenicola marina
+        COMMON_NAME:
+          type: string
+          example: lugworm
+        LIFESTAGE:
           type: string
           example: ADULT
-        sex:
+        SEX:
           type: string
           example: FEMALE
-        organismPart:
+        ORGANISM_PART:
           type: string
           example: MUSCLE
         GAL:
           type: string
           example: SANGER INSTITUTE
-        GALSampleId:
+        GAL_SAMPLE_ID:
           type: string
           example: SAN000100
-        collectedBy:
+        COLLECTED_BY:
           type: string
           example: ALEX COLLECTOR
-        collectorAffiliation:
+        COLLECTOR_AFFILIATION:
           type: string
           example: THE COLLECTOR INSTITUTE
-        dateOfCollection:
+        DATE_OF_COLLECTION:
           type: string
           example: 2020-09-01
-        collectionLocation:
+        COLLECTION_LOCATION:
           type: string
           example: UK | DARK FOREST
-        decimalLatitude:
+        DECIMAL_LATITUDE:
           type: string
           example: +50.12345678
-        decimalLongitude:
+        DECIMAL_LONGITUDE:
           type: string
           example: -1.98765432
-        habitat:
+        HABITAT:
           type: string
           example: Woodland
-        identifiedBy:
+        IDENTIFIED_BY:
           type: string
           example: JO IDENTIFIER
-        identifierAffiliation:
+        IDENTIFIER_AFFILIATION:
           type: string
           example: THE IDENTIFIER INSTITUTE
-        voucherId:
+        VOUCHER_ID:
           type: string
           example: voucher1
+        HEIGHT:
+          type: string
+          example: 1500
+        DEPTH:
+          type: string
+          example: 100
+        RELATIONSHIP:
+          type: string
+          example: host
+        biosampleId:
+          type: string
+          example: SAMEA12345678
         tolId:
           type: string
           example: wuAreMari1
       example:
-        sampleId: sample1
-        taxonomyId: 6344
-        scientificName: Arenicola marina
-        commonName: lugworm
-        specimenId: SAN000100
-        biosampleId: SAMEA12345678
-        lifestage: ADULT
-        sex: FEMALE
-        organismPart: MUSCLE
+        SPECIMEN_ID: SAN000100
+        TAXON_ID: 6344
+        SCIENTIFIC_NAME: Arenicola marina
+        COMMON_NAME: lugworm
+        LIFESTAGE: ADULT
+        SEX: FEMALE
+        ORGANISM_PART: MUSCLE
         GAL: SANGER INSTITUTE
-        GALSampleId: SAN000100
-        collectedBy: ALEX COLLECTOR
-        collectorAffiliation: THE COLLECTOR INSTITUTE
-        dateOfCollection: 2020-09-01
-        collectionLocation: UK | DARK FOREST
-        decimalLatitude: +50.12345678
-        decimalLongitude: -1.98765432
-        habitat: Woodland
-        identifiedBy: JO IDENTIFIER
-        identifierAffiliation: THE IDENTIFIER INSTITUTE
-        voucherId: voucher1
+        GAL_SAMPLE_ID: SAN000100
+        COLLECTED_BY: ALEX COLLECTOR
+        COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
+        DATE_OF_COLLECTION: 2020-09-01
+        COLLECTION_LOCATION: UK | DARK FOREST
+        DECIMAL_LATITUDE: +50.12345678
+        DECIMAL_LONGITUDE: -1.98765432
+        HABITAT: Woodland
+        IDENTIFIED_BY: JO IDENTIFIER
+        IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
+        VOUCHER_ID: voucher1
+        HEIGHT: 0
+        DEPTH: 100
+        RELATIONSHIP: child of SAMEA1234567
         tolId: wuAreMari1
+        biosampleId: SAMEA12345678
     User:
       required:
         - name
