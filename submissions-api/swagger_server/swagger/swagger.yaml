@@ -45,6 +45,35 @@ paths:
         "403":
           description: user not authorised to use this function
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/validate:
+    post:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Upload and immediately validate a JSON manifest
+      description: |
+        Upload a manifest in JSON format and validate it (convenience method)
+      operationId: submit_and_validate_manifest_json
+      requestBody:
+        description: Manifest to upload and validate
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Manifest'
+      responses:
+        "200":
+          description: manifest created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestValidationResult'
+                x-content-type: application/json
+        "400":
+          description: invalid input, object invalid, or item already exists
+        "403":
+          description: user not authorised to use this function
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /manifests/{manifestId}/validate:
     get:
       security:
@@ -74,6 +103,8 @@ paths:
                 x-content-type: application/json
         "400":
           description: bad input parameter
+        "404":
+          description: manifest does not exist
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /auth/login:
     get:
@@ -313,7 +344,7 @@ components:
         IDENTIFIED_BY: JO IDENTIFIER
         IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
         VOUCHER_ID: voucher1
-        HEIGHT: "0"
+        ELEVATION: "0"
         DEPTH: "100"
         RELATIONSHIP: child of SAMEA1234567
         tolId: wuAreMari1
@@ -356,9 +387,17 @@ components:
         role: "creator"
     ManifestValidationResult:
       required:
+        - manifestId
+        - number_of_errors
         - validations
       type: object
       properties:
+        manifestId:
+          type: integer
+          example: 1234
+        number_of_errors:
+          type: integer
+          example: 1
         validations:
           type: array
           items:

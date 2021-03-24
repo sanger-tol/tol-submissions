@@ -37,15 +37,15 @@ class TestManifestUtils(BaseTestCase):
         db.session.add(self.manifest1)
         db.session.add(self.sample1)
 
-        has_validated, results = validate_manifest(self.manifest1)
-        self.assertTrue(has_validated)
+        number_of_errors, results = validate_manifest(self.manifest1)
+        self.assertEqual(number_of_errors, 0)
         self.assertEqual(len(results), 1)
         self.assertEqual(len(results[0]["results"]), 0)
 
         # Cause a validation failure
         self.sample1.scientific_name = ""
-        has_validated, results = validate_manifest(self.manifest1)
-        self.assertFalse(has_validated)
+        number_of_errors, results = validate_manifest(self.manifest1)
+        self.assertEqual(number_of_errors, 1)
         self.assertEqual(len(results), 1)
         self.assertEqual(len(results[0]["results"]), 1)
 
