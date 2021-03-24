@@ -1,7 +1,7 @@
 from flask import jsonify
 from sqlalchemy import or_
 from swagger_server.model import db, SubmissionsRole, \
-    SubmissionsManifest
+    SubmissionsManifest, SubmissionsUser
 import swagger_server.manifest_utils as manifest_utils
 import connexion
 
@@ -13,8 +13,11 @@ def submit_manifest_json(body=None):  # noqa: E501
         .one_or_none()
     if role is None:
         return jsonify({'detail': "User does not have permission to use this function"}), 403
+    user = db.session.query(SubmissionsUser) \
+        .filter(SubmissionsUser.user_id == connexion.context["user"]) \
+        .one_or_none()
 
-    manifest = manifest_utils.create_manifest_from_json(body["samples"])
+    manifest = manifest_utils.create_manifest_from_json(body["samples"], user)
 
     db.session.add(manifest)
     db.session.commit()
@@ -51,8 +54,12 @@ def submit_and_validate_manifest_json(body=None):
     if role is None:
         return jsonify({'detail': "User does not have permission to use this function"}), 403
 
+    user = db.session.query(SubmissionsUser) \
+        .filter(SubmissionsUser.user_id == connexion.context["user"]) \
+        .one_or_none()
+
     # Add the manifest
-    manifest = manifest_utils.create_manifest_from_json(body["samples"])
+    manifest = manifest_utils.create_manifest_from_json(body["samples"], user)
 
     db.session.add(manifest)
     db.session.commit()

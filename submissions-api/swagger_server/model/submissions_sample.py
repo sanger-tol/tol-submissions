@@ -34,6 +34,12 @@ class SubmissionsSample(Base):
     tolid = db.Column(db.String(), nullable=True)
     biosample_id = db.Column(db.String(), nullable=True)
 
+    def collection_country(self):
+        return self.collection_location.split(' | ')[0]
+
+    def collection_region(self):
+        return ' | '.join(self.collection_location.split(' | ')[1:])
+
     def to_dict(cls):
         return {'row': cls.row,
                 'SPECIMEN_ID': cls.specimen_id,
