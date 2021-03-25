@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
+import os
 import responses
 # from openpyxl import load_workbook
 
@@ -42,6 +43,9 @@ class TestSubmittersController(BaseTestCase):
                      'SPECIMEN_ID': 'specimen9876',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'GENUS': 'Arenicola',
+                     'FAMILY': 'Arenicolidae',
+                     'ORDER_OR_GROUP': 'None',
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
@@ -84,6 +88,9 @@ class TestSubmittersController(BaseTestCase):
                          'SPECIMEN_ID': 'specimen9876',
                          'TAXON_ID': 6344,
                          'SCIENTIFIC_NAME': 'Arenicola marina',
+                         'GENUS': 'Arenicola',
+                         'FAMILY': 'Arenicolidae',
+                         'ORDER_OR_GROUP': 'None',
                          'COMMON_NAME': 'lugworm',
                          'LIFESTAGE': 'ADULT',
                          'SEX': 'FEMALE',
@@ -122,12 +129,23 @@ class TestSubmittersController(BaseTestCase):
                                   "submittable": "true"}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
+        mock_response_from_tolid = [{"taxonomyId": "6344",
+                                     "scientificName": "Arenicola marina",
+                                     "commonName": "lugworm",
+                                     "family": "Arenicolidae",
+                                     "genus": "Arenicola",
+                                     "order": "None"}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=200)
 
         body = {'samples': [
                     {'row': 1,
                      'SPECIMEN_ID': 'specimen9876',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'GENUS': 'Arenicola',
+                     'FAMILY': 'Arenicolidae',
+                     'ORDER_OR_GROUP': 'None',
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
@@ -228,6 +246,14 @@ class TestSubmittersController(BaseTestCase):
                                   "submittable": "true"}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
+        mock_response_from_tolid = [{"taxonomyId": "6344",
+                                     "scientificName": "Arenicola marina",
+                                     "commonName": "lugworm",
+                                     "family": "Arenicolidae",
+                                     "genus": "Arenicola",
+                                     "order": "None"}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=200)
 
         # No authorisation token given
         body = []
@@ -263,6 +289,9 @@ class TestSubmittersController(BaseTestCase):
                      'SPECIMEN_ID': 'specimen9876',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'GENUS': 'Arenicola',
+                     'FAMILY': 'Arenicolidae',
+                     'ORDER_OR_GROUP': 'None',
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',

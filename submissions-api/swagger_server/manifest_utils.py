@@ -1,5 +1,6 @@
 from swagger_server.model import SubmissionsManifest, SubmissionsSample
 import re
+import os
 import requests
 
 
@@ -13,6 +14,9 @@ def create_manifest_from_json(samples, user):
         sample.specimen_id = s.get('SPECIMEN_ID')
         sample.taxonomy_id = s.get('TAXON_ID')
         sample.scientific_name = s.get('SCIENTIFIC_NAME')
+        sample.family = s.get('FAMILY')
+        sample.genus = s.get('GENUS')
+        sample.order_or_group = s.get('ORDER_OR_GROUP')
         sample.common_name = s.get('COMMON_NAME')
         sample.lifestage = s.get('LIFESTAGE')
         sample.sex = s.get('SEX')
@@ -70,7 +74,47 @@ def validate_sample(sample):
 
 
 def validate_against_tolid(sample):
-    return([])
+    results = []
+    response = requests.get(os.environ['TOLID_URL'] + '/species/'
+                            + str(sample.taxonomy_id))
+    if (response.status_code == 404):
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Species not known in the ToLID service'})
+        return results
+
+    if (response.status_code != 200):
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Communication failed with the ToLID service: status code '
+                        + str(response.status_code)})
+        return results
+
+    data = response.json()[0]
+
+    # Does the SCIENTIFIC_NAME match?
+    if data['scientificName'] != sample.scientific_name:
+        results.append({'field': 'SCIENTIFIC_NAME',
+                        'message': 'Does not match that in the ToLID service (expecting '
+                        + data['scientificName'] + ')'})
+
+    # Does the GENUS match?
+    if data['genus'] != sample.genus:
+        results.append({'field': 'GENUS',
+                        'message': 'Does not match that in the ToLID service (expecting '
+                        + data['genus'] + ')'})
+
+    # Does the FAMILY match?
+    if data['family'] != sample.family:
+        results.append({'field': 'FAMILY',
+                        'message': 'Does not match that in the ToLID service (expecting '
+                        + data['family'] + ')'})
+
+    # Does the ORDER match?
+    if data['order'] != sample.order_or_group:
+        results.append({'field': 'ORDER_OR_GROUP',
+                        'message': 'Does not match that in the ToLID service (expecting '
+                        + data['order'] + ')'})
+
+    return(results)
 
 
 def validate_against_ena_checklist(sample):
@@ -275,11 +319,6 @@ def validate_ena_submittable(sample):
     #  "submittable" : "true"
     # }
     results = []
-    # First check that we have a TAXON_ID
-    if sample.taxonomy_id is None:
-        results.append({'field': 'TAXON_ID',
-                        'message': 'Must be given'})
-        return results
 
     response = requests.get('https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/'
                             + str(sample.taxonomy_id))

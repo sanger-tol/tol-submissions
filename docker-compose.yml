@@ -21,12 +21,7 @@ services:
       - ELIXIR_CLIENT_SECRET
       - ELIXIR_REDIRECT_URI
       - ELIXIR_JWK
-      - MAIL_SENDER
-      - MAIL_SENDER_NAME
-      - MAIL_USERNAME_SMTP
-      - MAIL_PASSWORD_SMTP
-      - MAIL_HOST
-      - MAIL_PORT
+      - TOLID_URL
     ports:
       - 8081:8080
 
@@ -56,12 +51,7 @@ services:
       - ELIXIR_CLIENT_SECRET
       - ELIXIR_REDIRECT_URI
       - ELIXIR_JWK
-      - MAIL_SENDER
-      - MAIL_SENDER_NAME
-      - MAIL_USERNAME_SMTP
-      - MAIL_PASSWORD_SMTP
-      - MAIL_HOST
-      - MAIL_PORT
+      - TOLID_URL
     depends_on:
       - submissions-db
       - submissions-api

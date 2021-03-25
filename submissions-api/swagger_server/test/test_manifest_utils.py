@@ -3,8 +3,9 @@ from __future__ import absolute_import
 from swagger_server.test import BaseTestCase
 
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
-    validate_ena_submittable
+    validate_ena_submittable, validate_against_tolid
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
+import os
 import responses
 
 
@@ -24,6 +25,14 @@ class TestManifestUtils(BaseTestCase):
                                   "submittable": "true"}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
+        mock_response_from_tolid = [{"taxonomyId": "6344",
+                                     "scientificName": "Arenicola marina",
+                                     "commonName": "lugworm",
+                                     "family": "Arenicolidae",
+                                     "genus": "Arenicola",
+                                     "order": "None"}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=200)
 
         self.manifest1 = SubmissionsManifest()
         self.sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
@@ -35,13 +44,16 @@ class TestManifestUtils(BaseTestCase):
                                          decimal_longitude="-1.98765432",
                                          depth="100",
                                          elevation="0",
+                                         family="Arenicolidae",
                                          GAL="SANGER INSTITUTE",
                                          GAL_sample_id="SAN000100",
+                                         genus="Arenicola",
                                          habitat="Woodland",
                                          identified_by="JO IDENTIFIER",
                                          identifier_affiliation="THE IDENTIFIER INSTITUTE",
                                          lifestage="ADULT",
                                          organism_part="MUSCLE",
+                                         order_or_group="None",
                                          relationship="child of SAMEA1234567",
                                          scientific_name="Arenicola marina",
                                          sex="FEMALE",
@@ -70,6 +82,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = ""
         sample.taxonomy_id = ""
         sample.scientific_name = ""
+        sample.family = ""
+        sample.genus = ""
+        sample.order_or_group = ""
         sample.common_name = ""
         sample.lifestage = "random"
         sample.sex = ""
@@ -122,6 +137,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
         sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
@@ -167,6 +185,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
         sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
@@ -211,6 +232,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
         sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
@@ -249,6 +273,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
         sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
@@ -285,6 +312,9 @@ class TestManifestUtils(BaseTestCase):
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
         sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
@@ -308,6 +338,183 @@ class TestManifestUtils(BaseTestCase):
         results = validate_ena_submittable(sample)
         expected = [{"field": "TAXON_ID",
                      "message": "Communication with ENA has failed with status code 500"}]
+
+        self.assertEqual(results, expected)
+
+    # The real version of this does a call to the ToLID service. We mock that call here
+    @responses.activate
+    def test_validate_tolid_correct(self):
+        mock_response_from_tolid = [{"taxonomyId": "6344",
+                                     "scientificName": "Arenicola marina",
+                                     "commonName": "lugworm",
+                                     "family": "Arenicolidae",
+                                     "genus": "Arenicola",
+                                     "order": "None"}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=200)
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+
+        results = validate_against_tolid(sample)
+        expected = []
+
+        self.assertEqual(results, expected)
+
+    # The real version of this does a call to the ToLID service. We mock that call here
+    @responses.activate
+    def test_validate_tolid_species_missing(self):
+        mock_response_from_tolid = []
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=404)
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+
+        results = validate_against_tolid(sample)
+        expected = [{"field": "TAXON_ID",
+                     "message": "Species not known in the ToLID service"}]
+
+        self.assertEqual(results, expected)
+
+    # The real version of this does a call to the ToLID service. We mock that call here
+    @responses.activate
+    def test_validate_tolid_cant_communicate(self):
+        mock_response_from_tolid = []
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=500)
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+
+        results = validate_against_tolid(sample)
+        expected = [{"field": "TAXON_ID",
+                     "message": "Communication failed with the ToLID service: status code 500"}]
+
+        self.assertEqual(results, expected)
+
+    # The real version of this does a call to the ToLID service. We mock that call here
+    @responses.activate
+    def test_validate_tolid_name_genus_family_order(self):
+        mock_response_from_tolid = [{"taxonomyId": "6344",
+                                     "scientificName": "Arenicola marina",
+                                     "commonName": "lugworm",
+                                     "family": "Arenicolidae",
+                                     "genus": "Arenicola",
+                                     "order": "None"}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+                      json=mock_response_from_tolid, status=200)
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina2"
+        sample.family = "Arenicolidae2"
+        sample.genus = "Arenicola2"
+        sample.order_or_group = "None2"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+
+        results = validate_against_tolid(sample)
+        expected = [{"field": "SCIENTIFIC_NAME",
+                     "message": "Does not match that in the ToLID service "
+                     + "(expecting Arenicola marina)"},
+                    {"field": "GENUS",
+                     "message": "Does not match that in the ToLID service (expecting Arenicola)"},
+                    {"field": "FAMILY",
+                     "message": "Does not match that in the ToLID service "
+                     + "(expecting Arenicolidae)"},
+                    {"field": "ORDER_OR_GROUP",
+                     "message": "Does not match that in the ToLID service (expecting None)"}]
 
         self.assertEqual(results, expected)
 

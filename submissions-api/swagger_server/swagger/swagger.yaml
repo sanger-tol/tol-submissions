@@ -206,6 +206,9 @@ components:
             SPECIMEN_ID: SAN000100
             TAXON_ID: 6344
             SCIENTIFIC_NAME: Arenicola marina
+            GENUS: Arenicola
+            FAMILY: Arenicolidae
+            ORDER_OR_GROUP: None
             COMMON_NAME: lugworm
             LIFESTAGE: ADULT
             SEX: FEMALE
@@ -231,6 +234,9 @@ components:
         - SPECIMEN_ID
         - TAXON_ID
         - SCIENTIFIC_NAME
+        - GENUS
+        - FAMILY
+        - ORDER_OR_GROUP
         - COMMON_NAME
         - LIFESTAGE
         - SEX
@@ -261,6 +267,15 @@ components:
         SCIENTIFIC_NAME:
           type: string
           example: Arenicola marina
+        GENUS:
+          type: string
+          example: Arenicola
+        FAMILY:
+          type: string
+          example: Arenicolidae
+        ORDER_OR_GROUP:
+          type: string
+          example: None
         COMMON_NAME:
           type: string
           example: lugworm
@@ -328,6 +343,9 @@ components:
         SPECIMEN_ID: SAN000100
         TAXON_ID: 6344
         SCIENTIFIC_NAME: Arenicola marina
+        GENUS: Arenicola
+        FAMILY: Arenicolidae
+        ORDER_OR_GROUP: None
         COMMON_NAME: lugworm
         LIFESTAGE: ADULT
         SEX: FEMALE

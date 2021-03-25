@@ -8,6 +8,9 @@ class SubmissionsSample(Base):
     sample_id = db.Column(db.Integer, primary_key=True)
     taxonomy_id = db.Column(db.Integer, nullable=False)
     scientific_name = db.Column(db.String(), nullable=False)
+    family = db.Column(db.String(), nullable=False)
+    genus = db.Column(db.String(), nullable=False)
+    order_or_group = db.Column(db.String(), nullable=False)
     common_name = db.Column(db.String(), nullable=False)
     manifest_id = db.Column(db.Integer, db.ForeignKey('manifest.manifest_id'))
     manifest = db.relationship("SubmissionsManifest", back_populates="samples",
@@ -45,6 +48,9 @@ class SubmissionsSample(Base):
                 'SPECIMEN_ID': cls.specimen_id,
                 'TAXON_ID': cls.taxonomy_id,
                 'SCIENTIFIC_NAME': cls.scientific_name,
+                'FAMILY': cls.family,
+                'GENUS': cls.genus,
+                'ORDER_OR_GROUP': cls.order_or_group,
                 'COMMON_NAME': cls.common_name,
                 'LIFESTAGE': cls.lifestage,
                 'SEX': cls.sex,
