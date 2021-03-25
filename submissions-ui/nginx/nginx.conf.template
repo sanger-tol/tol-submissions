@@ -21,7 +21,7 @@ http {
 
 		autoindex off;
 
-		location ^~ /api/v2/ {
+		location ^~ /api/v1/ {
 			proxy_pass ${SUBMISSIONS_API_LOCATION};
 		}
 
