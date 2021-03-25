@@ -160,9 +160,9 @@ deploy-staging:
   <<: *deploy-template
   environment:
     name: staging
-    url: http://172.27.21.233/
+    url: https://submissions-staging.tol.sanger.ac.uk
   variables:
-    DOCKER_HOST: "ssh://ubuntu@172.27.21.233"
+    DOCKER_HOST: "ssh://ubuntu@172.27.22.28"
   only:
     - staging
 
@@ -170,9 +170,9 @@ deploy-production:
   <<: *deploy-template
   environment:
     name: production
-    url: https://id.tol.sanger.ac.uk/
+    url: https://submissions.tol.sanger.ac.uk/
   variables:
-    DOCKER_HOST: "ssh://ubuntu@172.27.18.201"
+    DOCKER_HOST: "ssh://ubuntu@172.27.22.202"
   only:
     - master
   when: manual
