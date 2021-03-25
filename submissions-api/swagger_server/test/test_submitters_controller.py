@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
+import responses
 # from openpyxl import load_workbook
 
 
@@ -107,16 +108,30 @@ class TestSubmittersController(BaseTestCase):
                     ]}
         self.assertEquals(expected, response.json)
 
+    @responses.activate
     def test_validate_manifest_json(self):
+        mock_response_from_ena = {"taxId": "6344",
+                                  "scientificName": "Arenicola marina",
+                                  "commonName": "lugworm",
+                                  "formalName": "true",
+                                  "rank": "species",
+                                  "division": "INV",
+                                  "lineage": "",
+                                  "geneticCode": "1",
+                                  "mitochondrialGeneticCode": "5",
+                                  "submittable": "true"}
+        responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
+                      json=mock_response_from_ena, status=200)
+
         body = {'samples': [
                     {'row': 1,
                      'SPECIMEN_ID': 'specimen9876',
                      'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': '',
+                     'SCIENTIFIC_NAME': 'Arenicola marina',
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
+                     'ORGANISM_PART': '',
                      'GAL': 'SANGER INSTITUTE',
                      'GAL_SAMPLE_ID': 'SAN000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
@@ -193,13 +208,27 @@ class TestSubmittersController(BaseTestCase):
                     'validations': [
                         {"row": 1,
                          "results": [
-                             {"field": "SCIENTIFIC_NAME",
-                              "message": "Scientific name must be given"}
+                             {"field": "ORGANISM_PART",
+                              "message": "Must not be empty"}
                          ]}
                     ]}
         self.assertEquals(expected, response.json)
 
+    @responses.activate
     def test_submit_and_validate_manifest_json(self):
+        mock_response_from_ena = {"taxId": "6344",
+                                  "scientificName": "Arenicola marina",
+                                  "commonName": "lugworm",
+                                  "formalName": "true",
+                                  "rank": "species",
+                                  "division": "INV",
+                                  "lineage": "",
+                                  "geneticCode": "1",
+                                  "mitochondrialGeneticCode": "5",
+                                  "submittable": "true"}
+        responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
+                      json=mock_response_from_ena, status=200)
+
         # No authorisation token given
         body = []
         response = self.client.open(
@@ -233,11 +262,11 @@ class TestSubmittersController(BaseTestCase):
                     {'row': 1,
                      'SPECIMEN_ID': 'specimen9876',
                      'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': '',
+                     'SCIENTIFIC_NAME': 'Arenicola marina',
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
+                     'ORGANISM_PART': '',
                      'GAL': 'SANGER INSTITUTE',
                      'GAL_SAMPLE_ID': 'SAN000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
@@ -275,8 +304,8 @@ class TestSubmittersController(BaseTestCase):
                     'validations': [
                         {"row": 1,
                          "results": [
-                             {"field": "SCIENTIFIC_NAME",
-                              "message": "Scientific name must be given"}
+                             {"field": "ORGANISM_PART",
+                              "message": "Must not be empty"}
                          ]}
                     ]}
         self.assertEquals(expected, response.json)

@@ -1,5 +1,6 @@
 from swagger_server.model import SubmissionsManifest, SubmissionsSample
 import re
+import requests
 
 
 def create_manifest_from_json(samples, user):
@@ -257,4 +258,51 @@ def validate_against_ena_checklist(sample):
 
 
 def validate_ena_submittable(sample):
-    return([])
+    # https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/9606
+    #
+    # {
+    # "taxId" : "9606",
+    #  "scientificName" : "Homo sapiens",
+    #  "commonName" : "human",
+    #  "formalName" : "true",
+    #  "rank" : "species",
+    #  "division" : "HUM",
+    #  "lineage" : "Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+    #               Mammalia; Eutheria; Euarchontoglires; Primates; Haplorrhini; Catarrhini;
+    #               Hominidae; Homo; ",
+    #  "geneticCode" : "1",
+    #  "mitochondrialGeneticCode" : "2",
+    #  "submittable" : "true"
+    # }
+    results = []
+    # First check that we have a TAXON_ID
+    if sample.taxonomy_id is None:
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Must be given'})
+        return results
+
+    response = requests.get('https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/'
+                            + str(sample.taxonomy_id))
+    if (response.status_code != 200):
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Communication with ENA has failed with status code '
+                        + str(response.status_code)})
+        return results
+
+    # Might be an unknown TAX_ID
+    if response.text == "No results.":
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Is not known at ENA'})
+        return results
+    data = response.json()
+
+    # ENA submittable?
+    if data['submittable'] != "true":
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Is not ENA submittable'})
+
+    if data['scientificName'] != sample.scientific_name:
+        results.append({'field': 'SCIENTIFIC_NAME',
+                        'message': 'Must match ENA (expected ' + data['scientificName'] + ')'})
+
+    return(results)
