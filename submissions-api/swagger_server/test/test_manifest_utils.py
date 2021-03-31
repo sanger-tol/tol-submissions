@@ -96,7 +96,7 @@ class TestManifestUtils(BaseTestCase):
         sample.date_of_collection = "1st May 2021"
         sample.collection_location = "Moon | Sea of Tranquility"
         sample.decimal_latitude = ""
-        sample.decimal_longitude = ""
+        sample.decimal_longitude = "Greenwich meridian"
         sample.habitat = ""
         sample.identified_by = ""
         sample.identifier_affiliation = ""
@@ -109,26 +109,23 @@ class TestManifestUtils(BaseTestCase):
         expected = [{'field': 'ORGANISM_PART',
                      'message': 'Must not be empty'},
                     {'field': 'LIFESTAGE',
-                     'message': 'Must be one of adult, egg, embryo, gametophyte, juvenile, '
-                                + 'larva, not applicable, not collected, not provided, pupa, '
-                                + 'spore-bearing structure, sporophyte, vegetative cell, '
-                                + 'vegetative structure, zygote'},
+                     'message': 'Must be in allowed values'},
                     {'field': 'COLLECTED_BY', 'message': 'Must not be empty'},
-                    {'field': 'COLLECTION_DATE', 'message': 'Must match specific pattern'},
-                    {'field': 'COLLECTION_LOCATION', 'message': 'Must be in the allowed list'},
-                    {'field': 'DECIMAL_LATITUDE', 'message': 'Must match specific pattern'},
+                    {'field': 'DATE_OF_COLLECTION', 'message': 'Must match specific pattern'},
+                    {'field': 'COLLECTION_LOCATION', 'message': 'Must be in allowed values'},
+                    {'field': 'DECIMAL_LATITUDE', 'message': 'Must not be empty'},
                     {'field': 'DECIMAL_LONGITUDE', 'message': 'Must match specific pattern'},
-                    {'field': 'IDENTIFIED_BY', 'message': 'Must be given'},
-                    {'field': 'HABITAT', 'message': 'Must be given'},
-                    {'field': 'IDENTIFIER_AFFILIATION', 'message': 'Must be given'},
-                    {'field': 'SEX', 'message': 'Must be given'},
-                    {'field': 'COLLECTOR_AFFILIATION', 'message': 'Must be given'},
-                    {'field': 'GAL', 'message': 'Must be in allowed list'},
-                    {'field': 'VOUCHER_ID', 'message': 'Must be given'},
-                    {'field': 'SPECIMEN_ID', 'message': 'Must be given'},
-                    {'field': 'GAL_SAMPLE_ID', 'message': 'Must be given'},
+                    {'field': 'IDENTIFIED_BY', 'message': 'Must not be empty'},
                     {'field': 'DEPTH', 'message': 'Must match specific pattern'},
-                    {'field': 'ELEVATION', 'message': 'Must match specific pattern'}]
+                    {'field': 'ELEVATION', 'message': 'Must match specific pattern'},
+                    {'field': 'HABITAT', 'message': 'Must not be empty'},
+                    {'field': 'IDENTIFIER_AFFILIATION', 'message': 'Must not be empty'},
+                    {'field': 'SEX', 'message': 'Must not be empty'},
+                    {'field': 'COLLECTOR_AFFILIATION', 'message': 'Must not be empty'},
+                    {'field': 'GAL', 'message': 'Must be in allowed values'},
+                    {'field': 'VOUCHER_ID', 'message': 'Must not be empty'},
+                    {'field': 'SPECIMEN_ID', 'message': 'Must not be empty'},
+                    {'field': 'GAL_SAMPLE_ID', 'message': 'Must not be empty'}]
 
         self.assertEqual(results, expected)
 
