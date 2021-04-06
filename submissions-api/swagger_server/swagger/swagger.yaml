@@ -106,6 +106,43 @@ paths:
         "404":
           description: manifest does not exist
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/{manifestId}/generate:
+    patch:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Generates ToLIDs and BioSample IDs for a manifest
+      description: |
+        Calls out to ToLID service and ENA service
+      operationId: generate_ids_for_manifest
+      parameters:
+      - name: manifestId
+        in: path
+        description: a manifest ID (given when manifest created)
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: manifest with IDs filled in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manifest'
+                x-content-type: application/json
+        "400":
+          description: errors in generating IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestValidationResult'
+                x-content-type: application/json
+        "404":
+          description: manifest does not exist
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /auth/login:
     get:
       tags:

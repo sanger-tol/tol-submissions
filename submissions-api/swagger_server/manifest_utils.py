@@ -1,4 +1,4 @@
-from swagger_server.model import SubmissionsManifest, SubmissionsSample
+from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
 import re
 import os
 import requests
@@ -352,3 +352,65 @@ def validate_ena_submittable(sample):
                         'message': 'Must match ENA (expected ' + data['scientificName'] + ')'})
 
     return(results)
+
+
+def generate_ids_for_manifest(manifest):
+    # ToLIDs
+    results = generate_tolids_for_manifest(manifest)
+
+    if len(results) > 0:
+        # Something has gone wrong with the ToLID assignment
+        return results
+
+    # ENA IDs
+    generate_ena_ids_for_manifest(manifest)
+
+    db.session.commit()
+
+
+def generate_tolids_for_manifest(manifest):
+    results = []
+    error_count = 0
+    # ToLIDs
+    # List of taxon-specimen pairs
+    taxon_specimens = []
+    for sample in manifest.samples:
+        taxon_specimen = {"taxonomyId": sample.taxonomy_id,
+                          "specimenId": sample.specimen_id}
+        if taxon_specimen not in taxon_specimens:
+            taxon_specimens.append(taxon_specimen)
+
+    response = requests.post(os.environ['TOLID_URL'] + '/tol-ids',
+                             data=taxon_specimens,
+                             headers={"api-key": os.getenv("TOLID_API_KEY")})
+    if (response.status_code != 200):
+        results.append({"row": sample.row,
+                        "results": [{'field': 'TAXON_ID',
+                                     'message': 'Cannot connect to ToLID service'}]})
+        return 1, results
+
+    for tolid in response.json():
+        samples_to_update = db.session.query(SubmissionsSample) \
+            .filter(SubmissionsSample.manifest == manifest) \
+            .filter(SubmissionsSample.specimen_id == tolid["specimen"]["specimenId"]) \
+            .filter(SubmissionsSample.taxonomy_id == tolid["species"]["taxonomyId"]) \
+            .all()
+        for sample_to_update in samples_to_update:
+            if "tolId" in tolid:
+                sample_to_update.tolid = tolid["tolId"]
+            else:
+                # ToLID not been assigned - a request must have been generated
+                results.append({"row": sample_to_update.row,
+                                "results": [{'field': 'TAXON_ID',
+                                            'message': 'A ToLID has not been generated'}]})
+                error_count += 1
+
+    if error_count > 0:
+        return error_count, results
+
+    # Needs commiting elsewhere
+    return 0, []
+
+
+def generate_ena_ids_for_manifest(manifest):
+    return 0, []
