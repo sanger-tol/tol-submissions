@@ -352,17 +352,3 @@ def validate_ena_submittable(sample):
                         'message': 'Must match ENA (expected ' + data['scientificName'] + ')'})
 
     return(results)
-
-
-def generate_ena_xml(manifest):
-    xml = ''
-    for sample in manifest.samples:
-        xml += generate_ena_xml_for_sample(sample)
-
-    return xml
-
-
-def generate_ena_xml_for_sample(sample):
-    xml = ''
-
-    return xml
