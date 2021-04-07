@@ -74,6 +74,38 @@ paths:
         "403":
           description: user not authorised to use this function
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/{manifestId}:
+    get:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Gets a manifest
+      description: |
+        Returns a manifest that has been uploaded (and possibly validated and had IDs generated)
+      operationId: get_manifest
+      parameters:
+      - name: manifestId
+        in: path
+        description: a manifest ID (given when manifest created)
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: the manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manifest'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+        "404":
+          description: manifest does not exist
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /manifests/{manifestId}/validate:
     get:
       security:

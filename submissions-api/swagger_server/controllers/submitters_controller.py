@@ -24,6 +24,24 @@ def submit_manifest_json(body=None):  # noqa: E501
     return(jsonify(manifest))
 
 
+def get_manifest(manifest_id=None):
+    role = db.session.query(SubmissionsRole) \
+        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
+        .filter(SubmissionsRole.user_id == connexion.context["user"]) \
+        .one_or_none()
+    if role is None:
+        return jsonify({'detail': "User does not have permission to use this function"}), 403
+
+    # Does the manifest exist?
+    manifest = db.session.query(SubmissionsManifest) \
+        .filter(SubmissionsManifest.manifest_id == manifest_id) \
+        .one_or_none()
+    if manifest is None:
+        return jsonify({'detail': "Manifest does not exist"}), 404
+
+    return(jsonify(manifest))
+
+
 def validate_manifest(manifest_id=None):
     # Do the validation here
     role = db.session.query(SubmissionsRole) \
