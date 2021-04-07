@@ -256,14 +256,14 @@ components:
             COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
             DATE_OF_COLLECTION: 2020-09-01
             COLLECTION_LOCATION: UK | DARK FOREST
-            DECIMAL_LATITUDE: +50.12345678
-            DECIMAL_LONGITUDE: -1.98765432
+            DECIMAL_LATITUDE: "+50.12345678"
+            DECIMAL_LONGITUDE: "-1.98765432"
             HABITAT: Woodland
             IDENTIFIED_BY: JO IDENTIFIER
             IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
             VOUCHER_ID: voucher1
-            ELEVATION: 0
-            DEPTH: 100
+            ELEVATION: "0"
+            DEPTH: "100"
             RELATIONSHIP: child of SAMEA1234567
     Sample:
       required:

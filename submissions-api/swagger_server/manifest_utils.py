@@ -381,7 +381,7 @@ def generate_tolids_for_manifest(manifest):
             taxon_specimens.append(taxon_specimen)
 
     response = requests.post(os.environ['TOLID_URL'] + '/tol-ids',
-                             data=taxon_specimens,
+                             json=taxon_specimens,
                              headers={"api-key": os.getenv("TOLID_API_KEY")})
     if (response.status_code != 200):
         results.append({"row": sample.row,
