@@ -36,6 +36,9 @@ class SubmissionsSample(Base):
 
     tolid = db.Column(db.String(), nullable=True)
     biosample_id = db.Column(db.String(), nullable=True)
+    sra_accession = db.Column(db.String(), nullable=True)
+    submission_accession = db.Column(db.String(), nullable=True)
+    submission_error = db.Column(db.String(), nullable=True)
 
     sample_same_as = db.Column(db.String(), nullable=True)
     sample_derived_from = db.Column(db.String(), nullable=True)
@@ -77,7 +80,10 @@ class SubmissionsSample(Base):
                 'DEPTH': cls.depth,
                 'RELATIONSHIP': cls.relationship,
                 'tolId': cls.tolid,
-                'biosampleId': cls.biosample_id}
+                'biosampleId': cls.biosample_id,
+                'sraAccession': cls.sra_accession,
+                'submissionAccession': cls.submission_accession,
+                'submissionError': cls.submission_error}
 
     def to_ena_dict(cls):
         # Listed in the order they appear on the ENA checklist

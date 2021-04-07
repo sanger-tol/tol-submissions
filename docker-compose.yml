@@ -23,6 +23,9 @@ services:
       - ELIXIR_JWK
       - TOLID_URL
       - TOLID_API_KEY
+      - ENA_URL
+      - ENA_USERNAME
+      - ENA_PASSWORD
       - ENA_CONTACT_NAME
       - ENA_CONTACT_EMAIL
     ports:
@@ -56,6 +59,9 @@ services:
       - ELIXIR_JWK
       - TOLID_URL
       - TOLID_API_KEY
+      - ENA_URL
+      - ENA_USERNAME
+      - ENA_PASSWORD
       - ENA_CONTACT_NAME
       - ENA_CONTACT_EMAIL
     depends_on:

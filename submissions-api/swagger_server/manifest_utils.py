@@ -1,7 +1,10 @@
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
+from swagger_server.xml_utils import build_bundle_sample_xml, build_submission_xml
 import re
 import os
 import requests
+from requests.auth import HTTPBasicAuth
+import xml.etree.ElementTree as ET
 
 
 def create_manifest_from_json(samples, user):
@@ -356,16 +359,20 @@ def validate_ena_submittable(sample):
 
 def generate_ids_for_manifest(manifest):
     # ToLIDs
-    results = generate_tolids_for_manifest(manifest)
+    error_count, results = generate_tolids_for_manifest(manifest)
 
-    if len(results) > 0:
+    if error_count > 0:
         # Something has gone wrong with the ToLID assignment
-        return results
+        return error_count, results
 
     # ENA IDs
-    generate_ena_ids_for_manifest(manifest)
+    error_count, results = generate_ena_ids_for_manifest(manifest)
+    if error_count > 0:
+        # Something has gone wrong with the ENA assignment
+        return error_count, results
 
     db.session.commit()
+    return 0, []
 
 
 def generate_tolids_for_manifest(manifest):
@@ -413,4 +420,79 @@ def generate_tolids_for_manifest(manifest):
 
 
 def generate_ena_ids_for_manifest(manifest):
-    return 0, []
+    results = []
+    error_count = 0
+    bundle_xml_file = build_bundle_sample_xml(manifest)
+    submission_xml_file = build_submission_xml(manifest)
+    xml_files = [("SAMPLE", open(bundle_xml_file, "rb")),
+                 ("SUBMISSION", open(submission_xml_file, "rb"))]
+    response = requests.post(os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+                             files=xml_files,
+                             auth=HTTPBasicAuth(os.environ['ENA_USERNAME'],
+                                                os.environ['ENA_PASSWORD']))
+
+    if (response.status_code != 200):
+        results.append({"row": 1,
+                        "results": [{'field': 'TAXON_ID',
+                                     'message': 'Cannot connect to ENA service'}]})
+        return 1, results
+
+    if not assign_ena_ids(manifest, response.text):
+        results.append({"row": 1,
+                        "results": [{'field': 'TAXON_ID',
+                                     'message': 'Error returned from ENA service'}]})
+        return 1, results
+    return error_count, results
+
+
+def assign_ena_ids(manifest, xml):
+    try:
+        tree = ET.fromstring(xml)
+    except ET.ParseError:
+        #  message = " Unrecognized response from ENA - " + str(
+        #    xml) + " Please try again later, if it persists contact admins"
+        return False
+
+    success_status = tree.get('success')
+    if success_status == 'false':
+        manifest.submission_status = False
+        msg = ""
+        error_blocks = tree.find('MESSAGES').findall('ERROR')
+        for error in error_blocks:
+            msg += error.text + "<br>"
+        if not msg:
+            msg = "Undefined error"
+        # status = {"status": "error", "msg": msg}
+        # print(status)
+        for child in tree.iter():
+            if child.tag == 'SAMPLE':
+                sample_id = child.get('alias')
+                sample = db.session.query(SubmissionsSample) \
+                    .filter(SubmissionsSample.manifest == manifest) \
+                    .filter(SubmissionsSample.sample_id == sample_id) \
+                    .one_or_none()
+                sample.submission_error = msg
+        return False
+    else:
+        manifest.submission_status = True
+        return assign_biosample_ids(manifest, xml)
+
+
+def assign_biosample_ids(manifest, xml):
+    tree = ET.fromstring(xml)
+    submission_accession = tree.find('SUBMISSION').get('accession')
+    for child in tree.iter():
+        if child.tag == 'SAMPLE':
+            sample_id = child.get('alias')
+            sra_accession = child.get('accession')
+            biosample_accession = child.find('EXT_ID').get('accession')
+            sample = db.session.query(SubmissionsSample) \
+                .filter(SubmissionsSample.manifest == manifest) \
+                .filter(SubmissionsSample.sample_id == sample_id) \
+                .one_or_none()
+            if sample is None:
+                return False
+            sample.biosample_id = biosample_accession
+            sample.sra_accession = sra_accession
+            sample.submission_accession = submission_accession
+    return True

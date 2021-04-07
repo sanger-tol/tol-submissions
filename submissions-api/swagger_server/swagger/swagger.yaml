@@ -255,7 +255,7 @@ components:
             COLLECTED_BY: ALEX COLLECTOR
             COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
             DATE_OF_COLLECTION: 2020-09-01
-            COLLECTION_LOCATION: UK | DARK FOREST
+            COLLECTION_LOCATION: UNITED KINGDOM | DARK FOREST
             DECIMAL_LATITUDE: "+50.12345678"
             DECIMAL_LONGITUDE: "-1.98765432"
             HABITAT: Woodland
@@ -342,7 +342,7 @@ components:
           example: 2020-09-01
         COLLECTION_LOCATION:
           type: string
-          example: UK | DARK FOREST
+          example: UNITED KINGDOM | DARK FOREST
         DECIMAL_LATITUDE:
           type: string
           example: "+50.12345678"
@@ -370,12 +370,21 @@ components:
         RELATIONSHIP:
           type: string
           example: host
-        biosampleId:
-          type: string
-          example: SAMEA12345678
         tolId:
           type: string
           example: wuAreMari1
+        biosampleId:
+          type: string
+          example: SAMEA12345678
+        sraAccession:
+          type: string
+          example: ERS6206028
+        submissionAccession:
+          type: string
+          example: ERA3819349
+        sraAccession:
+          type: string
+          example: "The object being added already exists in the submission account with accession: \"ERS6206044\"."
       example:
         SPECIMEN_ID: SAN000100
         TAXON_ID: 6344
@@ -392,7 +401,7 @@ components:
         COLLECTED_BY: ALEX COLLECTOR
         COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
         DATE_OF_COLLECTION: 2020-09-01
-        COLLECTION_LOCATION: UK | DARK FOREST
+        COLLECTION_LOCATION: UNITED KINGDOM | DARK FOREST
         DECIMAL_LATITUDE: "+50.12345678"
         DECIMAL_LONGITUDE: "-1.98765432"
         HABITAT: Woodland
@@ -404,6 +413,9 @@ components:
         RELATIONSHIP: child of SAMEA1234567
         tolId: wuAreMari1
         biosampleId: SAMEA12345678
+        sraAccession: ERS6206028
+        submissionAccession: ERA3819349
+        submissionError: null
     User:
       required:
         - name

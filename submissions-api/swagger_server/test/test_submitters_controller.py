@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
+from swagger_server.model import db, SubmissionsManifest
 import os
 import responses
 # from openpyxl import load_workbook
@@ -83,6 +84,7 @@ class TestSubmittersController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
+                    'submissionStatus': None,
                     'samples': [
                         {'row': 1,
                          'SPECIMEN_ID': 'specimen9876',
@@ -111,7 +113,10 @@ class TestSubmittersController(BaseTestCase):
                          'DEPTH': None,
                          'RELATIONSHIP': None,
                          'tolId': None,
-                         'biosampleId': None}
+                         'biosampleId': None,
+                         'sraAccession': None,
+                         'submissionAccession': None,
+                         'submissionError': None}
                     ]}
         self.assertEquals(expected, response.json)
 
@@ -409,6 +414,13 @@ class TestSubmittersController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
+        manifest = db.session.query(SubmissionsManifest) \
+            .filter(SubmissionsManifest.manifest_id == 1) \
+            .one_or_none()
+        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(manifest.samples[0].sample_id) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
+        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+                      body=mock_response_from_ena, status=200)
+
         # No authorisation token given
         body = []
         response = self.client.open(
@@ -456,6 +468,7 @@ class TestSubmittersController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
+                    'submissionStatus': True,
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -483,8 +496,11 @@ class TestSubmittersController(BaseTestCase):
                         'DEPTH': None,
                         'ELEVATION': None,
                         'RELATIONSHIP': None,
-                        'biosampleId': None,
-                        'tolId': 'wuAreMari1'}
+                        'tolId': 'wuAreMari1',
+                        'biosampleId': "SAMEA8521239",
+                        'sraAccession': "ERS6206028",
+                        'submissionAccession': "ERA3819349",
+                        'submissionError': None}
                     ]}
         self.assertEquals(expected, response.json)
 
