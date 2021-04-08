@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
-from swagger_server.model import db, SubmissionsManifest
+from swagger_server.model import db, SubmissionsManifest, SubmissionsSpecimen
 import os
 import responses
 # from openpyxl import load_workbook
@@ -85,6 +85,7 @@ class TestSubmittersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
                     'submissionStatus': None,
+                    'projectName': 'ToL',  # Default - not given in body
                     'samples': [
                         {'row': 1,
                          'SPECIMEN_ID': 'specimen9876',
@@ -118,7 +119,10 @@ class TestSubmittersController(BaseTestCase):
                          'biosampleId': None,
                          'sraAccession': None,
                          'submissionAccession': None,
-                         'submissionError': None}
+                         'submissionError': None,
+                         'sampleSameAs': None,
+                         'sampleDerivedFrom': None,
+                         'sampleSymbiontOf': None}
                     ]}
         self.assertEquals(expected, response.json)
 
@@ -148,7 +152,8 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1'}
-                ]}
+                ],
+                'project_name': 'TestProj'}
 
         # Submit the manifest
         response = self.client.open(
@@ -207,6 +212,7 @@ class TestSubmittersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
                     'submissionStatus': None,
+                    'projectName': 'TestProj',
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -240,7 +246,11 @@ class TestSubmittersController(BaseTestCase):
                         'biosampleId': None,
                         'sraAccession': None,
                         'submissionAccession': None,
-                        'submissionError': None}
+                        'submissionError': None,
+                        'sampleSameAs': None,
+                        'sampleDerivedFrom': None,
+                        'sampleSymbiontOf': None}
+
                     ]}
         self.assertEquals(expected, response.json)
 
@@ -470,6 +480,12 @@ class TestSubmittersController(BaseTestCase):
 
     @responses.activate
     def test_generate_ids(self):
+        specimen = SubmissionsSpecimen()
+        specimen.specimen_id = "specimen9876"
+        specimen.biosample_id = "SAMEA12345678"
+        db.session.add(specimen)
+        db.session.commit()
+
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
                                   "commonName": "lugworm",
@@ -593,6 +609,7 @@ class TestSubmittersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
                     'submissionStatus': True,
+                    'projectName': 'ToL',
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -626,7 +643,10 @@ class TestSubmittersController(BaseTestCase):
                         'biosampleId': "SAMEA8521239",
                         'sraAccession': "ERS6206028",
                         'submissionAccession': "ERA3819349",
-                        'submissionError': None}
+                        'submissionError': None,
+                        'sampleSameAs': None,
+                        'sampleDerivedFrom': 'SAMEA12345678',
+                        'sampleSymbiontOf': None}
                     ]}
         self.assertEquals(expected, response.json)
 

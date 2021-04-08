@@ -266,6 +266,9 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SampleIn'
+        projectName:
+          type: string
+          example: SuperProject
       example:
         samples: &manifest_samples_example
           - row: 1
@@ -293,6 +296,7 @@ components:
             VOUCHER_ID: voucher1
             ELEVATION: "0"
             DEPTH: "100"
+        projectName: SuperProject
     ManifestOut:
       <<: *manifest
       properties:

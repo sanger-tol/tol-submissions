@@ -17,7 +17,7 @@ def submit_manifest_json(body=None):  # noqa: E501
         .filter(SubmissionsUser.user_id == connexion.context["user"]) \
         .one_or_none()
 
-    manifest = manifest_utils.create_manifest_from_json(body["samples"], user)
+    manifest = manifest_utils.create_manifest_from_json(body, user)
 
     db.session.add(manifest)
     db.session.commit()
@@ -77,7 +77,7 @@ def submit_and_validate_manifest_json(body=None):
         .one_or_none()
 
     # Add the manifest
-    manifest = manifest_utils.create_manifest_from_json(body["samples"], user)
+    manifest = manifest_utils.create_manifest_from_json(body, user)
 
     db.session.add(manifest)
     db.session.commit()

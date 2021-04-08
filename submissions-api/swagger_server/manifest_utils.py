@@ -8,10 +8,12 @@ from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 
 
-def create_manifest_from_json(samples, user):
+def create_manifest_from_json(json, user):
     manifest = SubmissionsManifest()
     manifest.user = user
-    for s in samples:
+    if "project_name" in json:
+        manifest.project_name = json["project_name"]
+    for s in json["samples"]:
         sample = SubmissionsSample()
         sample.manifest = manifest
         sample.row = s.get('row')
@@ -456,6 +458,12 @@ def generate_ids_for_manifest(manifest):
 
     if error_count > 0:
         # Something has gone wrong with the ToLID assignment
+        return error_count, results
+
+    # sampleSameAs, sampleDerivedFrom (specimens)
+    error_count, results = set_relationships_for_manifest(manifest)
+    if error_count > 0:
+        # Something has gone wrong with the ENA assignment
         return error_count, results
 
     # ENA IDs

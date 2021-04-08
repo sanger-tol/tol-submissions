@@ -85,7 +85,10 @@ class SubmissionsSample(Base):
                 'biosampleId': cls.biosample_id,
                 'sraAccession': cls.sra_accession,
                 'submissionAccession': cls.submission_accession,
-                'submissionError': cls.submission_error}
+                'submissionError': cls.submission_error,
+                'sampleSameAs': cls.sample_same_as,
+                'sampleDerivedFrom': cls.sample_derived_from,
+                'sampleSymbiontOf': cls.sample_symbiont_of}
 
     def to_ena_dict(cls):
         # Listed in the order they appear on the ENA checklist
@@ -94,7 +97,7 @@ class SubmissionsSample(Base):
         ret["lifestage"] = {
             "value": "spore-bearing structure" if cls.lifestage == "SPORE_BEARING_STRUCTURE"
             else cls.lifestage.replace("_", " ")}
-        ret["project name"] = {"value": "TOL"}
+        ret["project name"] = {"value": cls.manifest.project_name}
         ret["tolid"] = {"value": cls.tolid}
         ret["collected by"] = {"value": cls.collected_by.replace("_", " ")}
         ret["collection date"] = {"value": cls.date_of_collection}

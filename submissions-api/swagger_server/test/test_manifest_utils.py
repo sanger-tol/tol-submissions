@@ -37,6 +37,7 @@ class TestManifestUtils(BaseTestCase):
                       json=mock_response_from_tolid, status=200)
 
         self.manifest1 = SubmissionsManifest()
+        self.manifest1.project_name = "TestProj1"
         self.sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
                                          collection_location="UNITED KINGDOM | DARK FOREST",
                                          collector_affiliation="THE COLLECTOR INSTITUTE",
@@ -80,6 +81,8 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(len(results[0]["results"]), 1)
 
     def test_validate_against_ena_checklist_fail(self):
+        manifest = SubmissionsManifest()
+        manifest.project_name = "MostExcellentProject"
         sample = SubmissionsSample()
         sample.specimen_id = ""
         sample.taxonomy_id = ""
@@ -106,6 +109,7 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = "quite high"
         sample.depth = "really low"
         sample.relationship = ""
+        sample.manifest = manifest
 
         results = validate_against_ena_checklist(sample)
         expected = [{'field': 'ORGANISM_PART',
@@ -132,6 +136,8 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(results, expected)
 
     def test_validate_against_ena_checklist_pass(self):
+        manifest = SubmissionsManifest()
+        manifest.project_name = "MostExcellentProject"
         sample = SubmissionsSample()
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
@@ -158,6 +164,7 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = "1500"
         sample.depth = "1000"
         sample.relationship = "child of 1234"
+        sample.manifest = manifest
 
         results = validate_against_ena_checklist(sample)
         expected = []

@@ -1,8 +1,7 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
-
-from swagger_server.model import SubmissionsSample
+from swagger_server.model import SubmissionsSample, SubmissionsManifest
 
 
 class TestSubmissionsSample(BaseTestCase):
@@ -26,6 +25,9 @@ class TestSubmissionsSample(BaseTestCase):
         self.assertEqual(sample.collection_region(), "")
 
     def test_ena_dict(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+        manifest.project_name = "AwesomeProject"
         sample = SubmissionsSample()
         sample.specimen_id = "specimen1234"
         sample.taxonomy_id = 6344
@@ -52,11 +54,12 @@ class TestSubmissionsSample(BaseTestCase):
         sample.elevation = "1500"
         sample.depth = "1000"
         sample.relationship = "child of 1234"
+        sample.manifest = manifest
 
         expected = {"ENA-CHECKLIST": {"value": "ERC000053"},
                     'organism part': {'value': 'MUSCLE'},
                     'lifestage': {'value': 'ADULT'},
-                    'project name': {'value': 'TOL'},
+                    'project name': {'value': 'AwesomeProject'},
                     'tolid': {'value': None},
                     'collected by': {'value': 'ALEX COLLECTOR'},
                     'collection date': {'value': '2020-09-01'},
