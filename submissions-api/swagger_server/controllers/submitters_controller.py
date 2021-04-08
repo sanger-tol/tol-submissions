@@ -113,3 +113,31 @@ def generate_ids_for_manifest(manifest_id=None):
                         'validations': validation_results}))
 
     return(jsonify(manifest))
+
+
+def submit_and_generate_manifest_json(body=None):
+    role = db.session.query(SubmissionsRole) \
+        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
+        .filter(SubmissionsRole.user_id == connexion.context["user"]) \
+        .one_or_none()
+    if role is None:
+        return jsonify({'detail': "User does not have permission to use this function"}), 403
+
+    user = db.session.query(SubmissionsUser) \
+        .filter(SubmissionsUser.user_id == connexion.context["user"]) \
+        .one_or_none()
+
+    # Add the manifest
+    manifest = manifest_utils.create_manifest_from_json(body, user)
+
+    db.session.add(manifest)
+    db.session.commit()
+
+    number_of_errors, validation_results = manifest_utils.generate_ids_for_manifest(manifest)
+
+    if number_of_errors > 0:
+        return(jsonify({'manifestId': manifest.manifest_id,
+                        'number_of_errors': number_of_errors,
+                        'validations': validation_results}))
+
+    return(jsonify(manifest))

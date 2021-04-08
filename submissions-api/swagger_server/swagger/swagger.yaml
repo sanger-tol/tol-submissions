@@ -63,7 +63,7 @@ paths:
               $ref: '#/components/schemas/ManifestIn'
       responses:
         "200":
-          description: manifest created
+          description: manifest validated
           content:
             application/json:
               schema:
@@ -103,6 +103,8 @@ paths:
                 x-content-type: application/json
         "400":
           description: bad input parameter
+        "403":
+          description: user not authorised to use this function
         "404":
           description: manifest does not exist
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
@@ -135,6 +137,8 @@ paths:
                 x-content-type: application/json
         "400":
           description: bad input parameter
+        "403":
+          description: user not authorised to use this function
         "404":
           description: manifest does not exist
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
@@ -172,8 +176,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/ManifestValidationResult'
                 x-content-type: application/json
+        "403":
+          description: user not authorised to use this function
         "404":
           description: manifest does not exist
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/generate:
+    post:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Upload and immediately validate a JSON manifest
+      description: |
+        Upload a manifest in JSON format and validate it (convenience method)
+      operationId: submit_and_generate_manifest_json
+      requestBody:
+        description: Manifest to upload and validate
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManifestIn'
+      responses:
+        "200":
+          description: manifest with IDs filled in
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestOut'
+                x-content-type: application/json
+        "400":
+          description: errors in generating IDs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestValidationResult'
+                x-content-type: application/json
+        "403":
+          description: user not authorised to use this function
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /auth/login:
     get:
