@@ -4,8 +4,9 @@ from swagger_server.test import BaseTestCase
 
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
-    generate_ena_ids_for_manifest
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
+    generate_ena_ids_for_manifest, set_relationships_for_manifest
+from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
+    SubmissionsSpecimen
 import os
 import responses
 
@@ -708,6 +709,144 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(expected, results)
         self.assertEqual(None, sample.tolid)
         self.assertEqual(None, sample2.tolid)
+
+    def test_set_relationships_for_manifest_existing_specimen(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+
+        sample = SubmissionsSample()
+        sample.row = 1
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        specimen = SubmissionsSpecimen()
+        specimen.specimen_id = "specimen1234"
+        specimen.biosample_id = "SAMEA12345678"
+        db.session.add(specimen)
+        db.session.commit()
+
+        error_count, results = set_relationships_for_manifest(manifest)
+        self.assertEqual("SAMEA12345678", manifest.samples[0].sample_derived_from)
+        self.assertEqual(None, manifest.samples[0].sample_same_as)
+        self.assertEqual(None, manifest.samples[0].sample_symbiont_of)
+        self.assertEqual(0, error_count)
+        self.assertEqual([], results)
+
+    @responses.activate
+    def test_set_relationships_for_manifest_new_specimen(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+
+        sample = SubmissionsSample()
+        sample.row = 1
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "WHOLE_ORGANISM"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
+        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+                      body=mock_response_from_ena, status=200)
+
+        error_count, results = set_relationships_for_manifest(manifest)
+        self.assertEqual(None, manifest.samples[0].sample_derived_from)
+        self.assertEqual("SAMEA8521239", manifest.samples[0].sample_same_as)
+        self.assertEqual(None, manifest.samples[0].sample_symbiont_of)
+        self.assertEqual(0, error_count)
+        self.assertEqual([], results)
+
+    @responses.activate
+    def test_set_relationships_for_manifest_new_specimen_ena_error(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+
+        sample = SubmissionsSample()
+        sample.row = 1
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "WHOLE_ORGANISM"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
+        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+                      body=mock_response_from_ena, status=403)
+
+        error_count, results = set_relationships_for_manifest(manifest)
+        self.assertEqual(None, manifest.samples[0].sample_derived_from)
+        self.assertEqual(None, manifest.samples[0].sample_same_as)
+        self.assertEqual(None, manifest.samples[0].sample_symbiont_of)
+        self.assertEqual(1, error_count)
+        self.assertEqual([{'results': [{'field': 'TAXON_ID',
+                                        'message': 'Cannot connect to ENA service'}],
+                           'row': 1}], results)
 
     @responses.activate
     def test_generate_ena_ids_for_manifest(self):

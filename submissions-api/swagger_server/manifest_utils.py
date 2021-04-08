@@ -1,4 +1,5 @@
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
+from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
+    SubmissionsSpecimen
 from swagger_server.xml_utils import build_bundle_sample_xml, build_submission_xml
 import re
 import os
@@ -357,6 +358,98 @@ def validate_ena_submittable(sample):
     return(results)
 
 
+def set_relationships_for_manifest(manifest):
+    error_count = 0
+    results = []
+    for sample in manifest.samples:
+        set_relationships_for_sample(sample)
+
+    # Any with no relationship set need a new specimen submitting to ENA
+    new_specimen_samples = []
+    for sample in manifest.samples:
+        if sample.sample_same_as is None and sample.sample_derived_from is None:
+            new_specimen_samples.append(sample)
+
+    if len(new_specimen_samples) > 0:
+        specimen_manifest = SubmissionsManifest()
+        specimen_manifest.user = manifest.user
+        for sample in new_specimen_samples:
+            specimen_sample = make_specimen_sample(sample)
+            specimen_sample.manifest = specimen_manifest
+            db.session.add(specimen_sample)
+        db.session.add(specimen_manifest)
+        db.session.commit()
+        # Submit this specimen_manifest to ENA
+        error_count, results = generate_ena_ids_for_manifest(specimen_manifest)
+
+        if error_count == 0:
+            # Save the specimens
+            for specimen_sample in specimen_manifest.samples:
+                specimen = SubmissionsSpecimen()
+                specimen.specimen_id = specimen_sample.specimen_id
+                specimen.biosample_id = specimen_sample.biosample_id
+                db.session.add(specimen)
+                db.session.commit()
+
+            # Update relationships to pick up these new ones
+            for sample in manifest.samples:
+                set_relationships_for_sample(sample)
+
+    return error_count, results
+
+
+def set_relationships_for_sample(sample):
+    # Look up previous specimens
+    specimen = db.session.query(SubmissionsSpecimen) \
+        .filter(SubmissionsSpecimen.specimen_id == sample.specimen_id) \
+        .one_or_none()
+
+    if specimen is None:
+        # Look up in BioSamples
+        pass
+
+    if specimen is not None:
+        if sample.organism_part == "WHOLE_ORGANISM":
+            sample.sample_same_as = specimen.biosample_id
+        else:
+            sample.sample_derived_from = specimen.biosample_id
+
+
+def make_specimen_sample(sample):
+    specimen_sample = SubmissionsSample()
+    specimen_sample.row = sample.row
+    specimen_sample.specimen_id = sample.specimen_id
+    specimen_sample.taxonomy_id = sample.taxonomy_id
+    specimen_sample.scientific_name = sample.scientific_name
+    specimen_sample.family = sample.family
+    specimen_sample.genus = sample.genus
+    specimen_sample.order_or_group = sample.order_or_group
+    specimen_sample.common_name = sample.common_name
+    specimen_sample.lifestage = sample.lifestage
+    specimen_sample.sex = sample.sex
+    specimen_sample.organism_part = "WHOLE_ORGANISM"
+    specimen_sample.GAL = sample.GAL
+    specimen_sample.GAL_sample_id = "NOT_PROVIDED"
+    specimen_sample.collected_by = sample.collected_by
+    specimen_sample.collector_affiliation = sample.collector_affiliation
+    specimen_sample.date_of_collection = sample.date_of_collection
+    specimen_sample.collection_location = sample.collection_location
+    specimen_sample.decimal_latitude = sample.decimal_latitude
+    specimen_sample.decimal_longitude = sample.decimal_longitude
+    specimen_sample.habitat = sample.habitat
+    specimen_sample.identified_by = sample.identified_by
+    specimen_sample.identifier_affiliation = sample.identifier_affiliation
+    specimen_sample.voucher_id = sample.voucher_id
+    specimen_sample.elevation = sample.elevation
+    specimen_sample.depth = sample.depth
+    specimen_sample.relationship = sample.relationship
+    specimen_sample.symbiont = sample.symbiont
+    specimen_sample.culture_or_strain_id = sample.culture_or_strain_id
+
+    specimen_sample.tolid = sample.tolid
+    return specimen_sample
+
+
 def generate_ids_for_manifest(manifest):
     # ToLIDs
     error_count, results = generate_tolids_for_manifest(manifest)
@@ -491,7 +584,7 @@ def assign_biosample_ids(manifest, xml):
                 .filter(SubmissionsSample.sample_id == sample_id) \
                 .one_or_none()
             if sample is None:
-                return False
+                continue
             sample.biosample_id = biosample_accession
             sample.sra_accession = sra_accession
             sample.submission_accession = submission_accession

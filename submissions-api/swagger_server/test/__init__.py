@@ -8,7 +8,7 @@ from swagger_server.encoder import JSONEncoder
 
 from swagger_server.model import db, \
     SubmissionsUser, SubmissionsRole, SubmissionsState, \
-    SubmissionsManifest, SubmissionsSample
+    SubmissionsManifest, SubmissionsSample, SubmissionsSpecimen
 
 
 class BaseTestCase(TestCase):
@@ -20,6 +20,7 @@ class BaseTestCase(TestCase):
     def setUp(self):
         self.maxDiff = None
         db.create_all()
+        self.tearDown()
         self.user1 = SubmissionsUser(user_id=100,
                                      name="test_user_requester",
                                      email="test_user_requester@sanger.ac.uk",
@@ -52,6 +53,7 @@ class BaseTestCase(TestCase):
 
     def tearDown(self):
         db.session.query(SubmissionsSample).delete()
+        db.session.query(SubmissionsSpecimen).delete()
         db.session.query(SubmissionsManifest).delete()
         db.session.query(SubmissionsRole).delete()
         db.session.query(SubmissionsUser).delete()
