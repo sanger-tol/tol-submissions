@@ -31,14 +31,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Manifest'
+              $ref: '#/components/schemas/ManifestIn'
       responses:
         "200":
           description: manifest created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/ManifestOut'
                 x-content-type: application/json
         "400":
           description: invalid input, object invalid, or item already exists
@@ -60,7 +60,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Manifest'
+              $ref: '#/components/schemas/ManifestIn'
       responses:
         "200":
           description: manifest created
@@ -99,7 +99,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/ManifestOut'
                 x-content-type: application/json
         "400":
           description: bad input parameter
@@ -163,7 +163,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Manifest'
+                $ref: '#/components/schemas/ManifestOut'
                 x-content-type: application/json
         "400":
           description: errors in generating IDs
@@ -257,20 +257,17 @@ paths:
       x-openapi-router-controller: swagger_server.controllers.auth_controller
 components:
   schemas:
-    Manifest:
+    ManifestIn: &manifest
       required:
         - samples
       type: object
       properties:
-        manifestId:
-          type: string
-          example: manifest12345
         samples:
           type: array
           items:
-            $ref: '#/components/schemas/Sample'
+            $ref: '#/components/schemas/SampleIn'
       example:
-        samples:
+        samples: &manifest_samples_example
           - row: 1
             SPECIMEN_ID: SAN000100
             TAXON_ID: 6344
@@ -296,8 +293,32 @@ components:
             VOUCHER_ID: voucher1
             ELEVATION: "0"
             DEPTH: "100"
-            RELATIONSHIP: child of SAMEA1234567
-    Sample:
+    ManifestOut:
+      <<: *manifest
+      properties:
+        samples:
+          type: array
+          items:
+            $ref: '#/components/schemas/SampleOut'
+        manifestId:
+          type: string
+          example: manifest12345
+        submissionStatus:
+          type: boolean
+          example: true
+      example:
+        samples:
+          <<: *manifest_samples_example
+          tolId: wuAreMari1
+          biosampleId: SAMEA12345678
+          sraAccession: ERS1234
+          submissionAccession: ERA5678
+          sampleDerivedFrom: SAMEA87654321
+          sampleSameAs: null
+          sampleSymbiontOf: null
+        manifestId: 123
+        submissionStatus: false
+    SampleIn: &sample
       required:
         - row
         - SPECIMEN_ID
@@ -306,7 +327,6 @@ components:
         - GENUS
         - FAMILY
         - ORDER_OR_GROUP
-        - COMMON_NAME
         - LIFESTAGE
         - SEX
         - ORGANISM_PART
@@ -323,7 +343,7 @@ components:
         - IDENTIFIER_AFFILIATION
         - VOUCHER_ID
       type: object
-      properties:
+      properties: &sample_properties
         row:
           type: integer
           example: 1
@@ -402,22 +422,13 @@ components:
         RELATIONSHIP:
           type: string
           example: host
-        tolId:
+        SYMBIONT:
           type: string
-          example: wuAreMari1
-        biosampleId:
+          example: N
+        CULTURE_OR_STRAIN_ID:
           type: string
-          example: SAMEA12345678
-        sraAccession:
-          type: string
-          example: ERS6206028
-        submissionAccession:
-          type: string
-          example: ERA3819349
-        sraAccession:
-          type: string
-          example: "The object being added already exists in the submission account with accession: \"ERS6206044\"."
-      example:
+          example: ABC1234
+      example: &sample_example
         SPECIMEN_ID: SAN000100
         TAXON_ID: 6344
         SCIENTIFIC_NAME: Arenicola marina
@@ -443,11 +454,76 @@ components:
         ELEVATION: "0"
         DEPTH: "100"
         RELATIONSHIP: child of SAMEA1234567
+        SYMBIONT: "N"
+        CULTURE_OR_STRAIN_ID: ABC1234
+    SampleOut:
+      <<: *sample
+      required:
+        - row
+        - SPECIMEN_ID
+        - TAXON_ID
+        - SCIENTIFIC_NAME
+        - GENUS
+        - FAMILY
+        - ORDER_OR_GROUP
+        - LIFESTAGE
+        - SEX
+        - ORGANISM_PART
+        - GAL
+        - GAL_SAMPLE_ID
+        - COLLECTED_BY
+        - COLLECTOR_AFFILIATION
+        - DATE_OF_COLLECTION
+        - COLLECTION_LOCATION
+        - DECIMAL_LATITUDE
+        - DECIMAL_LONGITUDE
+        - HABITAT
+        - IDENTIFIED_BY
+        - IDENTIFIER_AFFILIATION
+        - VOUCHER_ID
+        - tolId
+        - biosampleId
+        - sraAccession
+        - submissionAccession
+        - sampleDerivedFrom
+        - sampleSameAs
+        - sampleSymbiontOf
+      properties:
+        <<: *sample_properties
+        tolId:
+          type: string
+          example: wuAreMari1
+        biosampleId:
+          type: string
+          example: SAMEA12345678
+        sraAccession:
+          type: string
+          example: ERS6206028
+        submissionAccession:
+          type: string
+          example: ERA3819349
+        sraAccession:
+          type: string
+          example: "The object being added already exists in the submission account with accession: \"ERS6206044\"."
+        sampleDerivedFrom:
+          type: string
+          example: "SAMEA87654321"
+        sampleSameAs:
+          type: string
+          example: "SAMEA87654321"
+        sampleSymbiontOf:
+          type: string
+          example: "SAMEA87654321"
+      example:
+        <<: *sample_example
         tolId: wuAreMari1
         biosampleId: SAMEA12345678
         sraAccession: ERS6206028
         submissionAccession: ERA3819349
         submissionError: null
+        sampleDerivedFrom: SAMEA87654321
+        sampleSameAs: null
+        sampleSymbionOf: null
     User:
       required:
         - name

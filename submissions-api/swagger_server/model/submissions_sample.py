@@ -33,6 +33,8 @@ class SubmissionsSample(Base):
     elevation = db.Column(db.String(), nullable=True)
     depth = db.Column(db.String(), nullable=True)
     relationship = db.Column(db.String(), nullable=True)
+    symbiont = db.Column(db.String(), nullable=True)
+    culture_or_strain_id = db.Column(db.String(), nullable=True)
 
     tolid = db.Column(db.String(), nullable=True)
     biosample_id = db.Column(db.String(), nullable=True)
@@ -43,8 +45,6 @@ class SubmissionsSample(Base):
     sample_same_as = db.Column(db.String(), nullable=True)
     sample_derived_from = db.Column(db.String(), nullable=True)
     sample_symbiont_of = db.Column(db.String(), nullable=True)
-    symbiont = db.Column(db.String(), nullable=True)
-    culture_or_strain_id = db.Column(db.String(), nullable=True)
 
     def collection_country(self):
         return self.collection_location.split(' | ')[0]
@@ -79,6 +79,8 @@ class SubmissionsSample(Base):
                 'ELEVATION': cls.elevation,
                 'DEPTH': cls.depth,
                 'RELATIONSHIP': cls.relationship,
+                'SYMBIONT': cls.symbiont,
+                'CULTURE_OR_STRAIN_ID': cls.culture_or_strain_id,
                 'tolId': cls.tolid,
                 'biosampleId': cls.biosample_id,
                 'sraAccession': cls.sra_accession,
