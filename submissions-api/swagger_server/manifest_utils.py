@@ -537,7 +537,8 @@ def generate_ena_ids_for_manifest(manifest):
     if (response.status_code != 200):
         results.append({"row": 1,
                         "results": [{'field': 'TAXON_ID',
-                                     'message': 'Cannot connect to ENA service'}]})
+                                     'message': 'Cannot connect to ENA service (status code '
+                                     + str(response.status_code) + ')'}]})
         return 1, results
 
     if not assign_ena_ids(manifest, response.text):

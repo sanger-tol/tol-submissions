@@ -866,7 +866,7 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(None, manifest.samples[0].sample_symbiont_of)
         self.assertEqual(1, error_count)
         self.assertEqual([{'results': [{'field': 'TAXON_ID',
-                                        'message': 'Cannot connect to ENA service'}],
+                                        'message': 'Cannot connect to ENA service (status code 403)'}],
                            'row': 1}], results)
 
     @responses.activate
@@ -996,7 +996,7 @@ class TestManifestUtils(BaseTestCase):
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
 
         expected = [{'results': [{'field': 'TAXON_ID',
-                                  'message': 'Cannot connect to ENA service'}],
+                                  'message': 'Cannot connect to ENA service (status code 404)'}],
                      'row': 1}]
         self.assertEqual(1, number_of_errors)
         self.assertEqual(expected, results)
