@@ -6,6 +6,7 @@ import os
 import requests
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
+import logging
 
 
 def create_manifest_from_json(json, user):
@@ -396,6 +397,7 @@ def set_relationships_for_manifest(manifest):
             # Update relationships to pick up these new ones
             for sample in manifest.samples:
                 set_relationships_for_sample(sample)
+                db.session.commit()
 
     return error_count, results
 
@@ -565,6 +567,7 @@ def assign_ena_ids(manifest, xml):
             msg = "Undefined error"
         # status = {"status": "error", "msg": msg}
         # print(status)
+        logging.warning(msg)
         for child in tree.iter():
             if child.tag == 'SAMPLE':
                 sample_id = child.get('alias')

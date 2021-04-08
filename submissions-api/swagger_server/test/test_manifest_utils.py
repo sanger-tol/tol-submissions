@@ -808,6 +808,20 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(0, error_count)
         self.assertEqual([], results)
 
+        # Check the new specimen manifest
+        specimen_manifest = db.session.query(SubmissionsManifest) \
+            .filter(SubmissionsManifest.manifest_id == 1) \
+            .one_or_none()
+
+        self.assertEqual("SAMEA8521239", specimen_manifest.samples[0].biosample_id)
+
+        # Check the new specimen
+        specimen = db.session.query(SubmissionsSpecimen) \
+            .filter(SubmissionsSpecimen.specimen_id == "specimen1234") \
+            .one_or_none()
+
+        self.assertEqual("SAMEA8521239", specimen.biosample_id)
+
     @responses.activate
     def test_set_relationships_for_manifest_new_specimen_ena_error(self):
         manifest = SubmissionsManifest()

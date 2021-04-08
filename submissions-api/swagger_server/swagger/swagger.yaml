@@ -187,7 +187,7 @@ paths:
         - ApiKeyAuth: []
       tags:
       - submitters
-      summary: Upload and immediately validate a JSON manifest
+      summary: Upload a JSON manifest and immediately generate IDs for its samples
       description: |
         Upload a manifest in JSON format and validate it (convenience method)
       operationId: submit_and_generate_manifest_json
