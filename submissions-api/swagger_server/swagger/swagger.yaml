@@ -7,7 +7,7 @@ info:
   license:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
-  version: 1.0.0
+  version: 1.0.1
 servers:
   - url: http://0.0.0.0:8081/api/v1
 tags:
@@ -546,7 +546,7 @@ components:
         submissionAccession:
           type: string
           example: ERA3819349
-        sraAccession:
+        submissionError:
           type: string
           example: "The object being added already exists in the submission account with accession: \"ERS6206044\"."
         sampleDerivedFrom:
@@ -638,6 +638,7 @@ components:
       required:
         - field
         - message
+        - severity
       type: object
       properties:
         field:
@@ -646,6 +647,10 @@ components:
         message:
           type: string
           example: "Fails regex check"
+        severity:
+          type: string
+          enum: [ERROR,WARNING]
+          example: "ERROR"
   securitySchemes:
     ApiKeyAuth:        # name for the security scheme
       type: apiKey

@@ -86,13 +86,15 @@ def validate_against_tolid(sample):
                             + str(sample.taxonomy_id))
     if (response.status_code == 404):
         results.append({'field': 'TAXON_ID',
-                        'message': 'Species not known in the ToLID service'})
+                        'message': 'Species not known in the ToLID service',
+                        'severity': 'WARNING'})
         return results
 
     if (response.status_code != 200):
         results.append({'field': 'TAXON_ID',
                         'message': 'Communication failed with the ToLID service: status code '
-                        + str(response.status_code)})
+                        + str(response.status_code),
+                        'severity': 'ERROR'})
         return results
 
     data = response.json()[0]
@@ -101,25 +103,29 @@ def validate_against_tolid(sample):
     if data['scientificName'] != sample.scientific_name:
         results.append({'field': 'SCIENTIFIC_NAME',
                         'message': 'Does not match that in the ToLID service (expecting '
-                        + data['scientificName'] + ')'})
+                        + data['scientificName'] + ')',
+                        'severity': 'ERROR'})
 
     # Does the GENUS match?
     if data['genus'] != sample.genus:
         results.append({'field': 'GENUS',
                         'message': 'Does not match that in the ToLID service (expecting '
-                        + data['genus'] + ')'})
+                        + data['genus'] + ')',
+                        'severity': 'ERROR'})
 
     # Does the FAMILY match?
     if data['family'] != sample.family:
         results.append({'field': 'FAMILY',
                         'message': 'Does not match that in the ToLID service (expecting '
-                        + data['family'] + ')'})
+                        + data['family'] + ')',
+                        'severity': 'ERROR'})
 
     # Does the ORDER match?
     if data['order'] != sample.order_or_group:
         results.append({'field': 'ORDER_OR_GROUP',
                         'message': 'Does not match that in the ToLID service (expecting '
-                        + data['order'] + ')'})
+                        + data['order'] + ')',
+                        'severity': 'ERROR'})
 
     return(results)
 
@@ -139,11 +145,13 @@ def validate_against_ena_checklist(sample):
         # Check mandatory fields
         if ena_checklist[check]["mandatory"] and check not in ena_fields:
             results.append({'field': fieldName,
-                            'message': 'Must be given'})
+                            'message': 'Must be given',
+                            'severity': 'ERROR'})
             continue
         if ena_checklist[check]["mandatory"] and ena_fields[check]["value"] == "":
             results.append({'field': fieldName,
-                            'message': 'Must not be empty'})
+                            'message': 'Must not be empty',
+                            'severity': 'ERROR'})
             continue
 
         # Check against regex
@@ -151,14 +159,16 @@ def validate_against_ena_checklist(sample):
             compiled_re = re.compile(ena_checklist[check]["regex"])
             if not compiled_re.search(ena_fields[check]["value"]):
                 results.append({'field': fieldName,
-                                'message': 'Must match specific pattern'})
+                                'message': 'Must match specific pattern',
+                                'severity': 'ERROR'})
 
         # Check against allowed values
         if "allowed_values" in ena_checklist[check] and check in ena_fields:
             if ena_fields[check]["value"].lower() not in \
                     [x.lower() for x in ena_checklist[check]["allowed_values"]]:
                 results.append({'field': fieldName,
-                                'message': 'Must be in allowed values'})
+                                'message': 'Must be in allowed values',
+                                'severity': 'ERROR'})
 
     return results
 
@@ -339,24 +349,28 @@ def validate_ena_submittable(sample):
     if (response.status_code != 200):
         results.append({'field': 'TAXON_ID',
                         'message': 'Communication with ENA has failed with status code '
-                        + str(response.status_code)})
+                        + str(response.status_code),
+                        'severity': 'ERROR'})
         return results
 
     # Might be an unknown TAX_ID
     if response.text == "No results.":
         results.append({'field': 'TAXON_ID',
-                        'message': 'Is not known at ENA'})
+                        'message': 'Is not known at ENA',
+                        'severity': 'ERROR'})
         return results
     data = response.json()
 
     # ENA submittable?
     if data['submittable'] != "true":
         results.append({'field': 'TAXON_ID',
-                        'message': 'Is not ENA submittable'})
+                        'message': 'Is not ENA submittable',
+                        'severity': 'ERROR'})
 
     if data['scientificName'] != sample.scientific_name:
         results.append({'field': 'SCIENTIFIC_NAME',
-                        'message': 'Must match ENA (expected ' + data['scientificName'] + ')'})
+                        'message': 'Must match ENA (expected ' + data['scientificName'] + ')',
+                        'severity': 'ERROR'})
 
     return(results)
 
@@ -496,7 +510,8 @@ def generate_tolids_for_manifest(manifest):
     if (response.status_code != 200):
         results.append({"row": sample.row,
                         "results": [{'field': 'TAXON_ID',
-                                     'message': 'Cannot connect to ToLID service'}]})
+                                     'message': 'Cannot connect to ToLID service',
+                                     'severity': 'ERROR'}]})
         return 1, results
 
     for tolid in response.json():
@@ -512,7 +527,8 @@ def generate_tolids_for_manifest(manifest):
                 # ToLID not been assigned - a request must have been generated
                 results.append({"row": sample_to_update.row,
                                 "results": [{'field': 'TAXON_ID',
-                                            'message': 'A ToLID has not been generated'}]})
+                                             'message': 'A ToLID has not been generated',
+                                             'severity': 'WARNING'}]})
                 error_count += 1
 
     if error_count > 0:
@@ -538,13 +554,15 @@ def generate_ena_ids_for_manifest(manifest):
         results.append({"row": 1,
                         "results": [{'field': 'TAXON_ID',
                                      'message': 'Cannot connect to ENA service (status code '
-                                     + str(response.status_code) + ')'}]})
+                                     + str(response.status_code) + ')',
+                                    'severity': 'ERROR'}]})
         return 1, results
 
     if not assign_ena_ids(manifest, response.text):
         results.append({"row": 1,
                         "results": [{'field': 'TAXON_ID',
-                                     'message': 'Error returned from ENA service'}]})
+                                     'message': 'Error returned from ENA service',
+                                     'severity': 'ERROR'}]})
         return 1, results
     return error_count, results
 

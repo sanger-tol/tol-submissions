@@ -113,25 +113,43 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_against_ena_checklist(sample)
         expected = [{'field': 'ORGANISM_PART',
-                     'message': 'Must not be empty'},
+                     'message': 'Must not be empty',
+                     'severity': 'ERROR'},
                     {'field': 'LIFESTAGE',
-                     'message': 'Must be in allowed values'},
-                    {'field': 'COLLECTED_BY', 'message': 'Must not be empty'},
-                    {'field': 'DATE_OF_COLLECTION', 'message': 'Must match specific pattern'},
-                    {'field': 'COLLECTION_LOCATION', 'message': 'Must be in allowed values'},
-                    {'field': 'DECIMAL_LATITUDE', 'message': 'Must not be empty'},
-                    {'field': 'DECIMAL_LONGITUDE', 'message': 'Must match specific pattern'},
-                    {'field': 'IDENTIFIED_BY', 'message': 'Must not be empty'},
-                    {'field': 'DEPTH', 'message': 'Must match specific pattern'},
-                    {'field': 'ELEVATION', 'message': 'Must match specific pattern'},
-                    {'field': 'HABITAT', 'message': 'Must not be empty'},
-                    {'field': 'IDENTIFIER_AFFILIATION', 'message': 'Must not be empty'},
-                    {'field': 'SEX', 'message': 'Must not be empty'},
-                    {'field': 'COLLECTOR_AFFILIATION', 'message': 'Must not be empty'},
-                    {'field': 'GAL', 'message': 'Must be in allowed values'},
-                    {'field': 'VOUCHER_ID', 'message': 'Must not be empty'},
-                    {'field': 'SPECIMEN_ID', 'message': 'Must not be empty'},
-                    {'field': 'GAL_SAMPLE_ID', 'message': 'Must not be empty'}]
+                     'message': 'Must be in allowed values',
+                     'severity': 'ERROR'},
+                    {'field': 'COLLECTED_BY', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'DATE_OF_COLLECTION', 'message': 'Must match specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'COLLECTION_LOCATION', 'message': 'Must be in allowed values',
+                     'severity': 'ERROR'},
+                    {'field': 'DECIMAL_LATITUDE', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'DECIMAL_LONGITUDE', 'message': 'Must match specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'IDENTIFIED_BY', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'DEPTH', 'message': 'Must match specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'ELEVATION', 'message': 'Must match specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'HABITAT', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'IDENTIFIER_AFFILIATION', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'SEX', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'COLLECTOR_AFFILIATION', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'GAL', 'message': 'Must be in allowed values',
+                     'severity': 'ERROR'},
+                    {'field': 'VOUCHER_ID', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'SPECIMEN_ID', 'message': 'Must not be empty',
+                     'severity': 'ERROR'},
+                    {'field': 'GAL_SAMPLE_ID', 'message': 'Must not be empty',
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -263,9 +281,11 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_ena_submittable(sample)
         expected = [{"field": "TAXON_ID",
-                     "message": "Is not ENA submittable"},
+                     "message": "Is not ENA submittable",
+                     'severity': 'ERROR'},
                     {'field': 'SCIENTIFIC_NAME',
-                     'message': 'Must match ENA (expected Arenicola marina2)'}]
+                     'message': 'Must match ENA (expected Arenicola marina2)',
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -304,7 +324,8 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_ena_submittable(sample)
         expected = [{"field": "TAXON_ID",
-                     "message": "Is not known at ENA"}]
+                     "message": "Is not known at ENA",
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -343,7 +364,8 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_ena_submittable(sample)
         expected = [{"field": "TAXON_ID",
-                     "message": "Communication with ENA has failed with status code 500"}]
+                     "message": "Communication with ENA has failed with status code 500",
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -427,7 +449,8 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_against_tolid(sample)
         expected = [{"field": "TAXON_ID",
-                     "message": "Species not known in the ToLID service"}]
+                     "message": "Species not known in the ToLID service",
+                     'severity': 'WARNING'}]
 
         self.assertEqual(results, expected)
 
@@ -467,7 +490,8 @@ class TestManifestUtils(BaseTestCase):
 
         results = validate_against_tolid(sample)
         expected = [{"field": "TAXON_ID",
-                     "message": "Communication failed with the ToLID service: status code 500"}]
+                     "message": "Communication failed with the ToLID service: status code 500",
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -513,14 +537,18 @@ class TestManifestUtils(BaseTestCase):
         results = validate_against_tolid(sample)
         expected = [{"field": "SCIENTIFIC_NAME",
                      "message": "Does not match that in the ToLID service "
-                     + "(expecting Arenicola marina)"},
+                     + "(expecting Arenicola marina)",
+                     'severity': 'ERROR'},
                     {"field": "GENUS",
-                     "message": "Does not match that in the ToLID service (expecting Arenicola)"},
+                     "message": "Does not match that in the ToLID service (expecting Arenicola)",
+                     'severity': 'ERROR'},
                     {"field": "FAMILY",
                      "message": "Does not match that in the ToLID service "
-                     + "(expecting Arenicolidae)"},
+                     + "(expecting Arenicolidae)",
+                     'severity': 'ERROR'},
                     {"field": "ORDER_OR_GROUP",
-                     "message": "Does not match that in the ToLID service (expecting None)"}]
+                     "message": "Does not match that in the ToLID service (expecting None)",
+                     'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
@@ -705,10 +733,12 @@ class TestManifestUtils(BaseTestCase):
 
         expected = [{"row": 1,
                      "results": [{"field": "TAXON_ID",
-                                  "message": "A ToLID has not been generated"}]},
+                                  "message": "A ToLID has not been generated",
+                                  'severity': 'WARNING'}]},
                     {"row": 2,
                      "results": [{"field": "TAXON_ID",
-                                  "message": "A ToLID has not been generated"}]}]
+                                  "message": "A ToLID has not been generated",
+                                  'severity': 'WARNING'}]}]
 
         number_of_errors, results = generate_tolids_for_manifest(manifest)
 
@@ -867,7 +897,8 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(1, error_count)
         self.assertEqual([{'results': [{'field': 'TAXON_ID',
                                         'message': 'Cannot connect to ENA service '
-                                        + '(status code 403)'}],
+                                        + '(status code 403)',
+                                        'severity': 'ERROR'}],
                            'row': 1}], results)
 
     @responses.activate
@@ -997,7 +1028,8 @@ class TestManifestUtils(BaseTestCase):
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
 
         expected = [{'results': [{'field': 'TAXON_ID',
-                                  'message': 'Cannot connect to ENA service (status code 404)'}],
+                                  'message': 'Cannot connect to ENA service (status code 404)',
+                                  'severity': 'ERROR'}],
                      'row': 1}]
         self.assertEqual(1, number_of_errors)
         self.assertEqual(expected, results)
@@ -1052,7 +1084,8 @@ class TestManifestUtils(BaseTestCase):
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
 
         expected = [{'results': [{'field': 'TAXON_ID',
-                                  'message': 'Error returned from ENA service'}],
+                                  'message': 'Error returned from ENA service',
+                                  'severity': 'ERROR'}],
                      'row': 1}]
         self.assertEqual(1, number_of_errors)
         self.assertEqual(expected, results)

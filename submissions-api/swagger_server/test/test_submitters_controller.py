@@ -366,7 +366,8 @@ class TestSubmittersController(BaseTestCase):
                         {"row": 1,
                          "results": [
                              {"field": "ORGANISM_PART",
-                              "message": "Must not be empty"}
+                              "message": "Must not be empty",
+                              'severity': 'ERROR'}
                          ]}
                     ]}
         self.assertEquals(expected, response.json)
@@ -473,7 +474,8 @@ class TestSubmittersController(BaseTestCase):
                         {"row": 1,
                          "results": [
                              {"field": "ORGANISM_PART",
-                              "message": "Must not be empty"}
+                              "message": "Must not be empty",
+                              'severity': 'ERROR'}
                          ]}
                     ]}
         self.assertEquals(expected, response.json)
