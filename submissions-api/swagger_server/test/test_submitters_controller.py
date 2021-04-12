@@ -153,7 +153,7 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1'}
                 ],
-                'project_name': 'TestProj'}
+                'projectName': 'TestProj'}
 
         # Submit the manifest
         response = self.client.open(

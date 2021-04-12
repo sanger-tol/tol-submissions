@@ -12,8 +12,8 @@ import logging
 def create_manifest_from_json(json, user):
     manifest = SubmissionsManifest()
     manifest.user = user
-    if "project_name" in json:
-        manifest.project_name = json["project_name"]
+    if "projectName" in json:
+        manifest.project_name = json["projectName"]
     for s in json["samples"]:
         sample = SubmissionsSample()
         sample.manifest = manifest
