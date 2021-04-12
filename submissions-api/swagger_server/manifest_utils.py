@@ -49,23 +49,34 @@ def create_manifest_from_json(json, user):
     return manifest
 
 
-def validate_manifest(manifest):
+def validate_manifest(manifest, full=True):
     results = []
     number_of_errors = 0
     for sample in manifest.samples:
-        sample_results = validate_sample(sample)
+        if full:
+            sample_results = validate_sample(sample)
+        else:
+            sample_results = validate_required_fields(sample)
         results.append({'row': sample.row,
                         'results': sample_results})
         number_of_errors += len(sample_results)
     return number_of_errors, results
 
 
+def validate_required_fields(sample):
+    results = []
+    for field in sample.all_fields:
+        if field["required"] and getattr(sample, field["python_name"]) is None:
+            results.append({'field': field["field_name"],
+                            'message': 'A value must be given',
+                            'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
-    if sample.scientific_name == "":
-        results.append({'field': 'SCIENTIFIC_NAME',
-                        'message': 'Scientific name must be given'})
+    results += validate_required_fields(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

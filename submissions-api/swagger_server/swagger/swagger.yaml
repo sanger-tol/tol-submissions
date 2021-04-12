@@ -22,16 +22,60 @@ paths:
         - ApiKeyAuth: []
       tags:
       - submitters
-      summary: Upload a JSON manifest
+      summary: Upload a JSON or Excel manifest
       description: |
-        Upload a manifest in JSON format
-      operationId: submit_manifest_json
+        Upload a manifest in JSON or Excel format
+      operationId: upload_manifest_json
       requestBody:
         description: Manifest to add
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/ManifestIn'
+      responses:
+        "200":
+          description: manifest created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManifestOut'
+                x-content-type: application/json
+        "400":
+          description: invalid input, object invalid, or item already exists
+        "403":
+          description: user not authorised to use this function
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/upload-excel:
+    post:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Upload an excel manifest
+      description: |
+        Validates an excel manifest and offers option to download manifest with ToLIDs filled in
+      operationId: upload_manifest_excel
+      parameters:
+        - name: projectName
+          in: query
+          description: the name of the project
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              x-body-name: excelFile
+              type: object
+              properties:
+                excelFile:
+                  type: string
+                  format: binary
+              required:
+                - excelFile
       responses:
         "200":
           description: manifest created

@@ -3,10 +3,13 @@ from sqlalchemy import or_
 from swagger_server.model import db, SubmissionsRole, \
     SubmissionsManifest, SubmissionsUser
 import swagger_server.manifest_utils as manifest_utils
+import swagger_server.excel_utils as excel_utils
 import connexion
+import logging
+import tempfile
 
 
-def submit_manifest_json(body=None):  # noqa: E501
+def upload_manifest_json(body={}, excel_file=None):  # noqa: E501
     role = db.session.query(SubmissionsRole) \
         .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
         .filter(SubmissionsRole.user_id == connexion.context["user"]) \
@@ -17,11 +20,52 @@ def submit_manifest_json(body=None):  # noqa: E501
         .filter(SubmissionsUser.user_id == connexion.context["user"]) \
         .one_or_none()
 
-    manifest = manifest_utils.create_manifest_from_json(body, user)
-
+    logging.warning(body)
+    if True:
+        manifest = manifest_utils.create_manifest_from_json(body, user)
+    else:
+        manifest = manifest_utils.create_manifest_from_excel(body, user)
     db.session.add(manifest)
     db.session.commit()
     return(jsonify(manifest))
+
+
+def upload_manifest_excel(excel_file=None, project_name=None):  # noqa: E501
+    role = db.session.query(SubmissionsRole) \
+        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
+        .filter(SubmissionsRole.user_id == connexion.context["user"]) \
+        .one_or_none()
+    if role is None:
+        return jsonify({'detail': "User does not have permission to use this function"}), 403
+
+    user = db.session.query(SubmissionsUser) \
+        .filter(SubmissionsUser.user_id == connexion.context["user"]) \
+        .one_or_none()
+    uploaded_file = connexion.request.files['excelFile']
+
+    # Save to a temporary location
+    dir = tempfile.TemporaryDirectory()
+    uploaded_file.save(dir.name+'/manifest.xlsx')
+
+    # Do the validation
+    manifest = excel_utils.read_excel(dirname=dir.name,
+                                      filename='manifest.xlsx',
+                                      user=user,
+                                      project_name=project_name)
+    # Remove old file
+    dir.cleanup()
+
+    # Quickly check for required fields - reject if any missing
+    number_of_errors, validation_results = manifest_utils.validate_manifest(manifest, full=False)
+    if number_of_errors > 0:
+        return(jsonify({'manifestId': manifest.manifest_id,
+                        'number_of_errors': number_of_errors,
+                        'validations': validation_results}), 400)
+
+    # Passed the basic checks so save it
+    db.session.add(manifest)
+    db.session.commit()
+    return jsonify(manifest)
 
 
 def get_manifest(manifest_id=None):

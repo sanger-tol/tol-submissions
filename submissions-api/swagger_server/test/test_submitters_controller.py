@@ -124,7 +124,7 @@ class TestSubmittersController(BaseTestCase):
                          'sampleDerivedFrom': None,
                          'sampleSymbiontOf': None}
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
 
     def test_get_manifest(self):
 
@@ -252,7 +252,7 @@ class TestSubmittersController(BaseTestCase):
                         'sampleSymbiontOf': None}
 
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
 
     @responses.activate
     def test_validate_manifest_json(self):
@@ -370,7 +370,7 @@ class TestSubmittersController(BaseTestCase):
                               'severity': 'ERROR'}
                          ]}
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
 
     @responses.activate
     def test_submit_and_validate_manifest_json(self):
@@ -478,7 +478,7 @@ class TestSubmittersController(BaseTestCase):
                               'severity': 'ERROR'}
                          ]}
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
 
     @responses.activate
     def test_generate_ids(self):
@@ -650,7 +650,7 @@ class TestSubmittersController(BaseTestCase):
                         'sampleDerivedFrom': 'SAMEA12345678',
                         'sampleSymbiontOf': None}
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
 
     @responses.activate
     def test_submit_and_generate_manifest_json(self):
@@ -798,7 +798,162 @@ class TestSubmittersController(BaseTestCase):
                         'sampleDerivedFrom': 'SAMEA12345678',
                         'sampleSymbiontOf': None}
                     ]}
-        self.assertEquals(expected, response.json)
+        self.assertEqual(expected, response.json)
+
+    def test_upload_manifest_excel(self):
+        # No authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Invalid authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": "12345678"},
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Excel file missing
+        data = {}
+        response = self.client.open(
+            '/api/v1/manifests/upload-excel',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            data=data)
+        self.assert400(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Excel file with no taxon ID, specimen ID
+        file = open('swagger_server/test/test-manifest-field-missing.xlsx', 'rb')
+        data = {
+            'excelFile': (file, 'test_file.xlsx'),
+        }
+        expected = {'manifestId': None,
+                    'number_of_errors': 1,
+                    'validations': [{'results': [], 'row': 1},
+                                    {'results': [{'field': 'SCIENTIFIC_NAME',
+                                                  'message': 'A value must be given',
+                                                  'severity': 'ERROR'}],
+                                     'row': 2}]}
+        response = self.client.open(
+            '/api/v1/manifests/upload-excel',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            data=data)
+        file.close()
+        self.assert400(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        self.assertEqual(expected, response.json)
+
+        # User not a submitter
+        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        data = {
+            'excelFile': (file, 'test_file.xlsx'),
+        }
+        response = self.client.open(
+            '/api/v1/manifests/upload-excel',
+            method='POST',
+            headers={"api-key": self.user1.api_key},
+            data=data)
+        file.close()
+        self.assert403(response, 'Not received a 403 response')
+
+        # Excel file correct
+        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        data = {
+            'excelFile': (file, 'test_file.xlsx'),
+        }
+        response = self.client.open(
+            '/api/v1/manifests/upload-excel',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            data=data)
+        file.close()
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 1,
+                    'projectName': 'ToL',
+                    'samples': [{
+                        'COLLECTED_BY': 'FABIAN HERDER',
+                        'COLLECTION_LOCATION': 'Germany | Bonn | Zoological Research Museum Alexander Koenig Leibniz Institute for Animal Biodiversity',  # noqa
+                        'COLLECTOR_AFFILIATION': 'ZFMK Adenauerallee 160 53113 Bonn Germany',
+                        'COMMON_NAME': None,
+                        'CULTURE_OR_STRAIN_ID': None,
+                        'DATE_OF_COLLECTION': '2020-12-08',
+                        'DECIMAL_LATITUDE': '50.7223215315783',
+                        'DECIMAL_LONGITUDE': '7.11382096910185',
+                        'DEPTH': None,
+                        'ELEVATION': None,
+                        'FAMILY': 'Telmatherinidae',
+                        'GAL': 'SANGER INSTITUTE',
+                        'GAL_SAMPLE_ID': 'SAN2300000',
+                        'GENUS': 'Telmatherina',
+                        'HABITAT': 'Aquarium ZFMK Bonn',
+                        'IDENTIFIED_BY': 'FABIAN HERDER',
+                        'IDENTIFIER_AFFILIATION': 'ZFMK Adenauerallee 160 53113 Bonn Germany',
+                        'LIFESTAGE': 'ADULT',
+                        'ORDER_OR_GROUP': 'Atheriniformes',
+                        'ORGANISM_PART': 'TESTIS',
+                        'RELATIONSHIP': None,
+                        'SCIENTIFIC_NAME': 'Telmatherina bonti',
+                        'SEX': 'MALE',
+                        'SPECIMEN_ID': 'SAN2300000',
+                        'SYMBIONT': None,
+                        'TAXON_ID': 446457,
+                        'VOUCHER_ID': 'NOT_PROVIDED',
+                        'biosampleId': None,
+                        'row': 1,
+                        'sampleDerivedFrom': None,
+                        'sampleSameAs': None,
+                        'sampleSymbiontOf': None,
+                        'sraAccession': None,
+                        'submissionAccession': None,
+                        'submissionError': None,
+                        'tolId': None}, {
+                        'COLLECTED_BY': 'FABIAN HERDER',
+                        'COLLECTION_LOCATION': 'Germany | Bonn | Zoological Research Museum Alexander Koenig Leibniz Institute for Animal Biodiversity',  # noqa
+                        'COLLECTOR_AFFILIATION': 'ZFMK Adenauerallee 160 53113 Bonn Germany',
+                        'COMMON_NAME': None,
+                        'CULTURE_OR_STRAIN_ID': None,
+                        'DATE_OF_COLLECTION': '2020-12-08',
+                        'DECIMAL_LATITUDE': '50.7223215315783',
+                        'DECIMAL_LONGITUDE': '7.11382096910185',
+                        'DEPTH': None,
+                        'ELEVATION': None,
+                        'FAMILY': 'Telmatherinidae',
+                        'GAL': 'SANGER INSTITUTE',
+                        'GAL_SAMPLE_ID': 'SAN2300000',
+                        'GENUS': 'Telmatherina',
+                        'HABITAT': 'Aquarium ZFMK Bonn',
+                        'IDENTIFIED_BY': 'FABIAN HERDER',
+                        'IDENTIFIER_AFFILIATION': 'ZFMK Adenauerallee 160 53113 Bonn Germany',
+                        'LIFESTAGE': 'ADULT',
+                        'ORDER_OR_GROUP': 'Atheriniformes',
+                        'ORGANISM_PART': 'LIVER',
+                        'RELATIONSHIP': None,
+                        'SCIENTIFIC_NAME': 'Telmatherina bonti',
+                        'SEX': 'MALE',
+                        'SPECIMEN_ID': 'SAN2300000',
+                        'SYMBIONT': None,
+                        'TAXON_ID': 446457,
+                        'VOUCHER_ID': 'NOT_PROVIDED',
+                        'biosampleId': None,
+                        'row': 2,
+                        'sampleDerivedFrom': None,
+                        'sampleSameAs': None,
+                        'sampleSymbiontOf': None,
+                        'sraAccession': None,
+                        'submissionAccession': None,
+                        'submissionError': None,
+                        'tolId': None}],
+                    'submissionStatus': None}
+        self.assertEqual(expected, response.json)
 
 
 if __name__ == '__main__':
