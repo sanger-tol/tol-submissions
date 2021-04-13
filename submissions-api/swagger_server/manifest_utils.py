@@ -396,9 +396,12 @@ def set_relationships_for_manifest(manifest):
 
     # Any with no relationship set need a new specimen submitting to ENA
     new_specimen_samples = []
+    seen = set()
     for sample in manifest.samples:
         if sample.sample_same_as is None and sample.sample_derived_from is None:
-            new_specimen_samples.append(sample)
+            if sample.specimen_id not in seen:
+                seen.add(sample.specimen_id)
+                new_specimen_samples.append(sample)
 
     if len(new_specimen_samples) > 0:
         specimen_manifest = SubmissionsManifest()
