@@ -10,9 +10,11 @@ class SubmissionsManifest(Base):
     user = db.relationship("SubmissionsUser", uselist=False, foreign_keys=[created_by])
     submission_status = db.Column(db.Boolean, nullable=True)
     project_name = db.Column(db.String(), nullable=False, default="ToL")
+    sts_manifest_id = db.Column(db.String(), nullable=True)
 
     def to_dict(cls):
         return {'manifestId': cls.manifest_id,
                 'projectName': cls.project_name,
+                'stsManifestId': cls.sts_manifest_id,
                 'samples': cls.samples,
                 'submissionStatus': cls.submission_status}

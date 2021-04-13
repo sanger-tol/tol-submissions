@@ -86,6 +86,7 @@ class TestSubmittersController(BaseTestCase):
         expected = {'manifestId': 1,
                     'submissionStatus': None,
                     'projectName': 'ToL',  # Default - not given in body
+                    'stsManifestId': None,  # Default - not given in body
                     'samples': [
                         {'row': 1,
                          'SPECIMEN_ID': 'specimen9876',
@@ -153,7 +154,8 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1'}
                 ],
-                'projectName': 'TestProj'}
+                'projectName': 'TestProj',
+                'stsManifestId': '1234-4321'}
 
         # Submit the manifest
         response = self.client.open(
@@ -213,6 +215,7 @@ class TestSubmittersController(BaseTestCase):
         expected = {'manifestId': 1,
                     'submissionStatus': None,
                     'projectName': 'TestProj',
+                    'stsManifestId': '1234-4321',
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -612,6 +615,7 @@ class TestSubmittersController(BaseTestCase):
         expected = {'manifestId': 1,
                     'submissionStatus': True,
                     'projectName': 'ToL',
+                    'stsManifestId': None,
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -760,6 +764,7 @@ class TestSubmittersController(BaseTestCase):
         expected = {'manifestId': 1,
                     'submissionStatus': True,
                     'projectName': 'ToL',
+                    'stsManifestId': None,
                     'samples': [{
                         'row': 1,
                         'SPECIMEN_ID': 'specimen9876',
@@ -879,6 +884,7 @@ class TestSubmittersController(BaseTestCase):
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
                     'projectName': 'ToL',
+                    'stsManifestId': None,
                     'samples': [{
                         'COLLECTED_BY': 'FABIAN HERDER',
                         'COLLECTION_LOCATION': 'Germany | Bonn | Zoological Research Museum Alexander Koenig Leibniz Institute for Animal Biodiversity',  # noqa

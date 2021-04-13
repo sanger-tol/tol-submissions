@@ -14,6 +14,8 @@ def create_manifest_from_json(json, user):
     manifest.user = user
     if "projectName" in json:
         manifest.project_name = json["projectName"]
+    if "stsManifestId" in json:
+        manifest.sts_manifest_id = json["stsManifestId"]
     for s in json["samples"]:
         sample = SubmissionsSample()
         sample.manifest = manifest

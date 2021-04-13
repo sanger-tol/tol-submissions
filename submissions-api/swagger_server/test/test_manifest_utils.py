@@ -38,6 +38,7 @@ class TestManifestUtils(BaseTestCase):
 
         self.manifest1 = SubmissionsManifest()
         self.manifest1.project_name = "TestProj1"
+        self.manifest1.sts_manifest_id = "1234-5678"
         self.sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
                                          collection_location="UNITED KINGDOM | DARK FOREST",
                                          collector_affiliation="THE COLLECTOR INSTITUTE",

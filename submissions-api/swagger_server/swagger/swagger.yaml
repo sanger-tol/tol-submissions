@@ -353,6 +353,9 @@ components:
         projectName:
           type: string
           example: SuperProject
+        stsManifestId:
+          type: string
+          example: 1234-5678-90
       example:
         samples: &manifest_samples_example
           - row: 1
@@ -381,6 +384,7 @@ components:
             ELEVATION: "0"
             DEPTH: "100"
         projectName: SuperProject
+        stsManifestId: 1234-5678-90
     ManifestOut:
       <<: *manifest
       properties:
