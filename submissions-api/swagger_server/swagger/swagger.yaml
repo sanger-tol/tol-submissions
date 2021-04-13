@@ -398,7 +398,7 @@ components:
         samples:
           <<: *manifest_samples_example
           tolId: wuAreMari1
-          biosampleId: SAMEA12345678
+          biosampleAccession: SAMEA12345678
           sraAccession: ERS1234
           submissionAccession: ERA5678
           sampleDerivedFrom: SAMEA87654321
@@ -570,7 +570,7 @@ components:
         - IDENTIFIER_AFFILIATION
         - VOUCHER_ID
         - tolId
-        - biosampleId
+        - biosampleAccession
         - sraAccession
         - submissionAccession
         - sampleDerivedFrom
@@ -581,7 +581,7 @@ components:
         tolId:
           type: string
           example: wuAreMari1
-        biosampleId:
+        biosampleAccession:
           type: string
           example: SAMEA12345678
         sraAccession:
@@ -605,7 +605,7 @@ components:
       example:
         <<: *sample_example
         tolId: wuAreMari1
-        biosampleId: SAMEA12345678
+        biosampleAccession: SAMEA12345678
         sraAccession: ERS6206028
         submissionAccession: ERA3819349
         submissionError: null

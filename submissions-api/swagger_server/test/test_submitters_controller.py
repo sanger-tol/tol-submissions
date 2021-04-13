@@ -64,7 +64,7 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1',
                      'tolId': 'wuAreMari1',
-                     'biosampleId': 'SAMEA12345678'}
+                     'biosampleAccession': 'SAMEA12345678'}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -116,7 +116,7 @@ class TestSubmittersController(BaseTestCase):
                          'SYMBIONT': None,
                          'CULTURE_OR_STRAIN_ID': None,
                          'tolId': None,
-                         'biosampleId': None,
+                         'biosampleAccession': None,
                          'sraAccession': None,
                          'submissionAccession': None,
                          'submissionError': None,
@@ -243,7 +243,7 @@ class TestSubmittersController(BaseTestCase):
                         'SYMBIONT': None,
                         'CULTURE_OR_STRAIN_ID': None,
                         'tolId': None,
-                        'biosampleId': None,
+                        'biosampleAccession': None,
                         'sraAccession': None,
                         'submissionAccession': None,
                         'submissionError': None,
@@ -302,7 +302,7 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1',
                      'tolId': 'wuAreMari1',
-                     'biosampleId': 'SAMEA12345678'}
+                     'biosampleAccession': 'SAMEA12345678'}
                 ]}
 
         # Submit the manifest
@@ -449,7 +449,7 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1',
                      'tolId': 'wuAreMari1',
-                     'biosampleId': 'SAMEA12345678'}
+                     'biosampleAccession': 'SAMEA12345678'}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -484,7 +484,7 @@ class TestSubmittersController(BaseTestCase):
     def test_generate_ids(self):
         specimen = SubmissionsSpecimen()
         specimen.specimen_id = "specimen9876"
-        specimen.biosample_id = "SAMEA12345678"
+        specimen.biosample_accession = "SAMEA12345678"
         db.session.add(specimen)
         db.session.commit()
 
@@ -642,7 +642,7 @@ class TestSubmittersController(BaseTestCase):
                         'SYMBIONT': None,
                         'CULTURE_OR_STRAIN_ID': None,
                         'tolId': 'wuAreMari1',
-                        'biosampleId': "SAMEA8521239",
+                        'biosampleAccession': "SAMEA8521239",
                         'sraAccession': "ERS6206028",
                         'submissionAccession': "ERA3819349",
                         'submissionError': None,
@@ -656,7 +656,7 @@ class TestSubmittersController(BaseTestCase):
     def test_submit_and_generate_manifest_json(self):
         specimen = SubmissionsSpecimen()
         specimen.specimen_id = "specimen9876"
-        specimen.biosample_id = "SAMEA12345678"
+        specimen.biosample_accession = "SAMEA12345678"
         db.session.add(specimen)
         db.session.commit()
 
@@ -790,7 +790,7 @@ class TestSubmittersController(BaseTestCase):
                         'SYMBIONT': None,
                         'CULTURE_OR_STRAIN_ID': None,
                         'tolId': 'wuAreMari1',
-                        'biosampleId': "SAMEA8521239",
+                        'biosampleAccession': "SAMEA8521239",
                         'sraAccession': "ERS6206028",
                         'submissionAccession': "ERA3819349",
                         'submissionError': None,
@@ -907,7 +907,7 @@ class TestSubmittersController(BaseTestCase):
                         'SYMBIONT': None,
                         'TAXON_ID': 446457,
                         'VOUCHER_ID': 'NOT_PROVIDED',
-                        'biosampleId': None,
+                        'biosampleAccession': None,
                         'row': 1,
                         'sampleDerivedFrom': None,
                         'sampleSameAs': None,
@@ -943,7 +943,7 @@ class TestSubmittersController(BaseTestCase):
                         'SYMBIONT': None,
                         'TAXON_ID': 446457,
                         'VOUCHER_ID': 'NOT_PROVIDED',
-                        'biosampleId': None,
+                        'biosampleAccession': None,
                         'row': 2,
                         'sampleDerivedFrom': None,
                         'sampleSameAs': None,

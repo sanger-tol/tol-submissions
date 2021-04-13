@@ -44,7 +44,7 @@ def create_manifest_from_json(json, user):
         sample.depth = s.get('DEPTH')
         sample.relationship = s.get('RELATIONSHIP')
         # The following are not added here
-        # biosampleId
+        # biosampleAccession
         # tolId
     return manifest
 
@@ -415,7 +415,7 @@ def set_relationships_for_manifest(manifest):
             for specimen_sample in specimen_manifest.samples:
                 specimen = SubmissionsSpecimen()
                 specimen.specimen_id = specimen_sample.specimen_id
-                specimen.biosample_id = specimen_sample.biosample_id
+                specimen.biosample_accession = specimen_sample.biosample_accession
                 db.session.add(specimen)
                 db.session.commit()
 
@@ -439,9 +439,9 @@ def set_relationships_for_sample(sample):
 
     if specimen is not None:
         if sample.organism_part == "WHOLE_ORGANISM":
-            sample.sample_same_as = specimen.biosample_id
+            sample.sample_same_as = specimen.biosample_accession
         else:
-            sample.sample_derived_from = specimen.biosample_id
+            sample.sample_derived_from = specimen.biosample_accession
 
 
 def make_specimen_sample(sample):
@@ -609,10 +609,10 @@ def assign_ena_ids(manifest, xml):
         return False
     else:
         manifest.submission_status = True
-        return assign_biosample_ids(manifest, xml)
+        return assign_biosample_accessions(manifest, xml)
 
 
-def assign_biosample_ids(manifest, xml):
+def assign_biosample_accessions(manifest, xml):
     tree = ET.fromstring(xml)
     submission_accession = tree.find('SUBMISSION').get('accession')
     for child in tree.iter():
@@ -626,7 +626,7 @@ def assign_biosample_ids(manifest, xml):
                 .one_or_none()
             if sample is None:
                 continue
-            sample.biosample_id = biosample_accession
+            sample.biosample_accession = biosample_accession
             sample.sra_accession = sra_accession
             sample.submission_accession = submission_accession
     return True

@@ -37,7 +37,7 @@ class SubmissionsSample(Base):
     culture_or_strain_id = db.Column(db.String(), nullable=True)
 
     tolid = db.Column(db.String(), nullable=True)
-    biosample_id = db.Column(db.String(), nullable=True)
+    biosample_accession = db.Column(db.String(), nullable=True)
     sra_accession = db.Column(db.String(), nullable=True)
     submission_accession = db.Column(db.String(), nullable=True)
     submission_error = db.Column(db.String(), nullable=True)
@@ -82,7 +82,7 @@ class SubmissionsSample(Base):
                 'SYMBIONT': cls.symbiont,
                 'CULTURE_OR_STRAIN_ID': cls.culture_or_strain_id,
                 'tolId': cls.tolid,
-                'biosampleId': cls.biosample_id,
+                'biosampleAccession': cls.biosample_accession,
                 'sraAccession': cls.sra_accession,
                 'submissionAccession': cls.submission_accession,
                 'submissionError': cls.submission_error,

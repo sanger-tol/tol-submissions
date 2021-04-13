@@ -782,7 +782,7 @@ class TestManifestUtils(BaseTestCase):
 
         specimen = SubmissionsSpecimen()
         specimen.specimen_id = "specimen1234"
-        specimen.biosample_id = "SAMEA12345678"
+        specimen.biosample_accession = "SAMEA12345678"
         db.session.add(specimen)
         db.session.commit()
 
@@ -843,14 +843,14 @@ class TestManifestUtils(BaseTestCase):
             .filter(SubmissionsManifest.manifest_id == 1) \
             .one_or_none()
 
-        self.assertEqual("SAMEA8521239", specimen_manifest.samples[0].biosample_id)
+        self.assertEqual("SAMEA8521239", specimen_manifest.samples[0].biosample_accession)
 
         # Check the new specimen
         specimen = db.session.query(SubmissionsSpecimen) \
             .filter(SubmissionsSpecimen.specimen_id == "specimen1234") \
             .one_or_none()
 
-        self.assertEqual("SAMEA8521239", specimen.biosample_id)
+        self.assertEqual("SAMEA8521239", specimen.biosample_accession)
 
     @responses.activate
     def test_set_relationships_for_manifest_new_specimen_ena_error(self):
@@ -974,10 +974,10 @@ class TestManifestUtils(BaseTestCase):
 
         self.assertEqual(0, number_of_errors)
         self.assertEqual([], results)
-        self.assertEqual("SAMEA8521239", sample.biosample_id)
+        self.assertEqual("SAMEA8521239", sample.biosample_accession)
         self.assertEqual("ERS6206028", sample.sra_accession)
         self.assertEqual("ERA3819349", sample.submission_accession)
-        self.assertEqual("SAMEA8521239B", sample2.biosample_id)
+        self.assertEqual("SAMEA8521239B", sample2.biosample_accession)
         self.assertEqual("ERS6206028B", sample2.sra_accession)
         self.assertEqual("ERA3819349", sample2.submission_accession)
         self.assertEqual(True, manifest.submission_status)
@@ -1034,7 +1034,7 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(1, number_of_errors)
         self.assertEqual(expected, results)
 
-        self.assertEqual(None, sample.biosample_id)
+        self.assertEqual(None, sample.biosample_accession)
         self.assertEqual(None, sample.sra_accession)
         self.assertEqual(None, sample.submission_accession)
         self.assertEqual(None, manifest.submission_status)
@@ -1089,7 +1089,7 @@ class TestManifestUtils(BaseTestCase):
                      'row': 1}]
         self.assertEqual(1, number_of_errors)
         self.assertEqual(expected, results)
-        self.assertEqual(None, sample.biosample_id)
+        self.assertEqual(None, sample.biosample_accession)
         self.assertEqual(None, sample.sra_accession)
         self.assertEqual(None, sample.submission_accession)
         self.assertEqual(False, manifest.submission_status)
