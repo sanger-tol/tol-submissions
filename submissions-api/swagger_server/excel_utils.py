@@ -1,6 +1,11 @@
 from openpyxl import load_workbook
 import re
+import os
+import json
+import shutil
 from swagger_server.model import SubmissionsManifest, SubmissionsSample
+from minio import Minio
+from minio.error import ResponseError, BucketAlreadyOwnedByYou, BucketAlreadyExists
 
 
 def clean_cell(value):
@@ -14,13 +19,12 @@ def clean_cell(value):
 
 
 def get_columns(sheet):
-    if not hasattr(get_columns, "columns"):
-        get_columns.columns = {}  # it doesn't exist yet, so initialize it
-        row = sheet[1]
-        for cell in row:
-            if cell.value != "":
-                get_columns.columns[cell.value] = cell.column - 1
-    return get_columns.columns
+    columns = {}
+    row = sheet[1]
+    for cell in row:
+        if cell.value != "":
+            columns[cell.value] = cell.column - 1
+    return columns
 
 
 def find_column(sheet, column_heading):
@@ -90,3 +94,106 @@ def read_excel(dirname=None, filename=None,
 
         current_row += 1
     return manifest
+
+
+def save_excel(manifest=None, dirname=None, filename=None):
+    minio_client = Minio(os.getenv("MINIO_URI"),
+                         os.getenv("MINIO_ACCESS_KEY"),
+                         os.getenv("MINIO_SECRET_KEY"),
+                         secure=(os.getenv("MINIO_SECURE", False) == "True"))
+    bucket = os.getenv("MINIO_BUCKET")
+    policy_read_only = {
+        "Version": "2012-10-17",
+        "Statement": [
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {"AWS": "*"},
+                "Action": "s3:GetBucketLocation",
+                "Resource": "arn:aws:s3:::" + bucket
+            },
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {"AWS": "*"},
+                "Action": "s3:ListBucket",
+                "Resource": "arn:aws:s3:::" + bucket
+            },
+            {
+                "Sid": "",
+                "Effect": "Allow",
+                "Principal": {"AWS": "*"},
+                "Action": "s3:GetObject",
+                "Resource": "arn:aws:s3:::" + bucket + "/*"
+            }
+        ]
+    }
+
+    try:
+        minio_client.make_bucket(bucket)
+        minio_client.set_bucket_policy(bucket, json.dumps(policy_read_only))
+    except BucketAlreadyOwnedByYou:
+        pass
+    except BucketAlreadyExists:
+        pass
+    except ResponseError:
+        pass
+
+    try:
+        (root, ext) = os.path.splitext(filename)
+        minio_filename = str(manifest.manifest_id) + ext
+
+        minio_client.fput_object(
+            bucket, minio_filename, os.path.join(dirname, filename)
+        )
+        manifest.excel_file = minio_filename
+    except ResponseError:
+        pass
+    # Needs committing elsewhere
+
+
+def load_excel(manifest=None, dirname=None, filename=None):
+    if manifest.excel_file is not None:
+        minio_client = Minio(os.getenv("MINIO_URI"),
+                             os.getenv("MINIO_ACCESS_KEY"),
+                             os.getenv("MINIO_SECRET_KEY"),
+                             secure=(os.getenv("MINIO_SECURE", False) == "True"))
+        try:
+            minio_client.fget_object(
+                os.getenv("MINIO_BUCKET"), manifest.excel_file, os.path.join(dirname, filename),
+            )
+            return True
+        except ResponseError:
+            return False
+    return False
+
+
+def create_excel(manifest=None, dirname=None, filename=None):
+    shutil.copyfile("swagger_server/templates/manifest_empty.xlsx",
+                    os.path.join(dirname, filename))
+    add_columns(manifest=manifest, fields=SubmissionsSample.all_fields,
+                dirname=dirname, filename=filename)
+
+
+def add_columns(manifest=None, fields=None, dirname=None, filename=None):
+    workbook = load_workbook(filename=os.path.join(dirname, filename))
+    sheet = workbook.active
+
+    # Sort out column headings
+    columns = get_columns(sheet)
+    for field in fields:
+        column_heading = field["field_name"]
+        if column_heading not in columns:
+            columns[column_heading] = len(columns) - 1
+            sheet.cell(row=1, column=columns[column_heading] + 1,
+                       value=column_heading)
+
+    # Now the sheet has all column headings and find_column will find them
+    for sample in manifest.samples:
+        for field in fields:
+            column = find_column(sheet, field["field_name"]) + 1  # add 1 to the index
+            row = sample.row + 1  # sample.row is the index of the row
+            value = getattr(sample, field["python_name"])
+            sheet.cell(column=column, row=row, value=value)
+
+    workbook.save(os.path.join(dirname, filename))

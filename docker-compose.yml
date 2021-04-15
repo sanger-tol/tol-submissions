@@ -17,6 +17,11 @@ services:
     #command: python3 -m swagger_server
     environment:
       - DB_URI
+      - MINIO_URI
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
+      - MINIO_BUCKET
+      - MINIO_SECURE
       - ELIXIR_CLIENT_ID
       - ELIXIR_CLIENT_SECRET
       - ELIXIR_REDIRECT_URI
@@ -45,14 +50,29 @@ services:
     volumes:
       - './submissions-ui/app:/usr/src/app'
       - '/usr/src/app/node_modules'
-    
+
+  submissions-minio:
+      image: minio/minio
+      environment:
+          - MINIO_ACCESS_KEY
+          - MINIO_SECRET_KEY
+      ports:
+          - 9000:9000
+      command: server /minio-data/data
+
   submissions-api-test:
     image: submissions-api
     command: dockerize
-        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:8080 -timeout 10s
+        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:8080 
+        -wait tcp://submissions-minio:9000 -timeout 10s
         bash -c "pip3 install tox; tox"
     environment:
       - DB_URI
+      - MINIO_URI
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
+      - MINIO_BUCKET
+      - MINIO_SECURE
       - ELIXIR_CLIENT_ID
       - ELIXIR_CLIENT_SECRET
       - ELIXIR_REDIRECT_URI
@@ -67,6 +87,7 @@ services:
     depends_on:
       - submissions-db
       - submissions-api
+      - submissions-minio
 
   submissions-ui-test:
     image: submissions-ui

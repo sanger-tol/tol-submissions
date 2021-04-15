@@ -225,6 +225,38 @@ paths:
         "404":
           description: manifest does not exist
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /manifests/{manifestId}/download-excel:
+    get:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Downloads an excel file for the manifest, with ID columns filled in
+      description: |
+        Will use original manifest excel file, if manifest was uploaded from Excel
+      operationId: download_manifest_excel
+      parameters:
+      - name: manifestId
+        in: path
+        description: a manifest ID (given when manifest created)
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: An Excel file, with the IDs filled in (if generate endpoint has been called previously)
+          content:
+            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
+              schema:
+                type: string
+                format: binary
+        "403":
+          description: user not authorised to use this function
+        "404":
+          description: manifest does not exist
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
   /manifests/generate:
     post:
       security:

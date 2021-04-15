@@ -1,10 +1,14 @@
 from __future__ import absolute_import
 
 from swagger_server.test import BaseTestCase
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSpecimen
+from swagger_server.model import db, SubmissionsManifest, SubmissionsSpecimen, \
+    SubmissionsSample
+import swagger_server.excel_utils as excel_utils
 import os
 import responses
-# from openpyxl import load_workbook
+import tempfile
+import filecmp
+from openpyxl import load_workbook
 
 
 class TestSubmittersController(BaseTestCase):
@@ -809,7 +813,7 @@ class TestSubmittersController(BaseTestCase):
         # No authorisation token given
         body = []
         response = self.client.open(
-            '/api/v1/manifests',
+            '/api/v1/manifests/upload-excel',
             method='POST',
             json=body)
         self.assert401(response,
@@ -818,7 +822,7 @@ class TestSubmittersController(BaseTestCase):
         # Invalid authorisation token given
         body = []
         response = self.client.open(
-            '/api/v1/manifests',
+            '/api/v1/manifests/upload-excel',
             method='POST',
             headers={"api-key": "12345678"},
             json=body)
@@ -960,6 +964,183 @@ class TestSubmittersController(BaseTestCase):
                         'tolId': None}],
                     'submissionStatus': None}
         self.assertEqual(expected, response.json)
+        # Has the Excel file been uploaded?
+        manifest = db.session.query(SubmissionsManifest) \
+            .filter(SubmissionsManifest.manifest_id == 1) \
+            .one_or_none()
+        self.assertEqual("1.xlsx", manifest.excel_file)
+
+        # Get that from minio and check it is the same file as went in
+        dir = tempfile.TemporaryDirectory()
+        excel_utils.load_excel(manifest=manifest, dirname=dir.name, filename="test.xlsx")
+        self.assertTrue(filecmp.cmp(dir.name + "/test.xlsx",
+                                    'swagger_server/test/test-manifest.xlsx',
+                                    shallow=False))
+
+    def test_download_manifest_excel(self):
+        # Upload it first
+        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        data = {
+            'excelFile': (file, 'test_file.xlsx'),
+        }
+        response = self.client.open(
+            '/api/v1/manifests/upload-excel',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            data=data)
+        file.close()
+        self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
+        # Don't need to test the response here as it has been tested before
+
+        # Pretend all the ID columns have been generated
+        manifest = db.session.query(SubmissionsManifest) \
+            .filter(SubmissionsManifest.manifest_id == 1) \
+            .one_or_none()
+        counter = 1
+        for sample in manifest.samples:
+            for field in SubmissionsSample.id_fields:
+                setattr(sample, field["python_name"], str(counter))
+                counter += 1
+        # Make sure there is a None in there
+        manifest.samples[0].sample_symbiont_of = None
+
+        # No authorisation token given
+        response = self.client.open(
+            '/api/v1/manifests/1/download-excel',
+            method='GET')
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Invalid authorisation token given
+        response = self.client.open(
+            '/api/v1/manifests/1/download-excel',
+            method='GET',
+            headers={"api-key": "12345678"})
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Manifest missing
+        response = self.client.open(
+            '/api/v1/manifests/999/download-excel',
+            method='GET',
+            headers={"api-key": self.user3.api_key})
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # User not a submitter
+        response = self.client.open(
+            '/api/v1/manifests/1/download-excel',
+            method='GET',
+            headers={"api-key": self.user1.api_key})
+        file.close()
+        self.assert403(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        response = self.client.open(
+            '/api/v1/manifests/1/download-excel',
+            method='GET',
+            headers={"api-key": self.user3.api_key})
+        file.close()
+        self.assert200(response,
+                       'Did not receive a 200 response')
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         response.content_type)
+
+        # Save as Excel file
+        file = open('swagger_server/test/test-manifest-validated.xlsx', 'wb')
+        file.write(response.get_data())
+        file.close()
+        workbook = load_workbook(filename='swagger_server/test/test-manifest-validated.xlsx')
+        sheet = workbook.active
+        # Do we have the columns filled in that we expect
+        for sample in manifest.samples:
+            for field in SubmissionsSample.id_fields:
+                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                row = sample.row + 1
+                value = getattr(sample, field["python_name"])
+                self.assertEqual(sheet.cell(row=row, column=column).value, value)
+
+    def test_download_manifest_excel_originally_json(self):
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'specimen9876',
+                     'TAXON_ID': 6344,
+                     'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'GENUS': 'Arenicola',
+                     'FAMILY': 'Arenicolidae',
+                     'ORDER_OR_GROUP': 'None',
+                     'COMMON_NAME': 'lugworm',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'GAL': 'SANGER INSTITUTE',
+                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'COLLECTED_BY': 'ALEX COLLECTOR',
+                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+                     'DATE_OF_COLLECTION': '2020-09-01',
+                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+                     'DECIMAL_LATITUDE': '+50.12345678',
+                     'DECIMAL_LONGITUDE': '-1.98765432',
+                     'HABITAT': 'Woodland',
+                     'IDENTIFIED_BY': 'JO IDENTIFIER',
+                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+                     'VOUCHER_ID': 'voucher1',
+                     'tolId': 'wuAreMari1',
+                     'biosampleAccession': 'SAMEA12345678'}
+                ]}
+
+        # Correct, full JSON
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        # Don't need to test the response here as it has been tested before
+
+        # Pretend all the ID columns have been generated
+        manifest = db.session.query(SubmissionsManifest) \
+            .filter(SubmissionsManifest.manifest_id == 1) \
+            .one_or_none()
+        counter = 1
+        for sample in manifest.samples:
+            for field in SubmissionsSample.id_fields:
+                setattr(sample, field["python_name"], str(counter))
+                counter += 1
+        # Make sure there is a None in there
+        manifest.samples[0].sample_symbiont_of = None
+
+        response = self.client.open(
+            '/api/v1/manifests/1/download-excel',
+            method='GET',
+            headers={"api-key": self.user3.api_key})
+        self.assert200(response,
+                       'Did not receive a 200 response')
+        self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                         response.content_type)
+
+        # Save as Excel file
+        file = open('swagger_server/test/test-manifest-validated.xlsx', 'wb')
+        file.write(response.get_data())
+        file.close()
+        workbook = load_workbook(filename='swagger_server/test/test-manifest-validated.xlsx')
+        sheet = workbook.active
+        # Do we have the columns filled in that we expect
+        for sample in manifest.samples:
+            for field in SubmissionsSample.id_fields:
+                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                row = sample.row + 1
+                value = getattr(sample, field["python_name"])
+                self.assertEqual(sheet.cell(row=row, column=column).value, value)
+
+        # Do we have the original columns in?
+        for sample in manifest.samples:
+            for field in SubmissionsSample.all_fields:
+                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                row = sample.row + 1
+                value = getattr(sample, field["python_name"])
+                self.assertEqual(sheet.cell(row=row, column=column).value, value)
 
 
 if __name__ == '__main__':

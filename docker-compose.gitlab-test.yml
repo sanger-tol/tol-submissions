@@ -11,3 +11,15 @@ services:
       - submissions
     deploy:
       replicas: 1
+
+  submissions-minio:
+      image: minio/minio
+      env_file:
+        - ${ENV_FILE}
+      ports:
+        - 9000:9000
+      networks:
+        - submissions
+      deploy:
+        replicas: 1
+      command: server /minio-data/data
