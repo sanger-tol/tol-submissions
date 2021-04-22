@@ -67,9 +67,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'tolId': 'wuAreMari1',
-                     'biosampleAccession': 'SAMEA12345678'}
+                     'VOUCHER_ID': 'voucher1'}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -412,9 +410,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'tolId': 'wuAreMari1',
-                     'biosampleAccession': 'SAMEA12345678'}
+                     'VOUCHER_ID': 'voucher1'}
                 ]}
 
         # Submit the manifest
@@ -559,9 +555,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'tolId': 'wuAreMari1',
-                     'biosampleAccession': 'SAMEA12345678'}
+                     'VOUCHER_ID': 'voucher1'}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -1189,9 +1183,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'tolId': 'wuAreMari1',
-                     'biosampleAccession': 'SAMEA12345678'}
+                     'VOUCHER_ID': 'voucher1'}
                 ]}
 
         # Correct, full JSON

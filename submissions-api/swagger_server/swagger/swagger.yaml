@@ -53,14 +53,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ManifestIn'
+              $ref: '#/components/schemas/Manifest'
       responses:
         "200":
           description: manifest created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManifestOut'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: invalid input, object invalid, or item already exists
@@ -104,7 +104,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManifestOut'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: invalid input, object invalid, or item already exists
@@ -126,7 +126,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ManifestIn'
+              $ref: '#/components/schemas/Manifest'
       responses:
         "200":
           description: manifest validated
@@ -165,7 +165,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManifestOut'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: bad input parameter
@@ -233,7 +233,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManifestOut'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: errors in generating IDs
@@ -294,14 +294,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ManifestIn'
+              $ref: '#/components/schemas/Manifest'
       responses:
         "200":
           description: manifest with IDs filled in
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ManifestOut'
+                $ref: '#/components/schemas/Manifest'
                 x-content-type: application/json
         "400":
           description: errors in generating IDs
@@ -395,75 +395,29 @@ paths:
       x-openapi-router-controller: swagger_server.controllers.auth_controller
 components:
   schemas:
-    ManifestIn: &manifest
+    Manifest:
+      type: object
       required:
         - samples
-      type: object
       properties:
-        samples:
-          type: array
-          items:
-            $ref: '#/components/schemas/SampleIn'
         projectName:
           type: string
           example: SuperProject
         stsManifestId:
           type: string
           example: 1234-5678-90
-      example:
-        samples: &manifest_samples_example
-          - row: 1
-            SPECIMEN_ID: SAN000100
-            TAXON_ID: 6344
-            SCIENTIFIC_NAME: Arenicola marina
-            GENUS: Arenicola
-            FAMILY: Arenicolidae
-            ORDER_OR_GROUP: None
-            COMMON_NAME: lugworm
-            LIFESTAGE: ADULT
-            SEX: FEMALE
-            ORGANISM_PART: MUSCLE
-            GAL: SANGER INSTITUTE
-            GAL_SAMPLE_ID: SAN000100
-            COLLECTED_BY: ALEX COLLECTOR
-            COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
-            DATE_OF_COLLECTION: 2020-09-01
-            COLLECTION_LOCATION: UNITED KINGDOM | DARK FOREST
-            DECIMAL_LATITUDE: "+50.12345678"
-            DECIMAL_LONGITUDE: "-1.98765432"
-            HABITAT: Woodland
-            IDENTIFIED_BY: JO IDENTIFIER
-            IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
-            VOUCHER_ID: voucher1
-            ELEVATION: "0"
-            DEPTH: "100"
-        projectName: SuperProject
-        stsManifestId: 1234-5678-90
-    ManifestOut:
-      <<: *manifest
-      properties:
         samples:
           type: array
           items:
-            $ref: '#/components/schemas/SampleOut'
+            $ref: '#/components/schemas/Sample'
         manifestId:
           type: string
           example: manifest12345
+          readOnly: true
         submissionStatus:
           type: boolean
           example: true
-      example:
-        samples:
-          <<: *manifest_samples_example
-          tolId: wuAreMari1
-          biosampleAccession: SAMEA12345678
-          sraAccession: ERS1234
-          submissionAccession: ERA5678
-          sampleDerivedFrom: SAMEA87654321
-          sampleSameAs: null
-          sampleSymbiontOf: null
-        manifestId: 123
-        submissionStatus: false
+          readOnly: true
     ManifestOutShort:
       required:
         - manifestId
@@ -501,7 +455,8 @@ components:
           email: scientist@institute.ac.uk
           roles:
             - role: submitter
-    SampleIn: &sample
+    Sample:
+      type: object
       required:
         - row
         - SPECIMEN_ID
@@ -525,8 +480,14 @@ components:
         - IDENTIFIED_BY
         - IDENTIFIER_AFFILIATION
         - VOUCHER_ID
-      type: object
-      properties: &sample_properties
+        - tolId
+        - biosampleAccession
+        - sraAccession
+        - submissionAccession
+        - sampleDerivedFrom
+        - sampleSameAs
+        - sampleSymbiontOf
+      properties:
         row:
           type: integer
           example: 1
@@ -611,102 +572,38 @@ components:
         CULTURE_OR_STRAIN_ID:
           type: string
           example: ABC1234
-      example: &sample_example
-        SPECIMEN_ID: SAN000100
-        TAXON_ID: 6344
-        SCIENTIFIC_NAME: Arenicola marina
-        GENUS: Arenicola
-        FAMILY: Arenicolidae
-        ORDER_OR_GROUP: None
-        COMMON_NAME: lugworm
-        LIFESTAGE: ADULT
-        SEX: FEMALE
-        ORGANISM_PART: MUSCLE
-        GAL: SANGER INSTITUTE
-        GAL_SAMPLE_ID: SAN000100
-        COLLECTED_BY: ALEX COLLECTOR
-        COLLECTOR_AFFILIATION: THE COLLECTOR INSTITUTE
-        DATE_OF_COLLECTION: 2020-09-01
-        COLLECTION_LOCATION: UNITED KINGDOM | DARK FOREST
-        DECIMAL_LATITUDE: "+50.12345678"
-        DECIMAL_LONGITUDE: "-1.98765432"
-        HABITAT: Woodland
-        IDENTIFIED_BY: JO IDENTIFIER
-        IDENTIFIER_AFFILIATION: THE IDENTIFIER INSTITUTE
-        VOUCHER_ID: voucher1
-        ELEVATION: "0"
-        DEPTH: "100"
-        RELATIONSHIP: child of SAMEA1234567
-        SYMBIONT: "N"
-        CULTURE_OR_STRAIN_ID: ABC1234
-    SampleOut:
-      <<: *sample
-      required:
-        - row
-        - SPECIMEN_ID
-        - TAXON_ID
-        - SCIENTIFIC_NAME
-        - GENUS
-        - FAMILY
-        - ORDER_OR_GROUP
-        - LIFESTAGE
-        - SEX
-        - ORGANISM_PART
-        - GAL
-        - GAL_SAMPLE_ID
-        - COLLECTED_BY
-        - COLLECTOR_AFFILIATION
-        - DATE_OF_COLLECTION
-        - COLLECTION_LOCATION
-        - DECIMAL_LATITUDE
-        - DECIMAL_LONGITUDE
-        - HABITAT
-        - IDENTIFIED_BY
-        - IDENTIFIER_AFFILIATION
-        - VOUCHER_ID
-        - tolId
-        - biosampleAccession
-        - sraAccession
-        - submissionAccession
-        - sampleDerivedFrom
-        - sampleSameAs
-        - sampleSymbiontOf
-      properties:
-        <<: *sample_properties
         tolId:
           type: string
           example: wuAreMari1
+          readOnly: true
         biosampleAccession:
           type: string
           example: SAMEA12345678
+          readOnly: true
         sraAccession:
           type: string
           example: ERS6206028
+          readOnly: true
         submissionAccession:
           type: string
           example: ERA3819349
+          readOnly: true
         submissionError:
           type: string
           example: "The object being added already exists in the submission account with accession: \"ERS6206044\"."
+          readOnly: true
         sampleDerivedFrom:
           type: string
           example: "SAMEA87654321"
+          readOnly: true
         sampleSameAs:
           type: string
           example: "SAMEA87654321"
+          readOnly: true
         sampleSymbiontOf:
           type: string
           example: "SAMEA87654321"
-      example:
-        <<: *sample_example
-        tolId: wuAreMari1
-        biosampleAccession: SAMEA12345678
-        sraAccession: ERS6206028
-        submissionAccession: ERA3819349
-        submissionError: null
-        sampleDerivedFrom: SAMEA87654321
-        sampleSameAs: null
-        sampleSymbionOf: null
+          readOnly: true
     User:
       required:
         - name
