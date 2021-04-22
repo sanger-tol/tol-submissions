@@ -6,3 +6,4 @@ from .submissions_state import SubmissionsState  # noqa
 from .submissions_manifest import SubmissionsManifest  # noqa
 from .submissions_sample import SubmissionsSample  # noqa
 from .submissions_specimen import SubmissionsSpecimen  # noqa
+from .submissions_sample_field import SubmissionsSampleField # noqa

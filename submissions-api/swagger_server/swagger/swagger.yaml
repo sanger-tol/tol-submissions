@@ -399,6 +399,7 @@ components:
       type: object
       required:
         - samples
+      additionalProperties: false
       properties:
         projectName:
           type: string
@@ -443,20 +444,10 @@ components:
           example: 96
         user:
           $ref: '#/components/schemas/User'
-      example:
-        manifestId: 123
-        stsManifestId: 123-456-789
-        projectName: ToL
-        submissionStatus: false
-        numberOfSamples: 96
-        user:
-          name: A Scientist
-          organisation: Institute of Science
-          email: scientist@institute.ac.uk
-          roles:
-            - role: submitter
     Sample:
       type: object
+      additionalProperties:
+        type: string
       required:
         - row
         - SPECIMEN_ID
@@ -611,6 +602,7 @@ components:
         - organisation
         - roles
       type: object
+      additionalProperties: false
       properties:
         name:
           type: string
@@ -625,16 +617,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Role'
-      example:
-        name: "A User"
-        email: "user@example.com"
-        organisation: "Research Inc"
-        roles:
-          role: submitter
     Role:
       required:
         - role
       type: object
+      additionalProperties: false
       properties:
         role:
           type: string
@@ -647,6 +634,7 @@ components:
         - number_of_errors
         - validations
       type: object
+      additionalProperties: false
       properties:
         manifestId:
           type: integer
@@ -663,6 +651,7 @@ components:
         - row
         - results
       type: object
+      additionalProperties: false
       properties:
         row:
           type: integer
@@ -677,6 +666,7 @@ components:
         - message
         - severity
       type: object
+      additionalProperties: false
       properties:
         field:
           type: string

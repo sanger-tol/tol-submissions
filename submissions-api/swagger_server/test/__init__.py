@@ -8,7 +8,8 @@ from swagger_server.encoder import JSONEncoder
 
 from swagger_server.model import db, \
     SubmissionsUser, SubmissionsRole, SubmissionsState, \
-    SubmissionsManifest, SubmissionsSample, SubmissionsSpecimen
+    SubmissionsManifest, SubmissionsSample, SubmissionsSpecimen, \
+    SubmissionsSampleField
 
 
 class BaseTestCase(TestCase):
@@ -52,6 +53,7 @@ class BaseTestCase(TestCase):
         db.engine.execute("ALTER SEQUENCE sample_sample_id_seq RESTART WITH 1;")
 
     def tearDown(self):
+        db.session.query(SubmissionsSampleField).delete()
         db.session.query(SubmissionsSample).delete()
         db.session.query(SubmissionsSpecimen).delete()
         db.session.query(SubmissionsManifest).delete()

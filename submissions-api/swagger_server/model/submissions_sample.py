@@ -46,6 +46,9 @@ class SubmissionsSample(Base):
     sample_derived_from = db.Column(db.String(), nullable=True)
     sample_symbiont_of = db.Column(db.String(), nullable=True)
 
+    sample_fields = db.relationship('SubmissionsSampleField', back_populates="sample",
+                                    lazy=False, order_by='SubmissionsSampleField.name')
+
     def collection_country(self):
         return self.collection_location.split(' | ')[0]
 
@@ -53,42 +56,43 @@ class SubmissionsSample(Base):
         return ' | '.join(self.collection_location.split(' | ')[1:])
 
     def to_dict(cls):
-        return {'row': cls.row,
-                'SPECIMEN_ID': cls.specimen_id,
-                'TAXON_ID': cls.taxonomy_id,
-                'SCIENTIFIC_NAME': cls.scientific_name,
-                'FAMILY': cls.family,
-                'GENUS': cls.genus,
-                'ORDER_OR_GROUP': cls.order_or_group,
-                'COMMON_NAME': cls.common_name,
-                'LIFESTAGE': cls.lifestage,
-                'SEX': cls.sex,
-                'ORGANISM_PART': cls.organism_part,
-                'GAL': cls.GAL,
-                'GAL_SAMPLE_ID': cls.GAL_sample_id,
-                'COLLECTED_BY': cls.collected_by,
-                'COLLECTOR_AFFILIATION': cls.collector_affiliation,
-                'DATE_OF_COLLECTION': cls.date_of_collection,
-                'COLLECTION_LOCATION': cls.collection_location,
-                'DECIMAL_LATITUDE': cls.decimal_latitude,
-                'DECIMAL_LONGITUDE': cls.decimal_longitude,
-                'HABITAT': cls.habitat,
-                'IDENTIFIED_BY': cls.identified_by,
-                'IDENTIFIER_AFFILIATION': cls.identifier_affiliation,
-                'VOUCHER_ID': cls.voucher_id,
-                'ELEVATION': cls.elevation,
-                'DEPTH': cls.depth,
-                'RELATIONSHIP': cls.relationship,
-                'SYMBIONT': cls.symbiont,
-                'CULTURE_OR_STRAIN_ID': cls.culture_or_strain_id,
-                'tolId': cls.tolid,
-                'biosampleAccession': cls.biosample_accession,
-                'sraAccession': cls.sra_accession,
-                'submissionAccession': cls.submission_accession,
-                'submissionError': cls.submission_error,
-                'sampleSameAs': cls.sample_same_as,
-                'sampleDerivedFrom': cls.sample_derived_from,
-                'sampleSymbiontOf': cls.sample_symbiont_of}
+        return {**{'row': cls.row,
+                   'SPECIMEN_ID': cls.specimen_id,
+                   'TAXON_ID': cls.taxonomy_id,
+                   'SCIENTIFIC_NAME': cls.scientific_name,
+                   'FAMILY': cls.family,
+                   'GENUS': cls.genus,
+                   'ORDER_OR_GROUP': cls.order_or_group,
+                   'COMMON_NAME': cls.common_name,
+                   'LIFESTAGE': cls.lifestage,
+                   'SEX': cls.sex,
+                   'ORGANISM_PART': cls.organism_part,
+                   'GAL': cls.GAL,
+                   'GAL_SAMPLE_ID': cls.GAL_sample_id,
+                   'COLLECTED_BY': cls.collected_by,
+                   'COLLECTOR_AFFILIATION': cls.collector_affiliation,
+                   'DATE_OF_COLLECTION': cls.date_of_collection,
+                   'COLLECTION_LOCATION': cls.collection_location,
+                   'DECIMAL_LATITUDE': cls.decimal_latitude,
+                   'DECIMAL_LONGITUDE': cls.decimal_longitude,
+                   'HABITAT': cls.habitat,
+                   'IDENTIFIED_BY': cls.identified_by,
+                   'IDENTIFIER_AFFILIATION': cls.identifier_affiliation,
+                   'VOUCHER_ID': cls.voucher_id,
+                   'ELEVATION': cls.elevation,
+                   'DEPTH': cls.depth,
+                   'RELATIONSHIP': cls.relationship,
+                   'SYMBIONT': cls.symbiont,
+                   'CULTURE_OR_STRAIN_ID': cls.culture_or_strain_id,
+                   'tolId': cls.tolid,
+                   'biosampleAccession': cls.biosample_accession,
+                   'sraAccession': cls.sra_accession,
+                   'submissionAccession': cls.submission_accession,
+                   'submissionError': cls.submission_error,
+                   'sampleSameAs': cls.sample_same_as,
+                   'sampleDerivedFrom': cls.sample_derived_from,
+                   'sampleSymbiontOf': cls.sample_symbiont_of},
+                **{field.name: field.value for field in cls.sample_fields}}
 
     def to_ena_dict(cls):
         # Listed in the order they appear on the ENA checklist

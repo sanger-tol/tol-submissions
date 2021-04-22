@@ -67,7 +67,8 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
+                     'VOUCHER_ID': 'voucher1',
+                     'EXTRA_FIELD': 'extra1'}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -119,6 +120,7 @@ class TestSubmittersController(BaseTestCase):
                          'RELATIONSHIP': None,
                          'SYMBIONT': None,
                          'CULTURE_OR_STRAIN_ID': None,
+                         'EXTRA_FIELD': 'extra1',
                          'tolId': None,
                          'biosampleAccession': None,
                          'sraAccession': None,
@@ -128,6 +130,7 @@ class TestSubmittersController(BaseTestCase):
                          'sampleDerivedFrom': None,
                          'sampleSymbiontOf': None}
                     ]}
+        print(response.json)
         self.assertEqual(expected, response.json)
 
     def test_get_manifest(self):
