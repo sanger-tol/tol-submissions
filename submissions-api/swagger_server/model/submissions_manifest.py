@@ -20,3 +20,12 @@ class SubmissionsManifest(Base):
                 'stsManifestId': cls.sts_manifest_id,
                 'samples': cls.samples,
                 'submissionStatus': cls.submission_status}
+
+    def to_dict_short(cls):
+        return {'manifestId': cls.manifest_id,
+                'projectName': cls.project_name,
+                'stsManifestId': cls.sts_manifest_id,
+                'submissionStatus': cls.submission_status,
+                'createdAt': cls.created_at,
+                'numberOfSamples': len(cls.samples),
+                'user': cls.user}

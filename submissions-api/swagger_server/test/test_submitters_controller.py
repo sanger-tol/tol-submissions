@@ -8,6 +8,7 @@ import os
 import responses
 import tempfile
 import filecmp
+import datetime
 from openpyxl import load_workbook
 
 
@@ -259,6 +260,110 @@ class TestSubmittersController(BaseTestCase):
                         'sampleSymbiontOf': None}
 
                     ]}
+        self.assertEqual(expected, response.json)
+
+    def test_get_manifests(self):
+
+        manifest1 = SubmissionsManifest()
+        manifest1.sts_manifest_id = "123-456-789"
+        manifest1.project_name = "WowProj"
+        manifest1.submission_status = True
+        manifest1.created_at = datetime.datetime(2020, 5, 17)
+        manifest1.user = self.user1
+        db.session.add(manifest1)
+        manifest2 = SubmissionsManifest()
+        manifest2.sts_manifest_id = "987-654-321"
+        manifest2.project_name = "DudProj"
+        manifest2.submission_status = False
+        manifest2.created_at = datetime.datetime(2021, 6, 18)
+        manifest2.user = self.user2
+        sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
+                                    collection_location="UNITED KINGDOM | DARK FOREST",
+                                    collector_affiliation="THE COLLECTOR INSTITUTE",
+                                    common_name="lugworm",
+                                    date_of_collection="2020-09-01",
+                                    decimal_latitude="50.12345678",
+                                    decimal_longitude="-1.98765432",
+                                    depth="100",
+                                    elevation="0",
+                                    family="Arenicolidae",
+                                    GAL="SANGER INSTITUTE",
+                                    GAL_sample_id="SAN000100",
+                                    genus="Arenicola",
+                                    habitat="Woodland",
+                                    identified_by="JO IDENTIFIER",
+                                    identifier_affiliation="THE IDENTIFIER INSTITUTE",
+                                    lifestage="ADULT",
+                                    organism_part="MUSCLE",
+                                    order_or_group="None",
+                                    relationship="child of SAMEA1234567",
+                                    scientific_name="Arenicola marina",
+                                    sex="FEMALE",
+                                    specimen_id="SAN000100",
+                                    taxonomy_id=6344,
+                                    voucher_id="voucher1",
+                                    row=1)
+        sample1.manifest = manifest1
+        db.session.add(manifest2)
+        db.session.commit()
+
+        # No authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='GET',
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Invalid authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='GET',
+            headers={"api-key": "12345678"},
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Not a submitter
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='GET',
+            headers={"api-key": self.user1.api_key},
+            json=body)
+        self.assert403(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Correct - should validate and return errors
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='GET',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        expected = [{'manifestId': 2,
+                     'submissionStatus': False,
+                     'projectName': 'DudProj',
+                     'stsManifestId': '987-654-321',
+                     'createdAt': '2021-06-18T00:00:00Z',
+                     'numberOfSamples': 0,
+                     'user': {'email': 'test_user_admin@sanger.ac.uk',
+                              'name': 'test_user_admin',
+                              'organisation': 'Sanger Institute',
+                              'roles': [{'role': 'admin'}]}},
+                    {'manifestId': 1,
+                     'submissionStatus': True,
+                     'projectName': 'WowProj',
+                     'stsManifestId': '123-456-789',
+                     'createdAt': '2020-05-17T00:00:00Z',
+                     'numberOfSamples': 1,
+                     'user': {'email': 'test_user_requester@sanger.ac.uk',
+                              'name': 'test_user_requester',
+                              'organisation': 'Sanger Institute',
+                              'roles': []}}
+                    ]
         self.assertEqual(expected, response.json)
 
     @responses.activate

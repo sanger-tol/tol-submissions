@@ -5,8 +5,21 @@ from swagger_server.model import db, SubmissionsRole, \
 import swagger_server.manifest_utils as manifest_utils
 import swagger_server.excel_utils as excel_utils
 import connexion
-import logging
 import tempfile
+
+
+def get_manifests():
+    role = db.session.query(SubmissionsRole) \
+        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
+        .filter(SubmissionsRole.user_id == connexion.context["user"]) \
+        .one_or_none()
+    if role is None:
+        return jsonify({'detail': "User does not have permission to use this function"}), 403
+    manifests = db.session.query(SubmissionsManifest) \
+        .order_by(SubmissionsManifest.manifest_id.desc()) \
+        .all()
+
+    return jsonify([manifest.to_dict_short() for manifest in manifests])
 
 
 def upload_manifest_json(body={}, excel_file=None):  # noqa: E501
@@ -20,11 +33,7 @@ def upload_manifest_json(body={}, excel_file=None):  # noqa: E501
         .filter(SubmissionsUser.user_id == connexion.context["user"]) \
         .one_or_none()
 
-    logging.warning(body)
-    if True:
-        manifest = manifest_utils.create_manifest_from_json(body, user)
-    else:
-        manifest = manifest_utils.create_manifest_from_excel(body, user)
+    manifest = manifest_utils.create_manifest_from_json(body, user)
     db.session.add(manifest)
     db.session.commit()
     return(jsonify(manifest))

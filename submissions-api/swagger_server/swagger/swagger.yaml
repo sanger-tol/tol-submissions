@@ -17,6 +17,28 @@ tags:
   description: Authorisation
 paths:
   /manifests:
+    get:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: List all manifests
+      description: |
+        All manifests
+      operationId: get_manifests
+      responses:
+        "200":
+          description: manifests
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ManifestOutShort'
+                x-content-type: application/json
+        "403":
+          description: user not authorised to use this function
+      x-openapi-router-controller: swagger_server.controllers.submitters_controller
     post:
       security:
         - ApiKeyAuth: []
@@ -442,6 +464,43 @@ components:
           sampleSymbiontOf: null
         manifestId: 123
         submissionStatus: false
+    ManifestOutShort:
+      required:
+        - manifestId
+        - projectName
+        - submissionStatus
+        - numberOfSamples
+        - user
+      properties:
+        manifestId:
+          type: string
+          example: manifest12345
+        stsManifestId:
+          type: string
+          example: 123-456-789
+        projectName:
+          type: string
+          example: ToL
+        submissionStatus:
+          type: boolean
+          example: true
+        numberOfSamples:
+          type: integer
+          example: 96
+        user:
+          $ref: '#/components/schemas/User'
+      example:
+        manifestId: 123
+        stsManifestId: 123-456-789
+        projectName: ToL
+        submissionStatus: false
+        numberOfSamples: 96
+        user:
+          name: A Scientist
+          organisation: Institute of Science
+          email: scientist@institute.ac.uk
+          roles:
+            - role: submitter
     SampleIn: &sample
       required:
         - row
@@ -674,6 +733,7 @@ components:
         email: "user@example.com"
         organisation: "Research Inc"
         roles:
+          role: submitter
     Role:
       required:
         - role
@@ -681,9 +741,9 @@ components:
       properties:
         role:
           type: string
-          example: "creator"
+          example: submitter
       example:
-        role: "creator"
+        role: submitter
     ManifestValidationResult:
       required:
         - manifestId
