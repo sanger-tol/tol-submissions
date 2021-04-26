@@ -563,6 +563,87 @@ components:
         CULTURE_OR_STRAIN_ID:
           type: string
           example: ABC1234
+        SERIES:
+          type: string
+          example: "1"
+        RACK_OR_PLATE_ID:
+          type: string
+          example: RACK1234
+        TUBE_OR_WELL_ID:
+          type: string
+          example: Tube_6
+        TAXON_REMARKS:
+          type: string
+          example: ABC1234
+        INFRASPECIFIC_EPITHET:
+          type: string
+          example: ABC1234
+        COLLECTOR_SAMPLE_ID:
+          type: string
+          example: MySample678
+        GRID_REFERENCE:
+          type: string
+          example: TL 1234 5678
+        TIME_OF_COLLECTION:
+          type: string
+          example: "16:00"
+        DESCRIPTION_OF_COLLECTION_METHOD:
+          type: string
+          example: Picked from a tree
+        DIFFICULT_OR_HIGH_PRIORITY_SAMPLE:
+          type: string
+          example: HIGH_PRIORITY
+        IDENTIFIED_HOW:
+          type: string
+          example: Looking
+        SPECIMEN_ID_RISK:
+          type: string
+          example: Y
+        PRESERVED_BY:
+          type: string
+          example: A PICKLER
+        PRESERVER_AFFILIATION:
+          type: string
+          example: THE SAMPLE PRESERVATION SOCIETY
+        PRESERVATION_APPROACH:
+          type: string
+          example: snap frozen
+        PRESERVATIVE_SOLUTION:
+          type: string
+          example: Water
+        TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION:
+          type: string
+          example: "60"
+        DATE_OF_PRESERVATION:
+          type: string
+          example: "2020-01-01"
+        SIZE_OF_TISSUE_IN_TUBE:
+          type: string
+          example: VS
+        TISSUE_REMOVED_FOR_BARCODING:
+          type: string
+          example: N
+        PLATE_ID_FOR_BARCODING:
+          type: string
+          example: Plate_3456
+        TUBE_OR_WELL_ID_FOR_BARCODING:
+          type: string
+          example: Well_4567
+        TISSUE_FOR_BARCODING:
+          type: string
+          example: LEG
+        BARCODE_PLATE_PRESERVATIVE:
+          type: string
+          example: Ethanol
+        PURPOSE_OF_SPECIMEN:
+          type: string
+          example: REFERENCE_GENOME
+        HAZARD_GROUP:
+          type: string
+          example: HG1
+        REGULATORY_COMPLIANCE:
+          type: string
+          example: Y
         tolId:
           type: string
           example: wuAreMari1

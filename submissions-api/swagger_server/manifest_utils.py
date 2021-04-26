@@ -298,7 +298,7 @@ def get_ena_checklist():
                                  "field": "RELATIONSHIP"},
                 "symbiont": {"mandatory": False,
                              "field": "SYMBIONT",
-                             "allowed_options": ['N', 'Y']},
+                             "allowed_values": ['N', 'Y']},
                 "collecting institution": {"mandatory": True,
                                            "field": "COLLECTOR_AFFILIATION"},
                 "GAL": {"mandatory": True,

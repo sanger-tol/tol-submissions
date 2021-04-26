@@ -35,6 +35,33 @@ class SubmissionsSample(Base):
     relationship = db.Column(db.String(), nullable=True)
     symbiont = db.Column(db.String(), nullable=True)
     culture_or_strain_id = db.Column(db.String(), nullable=True)
+    series = db.Column(db.String(), nullable=True)
+    rack_or_plate_id = db.Column(db.String(), nullable=True)
+    tube_or_well_id = db.Column(db.String(), nullable=True)
+    taxon_remarks = db.Column(db.String(), nullable=True)
+    infraspecific_epithet = db.Column(db.String(), nullable=True)
+    collector_sample_id = db.Column(db.String(), nullable=True)
+    grid_reference = db.Column(db.String(), nullable=True)
+    time_of_collection = db.Column(db.String(), nullable=True)
+    description_of_collection_method = db.Column(db.String(), nullable=True)
+    difficult_or_high_priority_sample = db.Column(db.String(), nullable=True)
+    identified_how = db.Column(db.String(), nullable=True)
+    specimen_id_risk = db.Column(db.String(), nullable=True)
+    preserved_by = db.Column(db.String(), nullable=True)
+    preserver_affiliation = db.Column(db.String(), nullable=True)
+    preservation_approach = db.Column(db.String(), nullable=True)
+    preservative_solution = db.Column(db.String(), nullable=True)
+    time_elapsed_from_collection_to_preservation = db.Column(db.String(), nullable=True)
+    date_of_preservation = db.Column(db.String(), nullable=True)
+    size_of_tissue_in_tube = db.Column(db.String(), nullable=True)
+    tissue_removed_for_barcoding = db.Column(db.String(), nullable=True)
+    plate_id_for_barcoding = db.Column(db.String(), nullable=True)
+    tube_or_well_id_for_barcoding = db.Column(db.String(), nullable=True)
+    tissue_for_barcoding = db.Column(db.String(), nullable=True)
+    barcode_plate_preservative = db.Column(db.String(), nullable=True)
+    purpose_of_specimen = db.Column(db.String(), nullable=True)
+    hazard_group = db.Column(db.String(), nullable=True)
+    regulatory_compliance = db.Column(db.String(), nullable=True)
 
     tolid = db.Column(db.String(), nullable=True)
     biosample_accession = db.Column(db.String(), nullable=True)
@@ -56,42 +83,11 @@ class SubmissionsSample(Base):
         return ' | '.join(self.collection_location.split(' | ')[1:])
 
     def to_dict(cls):
-        return {**{'row': cls.row,
-                   'SPECIMEN_ID': cls.specimen_id,
-                   'TAXON_ID': cls.taxonomy_id,
-                   'SCIENTIFIC_NAME': cls.scientific_name,
-                   'FAMILY': cls.family,
-                   'GENUS': cls.genus,
-                   'ORDER_OR_GROUP': cls.order_or_group,
-                   'COMMON_NAME': cls.common_name,
-                   'LIFESTAGE': cls.lifestage,
-                   'SEX': cls.sex,
-                   'ORGANISM_PART': cls.organism_part,
-                   'GAL': cls.GAL,
-                   'GAL_SAMPLE_ID': cls.GAL_sample_id,
-                   'COLLECTED_BY': cls.collected_by,
-                   'COLLECTOR_AFFILIATION': cls.collector_affiliation,
-                   'DATE_OF_COLLECTION': cls.date_of_collection,
-                   'COLLECTION_LOCATION': cls.collection_location,
-                   'DECIMAL_LATITUDE': cls.decimal_latitude,
-                   'DECIMAL_LONGITUDE': cls.decimal_longitude,
-                   'HABITAT': cls.habitat,
-                   'IDENTIFIED_BY': cls.identified_by,
-                   'IDENTIFIER_AFFILIATION': cls.identifier_affiliation,
-                   'VOUCHER_ID': cls.voucher_id,
-                   'ELEVATION': cls.elevation,
-                   'DEPTH': cls.depth,
-                   'RELATIONSHIP': cls.relationship,
-                   'SYMBIONT': cls.symbiont,
-                   'CULTURE_OR_STRAIN_ID': cls.culture_or_strain_id,
-                   'tolId': cls.tolid,
-                   'biosampleAccession': cls.biosample_accession,
-                   'sraAccession': cls.sra_accession,
-                   'submissionAccession': cls.submission_accession,
-                   'submissionError': cls.submission_error,
-                   'sampleSameAs': cls.sample_same_as,
-                   'sampleDerivedFrom': cls.sample_derived_from,
-                   'sampleSymbiontOf': cls.sample_symbiont_of},
+        return {**{'row': cls.row},
+                **{field["field_name"]: getattr(cls, field["python_name"])
+                    for field in cls.all_fields},
+                **{field["field_name"]: getattr(cls, field["python_name"])
+                    for field in cls.id_fields},
                 **{field.name: field.value for field in cls.sample_fields}}
 
     def to_ena_dict(cls):
@@ -222,26 +218,110 @@ class SubmissionsSample(Base):
                    "required": False},
                   {"python_name": "culture_or_strain_id",
                    "field_name": "CULTURE_OR_STRAIN_ID",
+                   "required": False},
+                  {"python_name": "series",
+                   "field_name": "SERIES",
+                   "required": False},
+                  {"python_name": "rack_or_plate_id",
+                   "field_name": "RACK_OR_PLATE_ID",
+                   "required": False},
+                  {"python_name": "tube_or_well_id",
+                   "field_name": "TUBE_OR_WELL_ID",
+                   "required": False},
+                  {"python_name": "taxon_remarks",
+                   "field_name": "TAXON_REMARKS",
+                   "required": False},
+                  {"python_name": "infraspecific_epithet",
+                   "field_name": "INFRASPECIFIC_EPITHET",
+                   "required": False},
+                  {"python_name": "collector_sample_id",
+                   "field_name": "COLLECTOR_SAMPLE_ID",
+                   "required": False},
+                  {"python_name": "grid_reference",
+                   "field_name": "GRID_REFERENCE",
+                   "required": False},
+                  {"python_name": "time_of_collection",
+                   "field_name": "TIME_OF_COLLECTION",
+                   "required": False},
+                  {"python_name": "description_of_collection_method",
+                   "field_name": "DESCRIPTION_OF_COLLECTION_METHOD",
+                   "required": False},
+                  {"python_name": "difficult_or_high_priority_sample",
+                   "field_name": "DIFFICULT_OR_HIGH_PRIORITY_SAMPLE",
+                   "required": False},
+                  {"python_name": "identified_how",
+                   "field_name": "IDENTIFIED_HOW",
+                   "required": False},
+                  {"python_name": "specimen_id_risk",
+                   "field_name": "SPECIMEN_ID_RISK",
+                   "required": False},
+                  {"python_name": "preserved_by",
+                   "field_name": "PRESERVED_BY",
+                   "required": False},
+                  {"python_name": "preserver_affiliation",
+                   "field_name": "PRESERVER_AFFILIATION",
+                   "required": False},
+                  {"python_name": "preservation_approach",
+                   "field_name": "PRESERVATION_APPROACH",
+                   "required": False},
+                  {"python_name": "preservative_solution",
+                   "field_name": "PRESERVATIVE_SOLUTION",
+                   "required": False},
+                  {"python_name": "time_elapsed_from_collection_to_preservation",
+                   "field_name": "TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION",
+                   "required": False},
+                  {"python_name": "date_of_preservation",
+                   "field_name": "DATE_OF_PRESERVATION",
+                   "required": False},
+                  {"python_name": "size_of_tissue_in_tube",
+                   "field_name": "SIZE_OF_TISSUE_IN_TUBE",
+                   "required": False},
+                  {"python_name": "tissue_removed_for_barcoding",
+                   "field_name": "TISSUE_REMOVED_FOR_BARCODING",
+                   "required": False},
+                  {"python_name": "plate_id_for_barcoding",
+                   "field_name": "PLATE_ID_FOR_BARCODING",
+                   "required": False},
+                  {"python_name": "tube_or_well_id_for_barcoding",
+                   "field_name": "TUBE_OR_WELL_ID_FOR_BARCODING",
+                   "required": False},
+                  {"python_name": "tissue_for_barcoding",
+                   "field_name": "TISSUE_FOR_BARCODING",
+                   "required": False},
+                  {"python_name": "barcode_plate_preservative",
+                   "field_name": "BARCODE_PLATE_PRESERVATIVE",
+                   "required": False},
+                  {"python_name": "purpose_of_specimen",
+                   "field_name": "PURPOSE_OF_SPECIMEN",
+                   "required": False},
+                  {"python_name": "hazard_group",
+                   "field_name": "HAZARD_GROUP",
+                   "required": False},
+                  {"python_name": "regulatory_compliance",
+                   "field_name": "REGULATORY_COMPLIANCE",
                    "required": False}]
 
     id_fields = [{"python_name": "tolid",
-                  "field_name": "PUBLIC_NAME",
+                  "field_name": "tolId",
                   "required": True},
                  {"python_name": "sample_same_as",
-                  "field_name": "SAMPLE_SAME_AS",
+                  "field_name": "sampleSameAs",
                   "required": True},
                  {"python_name": "sample_derived_from",
-                  "field_name": "SAMPLE_DERIVED_FROM",
+                  "field_name": "sampleDerivedFrom",
                   "required": True},
                  {"python_name": "sample_symbiont_of",
-                  "field_name": "SAMPLE_SYMBIONT_OF",
+                  "field_name": "sampleSymbiontOf",
                   "required": True},
                  {"python_name": "biosample_accession",
-                  "field_name": "BIOSAMPLE_ACCESSION",
+                  "field_name": "biosampleAccession",
                   "required": True},
                  {"python_name": "sra_accession",
-                  "field_name": "SRA_ACCESSION",
+                  "field_name": "sraAccession",
                   "required": True},
                  {"python_name": "submission_accession",
-                  "field_name": "SUBMISSION_ACCESSION",
+                  "field_name": "submissionAccession",
+                  "required": True},
+                 {"python_name": "submission_error",
+                  "field_name": "submissionError",
                   "required": True}]
