@@ -24,7 +24,14 @@ function Home() {
             <div className="col-lg-12 order-lg-1">
               <div className="p-5">
                 <h2 className="display-4">What are submissions?</h2>
-                <p>Description coming soon...</p>
+                <p>Submissions is a Sanger internal service for generating ENA and Biosample IDs from sample manifests.
+                  It is called from STS but can also be used on its own. It's developed and maintained by the
+                  <a href="mailto:tol-platforms@sanger.ac.uk">Tree of Life Enabling Platforms team</a>.
+                </p>
+                <h2 className="display-4">How can I use it?</h2>
+                <p>At the moment, all use is via the API. To start using the API you'll need to ask us for an API key.
+                  Once you have this you can call all the API endpoints.
+                </p>
               </div>
             </div>
           </div>
