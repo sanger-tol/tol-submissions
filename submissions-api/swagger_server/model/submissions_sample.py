@@ -103,9 +103,9 @@ class SubmissionsSample(Base):
         ret["collection date"] = {"value": cls.date_of_collection}
         ret["geographic location (country and/or sea)"] = {
             "value": cls.collection_country().replace("_", " ")}
-        ret["geographic location (latitude)"] = {"value": cls.decimal_latitude,
+        ret["geographic location (latitude)"] = {"value": cls.decimal_latitude.replace("_", " "),
                                                  "units": "DD"}
-        ret["geographic location (longitude)"] = {"value": cls.decimal_longitude,
+        ret["geographic location (longitude)"] = {"value": cls.decimal_longitude.replace("_", " "),
                                                   "units": "DD"}
         ret["geographic location (region and locality)"] = {
             "value": cls.collection_region().replace("_", " ")}
