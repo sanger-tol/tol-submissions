@@ -103,9 +103,9 @@ class SubmissionsSample(Base):
         ret["collection date"] = {"value": cls.date_of_collection}
         ret["geographic location (country and/or sea)"] = {
             "value": cls.collection_country().replace("_", " ")}
-        ret["geographic location (latitude)"] = {"value": cls.decimal_latitude.replace("_", " "),
+        ret["geographic location (latitude)"] = {"value": cls.decimal_latitude.replace("_", " ").lower(),  # noqa
                                                  "units": "DD"}
-        ret["geographic location (longitude)"] = {"value": cls.decimal_longitude.replace("_", " "),
+        ret["geographic location (longitude)"] = {"value": cls.decimal_longitude.replace("_", " ").lower(),  # noqa
                                                   "units": "DD"}
         ret["geographic location (region and locality)"] = {
             "value": cls.collection_region().replace("_", " ")}
@@ -128,7 +128,7 @@ class SubmissionsSample(Base):
         if cls.relationship is not None:
             ret["relationship"] = {"value": cls.relationship.replace("_", " ")}
         if cls.symbiont is not None:
-            ret["symbiont"] = {"value": cls.symbiont.replace("_", " ")}
+            ret["symbiont"] = {"value": "Y" if cls.symbiont == "SYMBIONT" else "N"}
         ret["collecting institution"] = {"value": cls.collector_affiliation.replace("_", " ")}
         ret["GAL"] = {"value": cls.GAL.replace("_", " ")}
         ret["specimen_voucher"] = {"value": cls.voucher_id.replace("_", " ")}

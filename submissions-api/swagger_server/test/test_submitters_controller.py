@@ -68,6 +68,7 @@ class TestSubmittersController(BaseTestCase):
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
                      'VOUCHER_ID': 'voucher1',
+                     'ELEVATION': '',  # Expect this to be set to None
                      'SERIES': '1',
                      'RACK_OR_PLATE_ID': 'rack1',
                      'TUBE_OR_WELL_ID': 'tube1',

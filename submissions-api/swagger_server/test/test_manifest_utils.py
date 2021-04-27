@@ -174,7 +174,7 @@ class TestManifestUtils(BaseTestCase):
         sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
         sample.date_of_collection = "2020-09-01"
         sample.collection_location = "UNITED KINGDOM | DARK FOREST"
-        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_latitude = "NOT_COLLECTED"
         sample.decimal_longitude = "-1.98765432"
         sample.habitat = "WOODLAND"
         sample.identified_by = "JO IDENTIFIER"
@@ -183,6 +183,7 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = "1500"
         sample.depth = "1000"
         sample.relationship = "child of 1234"
+        sample.symbiont = "TARGET"
         sample.manifest = manifest
 
         results = validate_against_ena_checklist(sample)

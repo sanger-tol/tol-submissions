@@ -25,6 +25,9 @@ def create_manifest_from_json(json, user):
         # All named fields
         for field in SubmissionsSample.all_fields:
             value = s.get(field["field_name"])
+            # Treat "empty" strings as though they hadn't been given at all
+            if not field["required"] and isinstance(value, str) and value.strip() == "":
+                value = None
             setattr(sample, field["python_name"], value)
             ignore_fields.append(field["field_name"])
 
