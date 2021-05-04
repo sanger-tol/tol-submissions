@@ -214,7 +214,7 @@ paths:
         - ApiKeyAuth: []
       tags:
       - submitters
-      summary: Generates ToLIDs and BioSample IDs for a manifest
+      summary: Generates ToLIDs and BioSamples accessions for a manifest
       description: |
         Calls out to ToLID service and ENA service
       operationId: generate_ids_for_manifest
