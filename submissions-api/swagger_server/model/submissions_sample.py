@@ -62,8 +62,8 @@ class SubmissionsSample(Base):
     purpose_of_specimen = db.Column(db.String(), nullable=True)
     hazard_group = db.Column(db.String(), nullable=True)
     regulatory_compliance = db.Column(db.String(), nullable=True)
-    original_field_collection_date = db.Column(db.String(), nullable=True)
-    original_field_collection_location = db.Column(db.String(), nullable=True)
+    original_collection_date = db.Column(db.String(), nullable=True)
+    original_collection_location = db.Column(db.String(), nullable=True)
     barcode_hub = db.Column(db.String(), nullable=True)
 
     tolid = db.Column(db.String(), nullable=True)
@@ -358,11 +358,11 @@ class SubmissionsSample(Base):
                    "field_name": "REGULATORY_COMPLIANCE",
                    "required": False,
                    "allowed_values": ["Y", "N", "NOT_APPLICABLE"]},
-                  {"python_name": "original_field_collection_date",
-                   "field_name": "ORIGINAL_FIELD_COLLECTION_DATE",  # Validated in ENA checklist
+                  {"python_name": "original_collection_date",
+                   "field_name": "ORIGINAL_COLLECTION_DATE",  # Validated in ENA checklist
                    "required": False},
-                  {"python_name": "original_field_collection_location",
-                   "field_name": "ORIGINAL_FIELD_COLLECTION_LOCATION",
+                  {"python_name": "original_collection_location",
+                   "field_name": "ORIGINAL_COLLECTION_LOCATION",
                    "required": False},  # Validated in ENA checklist
                   {"python_name": "barcode_hub",
                    "field_name": "BARCODE_HUB",  # Validated in ENA checklist
