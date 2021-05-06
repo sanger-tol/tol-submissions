@@ -66,10 +66,24 @@ def validate_required_fields(sample):
     return results
 
 
+def validate_allowed_values(sample):
+    results = []
+    for field in sample.all_fields:
+        field_value = getattr(sample, field["python_name"])
+        if field.get("allowed_values") is not None and field_value is not None:
+            if field_value not in field.get("allowed_values"):
+                results.append({'field': field["field_name"],
+                                'message': 'Must be an allowed value',
+                                'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
     results += validate_required_fields(sample)
+
+    results += validate_allowed_values(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

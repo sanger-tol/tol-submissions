@@ -482,7 +482,7 @@ class TestSubmittersController(BaseTestCase):
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
-                     'ORGANISM_PART': '',
+                     'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
                      'GAL_SAMPLE_ID': 'SAN000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
@@ -494,7 +494,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
+                     'VOUCHER_ID': ''}
                 ]}
 
         # Submit the manifest
@@ -557,7 +557,7 @@ class TestSubmittersController(BaseTestCase):
                     'validations': [
                         {"row": 1,
                          "results": [
-                             {"field": "ORGANISM_PART",
+                             {"field": "VOUCHER_ID",
                               "message": "Must not be empty",
                               'severity': 'ERROR'}
                          ]}
@@ -627,7 +627,7 @@ class TestSubmittersController(BaseTestCase):
                      'COMMON_NAME': 'lugworm',
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
-                     'ORGANISM_PART': '',
+                     'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
                      'GAL_SAMPLE_ID': 'SAN000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
@@ -639,7 +639,7 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
+                     'VOUCHER_ID': ''}
                 ]}
         # Not a submitter
         response = self.client.open(
@@ -663,7 +663,7 @@ class TestSubmittersController(BaseTestCase):
                     'validations': [
                         {"row": 1,
                          "results": [
-                             {"field": "ORGANISM_PART",
+                             {"field": "VOUCHER_ID",
                               "message": "Must not be empty",
                               'severity': 'ERROR'}
                          ]}

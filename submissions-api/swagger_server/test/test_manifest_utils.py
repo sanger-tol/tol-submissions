@@ -4,7 +4,7 @@ from swagger_server.test import BaseTestCase
 
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
-    generate_ena_ids_for_manifest, set_relationships_for_manifest
+    generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -12,6 +12,92 @@ import responses
 
 
 class TestManifestUtils(BaseTestCase):
+
+    def test_validate_allowed_values(self):
+        self.sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
+                                         collection_location="UNITED KINGDOM | DARK FOREST",
+                                         collector_affiliation="THE COLLECTOR INSTITUTE",
+                                         common_name="lugworm",
+                                         date_of_collection="2020-09-01",
+                                         decimal_latitude="50.12345678",
+                                         decimal_longitude="-1.98765432",
+                                         depth="100",
+                                         difficult_or_high_priority_sample="INVALID",
+                                         elevation="0",
+                                         family="Arenicolidae",
+                                         GAL="SANGER INSTITUTE",
+                                         GAL_sample_id="SAN000100",
+                                         genus="Arenicola",
+                                         habitat="Woodland",
+                                         hazard_group="INVALID",
+                                         identified_by="JO IDENTIFIER",
+                                         identifier_affiliation="THE IDENTIFIER INSTITUTE",
+                                         lifestage="ADULT",
+                                         organism_part="INVALID",
+                                         order_or_group="None",
+                                         purpose_of_specimen="INVALID",
+                                         regulatory_compliance="INVALID",
+                                         relationship="child of SAMEA1234567",
+                                         scientific_name="Arenicola marina",
+                                         sex="INVALID",
+                                         size_of_tissue_in_tube="INVALID",
+                                         specimen_id="SAN000100",
+                                         specimen_id_risk="INVALID",
+                                         symbiont="INVALID",
+                                         taxonomy_id=6344,
+                                         tissue_for_barcoding="INVALID",
+                                         tissue_removed_for_barcoding="INVALID",
+                                         voucher_id="voucher1",
+                                         row=1)
+        expected = [{'field': 'SEX',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'ORGANISM_PART',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'SYMBIONT',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'SPECIMEN_ID_RISK',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'SIZE_OF_TISSUE_IN_TUBE',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'TISSUE_REMOVED_FOR_BARCODING',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'TISSUE_FOR_BARCODING',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'PURPOSE_OF_SPECIMEN',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'HAZARD_GROUP',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'},
+                    {'field': 'REGULATORY_COMPLIANCE',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'}]
+        results = validate_allowed_values(self.sample1)
+        self.assertEqual(results, expected)
+
+        self.sample1.symbiont = "TARGET"
+        self.sample1.organism_part = "SPORE"
+        self.sample1.sex = "FEMALE"
+        self.sample1.difficult_or_high_priority_sample = "DIFFICULT"
+        self.sample1.specimen_id_risk = "Y"
+        self.sample1.size_of_tissue_in_tube = "VS"
+        self.sample1.tissue_removed_for_barcoding = "Y"
+        self.sample1.tissue_for_barcoding = "SPLEEN"
+        self.sample1.purpose_of_specimen = "RNA_SEQUENCING"
+        self.sample1.hazard_group = "HG1"
+        self.sample1.regulatory_compliance = "Y"
+        results = validate_allowed_values(self.sample1)
+        self.assertEqual(results, [])
 
     @responses.activate
     def test_validate_manifest(self):
@@ -75,7 +161,7 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(len(results[0]["results"]), 0)
 
         # Cause a validation failure
-        self.sample1.organism_part = ""
+        self.sample1.family = ""
         number_of_errors, results = validate_manifest(self.manifest1)
         self.assertEqual(number_of_errors, 1)
         self.assertEqual(len(results), 1)
