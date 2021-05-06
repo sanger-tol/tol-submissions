@@ -81,6 +81,15 @@ class TestSubmissionsSample(BaseTestCase):
                     'GAL_sample_id': {'value': 'SAN000100'}}
         self.assertEqual(sample.to_ena_dict(), expected)
 
+    def test_is_symbiont(self):
+        sample = SubmissionsSample()
+        sample.symbiont = None
+        self.assertFalse(sample.is_symbiont())
+        sample.symbiont = "TARGET"
+        self.assertFalse(sample.is_symbiont())
+        sample.symbiont = "SYMBIONT"
+        self.assertTrue(sample.is_symbiont())
+
 
 if __name__ == '__main__':
     import unittest

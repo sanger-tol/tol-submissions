@@ -141,6 +141,12 @@ class SubmissionsSample(Base):
             ret["culture_or_strain_id"] = {"value": cls.culture_or_strain_id.replace("_", " ")}
         return ret
 
+    def is_symbiont(cls):
+        if cls.symbiont is not None:
+            if cls.symbiont == "SYMBIONT":
+                return True
+        return False
+
     all_fields = [{"python_name": "specimen_id",
                    "field_name": "SPECIMEN_ID",
                    "required": True},

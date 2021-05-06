@@ -403,7 +403,8 @@ def set_relationships_for_manifest(manifest):
     new_specimen_samples = []
     seen = set()
     for sample in manifest.samples:
-        if sample.sample_same_as is None and sample.sample_derived_from is None:
+        if sample.sample_same_as is None and sample.sample_derived_from is None \
+                and sample.sample_symbiont_of is None:
             if sample.specimen_id not in seen:
                 seen.add(sample.specimen_id)
                 new_specimen_samples.append(sample)
@@ -448,7 +449,9 @@ def set_relationships_for_sample(sample):
         pass
 
     if specimen is not None:
-        if sample.organism_part == "WHOLE_ORGANISM":
+        if sample.is_symbiont():
+            sample.sample_symbiont_of = specimen.biosample_accession
+        elif sample.organism_part == "WHOLE_ORGANISM":
             sample.sample_same_as = specimen.biosample_accession
         else:
             sample.sample_derived_from = specimen.biosample_accession

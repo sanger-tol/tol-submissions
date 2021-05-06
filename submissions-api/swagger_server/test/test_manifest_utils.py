@@ -866,6 +866,37 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = "1500"
         sample.depth = "1000"
         sample.relationship = "child of 1234"
+        sample.symbiont = "TARGET"
+        sample.manifest = manifest
+
+        sample = SubmissionsSample()
+        sample.row = 2
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 2720616
+        sample.scientific_name = "Trichosporum symbioticum"
+        sample.family = "Piedraiaceae"
+        sample.genus = "Trichosporum"
+        sample.order_or_group = "Capnodiales"
+        sample.common_name = "None"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "SPORE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.symbiont = "SYMBIONT"
         sample.manifest = manifest
 
         specimen = SubmissionsSpecimen()
@@ -878,6 +909,9 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual("SAMEA12345678", manifest.samples[0].sample_derived_from)
         self.assertEqual(None, manifest.samples[0].sample_same_as)
         self.assertEqual(None, manifest.samples[0].sample_symbiont_of)
+        self.assertEqual(None, manifest.samples[1].sample_derived_from)
+        self.assertEqual(None, manifest.samples[1].sample_same_as)
+        self.assertEqual("SAMEA12345678", manifest.samples[1].sample_symbiont_of)
         self.assertEqual(0, error_count)
         self.assertEqual([], results)
 
