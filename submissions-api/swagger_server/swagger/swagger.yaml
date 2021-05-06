@@ -644,6 +644,15 @@ components:
         REGULATORY_COMPLIANCE:
           type: string
           example: Y
+        ORIGINAL_FIELD_COLLECTION_DATE:
+          type: string
+          example: "2020-01-01"
+        ORIGINAL_FIELD_COLLECTION_LOCATION:
+          type: string
+          example: UNITED KINGDOM | LIGHT FOREST
+        BARCODE_HUB:
+          type: string
+          example: SANGER INSTITUTE
         tolId:
           type: string
           example: wuAreMari1

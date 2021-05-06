@@ -62,6 +62,9 @@ class SubmissionsSample(Base):
     purpose_of_specimen = db.Column(db.String(), nullable=True)
     hazard_group = db.Column(db.String(), nullable=True)
     regulatory_compliance = db.Column(db.String(), nullable=True)
+    original_field_collection_date = db.Column(db.String(), nullable=True)
+    original_field_collection_location = db.Column(db.String(), nullable=True)
+    barcode_hub = db.Column(db.String(), nullable=True)
 
     tolid = db.Column(db.String(), nullable=True)
     biosample_accession = db.Column(db.String(), nullable=True)
@@ -188,7 +191,9 @@ class SubmissionsSample(Base):
                                       "SPORE_BEARING_STRUCTURE", "HOLDFAST_FUNGI", "STIPE",
                                       "CAP", "GILL_FUNGI", "THALLUS_FUNGI", "SPORE",
                                       "**OTHER_FUNGAL_TISSUE**", "NOT_COLLECTED",
-                                      "NOT_APPLICABLE", "NOT_PROVIDED"]},
+                                      "NOT_APPLICABLE", "NOT_PROVIDED", "MOLLUSC_FOOT",
+                                      "UNICELLULAR_ORGANISMS_IN_CULTURE",
+                                      "MULTICELLULAR_ORGANISMS_IN_CULTURE"]},
                   {"python_name": "GAL",
                    "field_name": "GAL",  # Validated in ENA checklist
                    "required": True},
@@ -272,7 +277,7 @@ class SubmissionsSample(Base):
                    "field_name": "DIFFICULT_OR_HIGH_PRIORITY_SAMPLE",
                    "required": False,
                    "allowed_values": ["HIGH_PRIORITY", "DIFFICULT", "NOT_APPLICABLE",
-                                      "NOT_PROVIDED", "NOT_COLLECTED"]},
+                                      "NOT_PROVIDED", "NOT_COLLECTED", "FULL_CURATION"]},
                   {"python_name": "identified_how",
                    "field_name": "IDENTIFIED_HOW",
                    "required": False},
@@ -334,7 +339,9 @@ class SubmissionsSample(Base):
                                       "SPORE_BEARING_STRUCTURE", "HOLDFAST_FUNGI", "STIPE",
                                       "CAP", "GILL_FUNGI", "THALLUS_FUNGI", "SPORE",
                                       "**OTHER_FUNGAL_TISSUE**", "NOT_COLLECTED",
-                                      "NOT_APPLICABLE", "NOT_PROVIDED", "DNA_EXTRACT"]},
+                                      "NOT_APPLICABLE", "NOT_PROVIDED", "DNA_EXTRACT",
+                                      "MOLLUSC_FOOT", "UNICELLULAR_ORGANISMS_IN_CULTURE",
+                                      "MULTICELLULAR_ORGANISMS_IN_CULTURE"]},
                   {"python_name": "barcode_plate_preservative",
                    "field_name": "BARCODE_PLATE_PRESERVATIVE",
                    "required": False},
@@ -342,7 +349,7 @@ class SubmissionsSample(Base):
                    "field_name": "PURPOSE_OF_SPECIMEN",
                    "required": False,
                    "allowed_values": ["REFERENCE_GENOME", "SHORT_READ_SEQUENCING",
-                                      "DNA_BARCODING_ONLY", "RNA_SEQUENCING"]},
+                                      "DNA_BARCODING_ONLY", "RNA_SEQUENCING", "R&D"]},
                   {"python_name": "hazard_group",
                    "field_name": "HAZARD_GROUP",
                    "required": False,
@@ -350,7 +357,16 @@ class SubmissionsSample(Base):
                   {"python_name": "regulatory_compliance",
                    "field_name": "REGULATORY_COMPLIANCE",
                    "required": False,
-                   "allowed_values": ["Y", "N", "NOT_APPLICABLE"]}]
+                   "allowed_values": ["Y", "N", "NOT_APPLICABLE"]},
+                  {"python_name": "original_field_collection_date",
+                   "field_name": "ORIGINAL_FIELD_COLLECTION_DATE",  # Validated in ENA checklist
+                   "required": False},
+                  {"python_name": "original_field_collection_location",
+                   "field_name": "ORIGINAL_FIELD_COLLECTION_LOCATION",
+                   "required": False},  # Validated in ENA checklist
+                  {"python_name": "barcode_hub",
+                   "field_name": "BARCODE_HUB",  # Validated in ENA checklist
+                   "required": False}]
 
     id_fields = [{"python_name": "tolid",
                   "field_name": "tolId",
