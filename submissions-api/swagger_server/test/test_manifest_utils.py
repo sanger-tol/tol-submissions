@@ -101,11 +101,16 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(results, [])
 
     def test_validate_regexs(self):
-        self.sample1 = SubmissionsSample(time_of_collection="INVALID",
+        self.sample1 = SubmissionsSample(series="INVALID",
+                                         time_of_collection="INVALID",
                                          rack_or_plate_id="AJV1234",
                                          tube_or_well_id="AJV5678",
+                                         time_elapsed_from_collection_to_preservation="INVALID",
                                          row=1)
-        expected = [{'field': 'RACK_OR_PLATE_ID',
+        expected = [{'field': 'SERIES',
+                     'message': 'Does not match a specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'RACK_OR_PLATE_ID',
                      'message': 'Does not match a specific pattern',
                      'severity': 'WARNING'},
                     {'field': 'TUBE_OR_WELL_ID',
@@ -113,13 +118,19 @@ class TestManifestUtils(BaseTestCase):
                      'severity': 'WARNING'},
                     {'field': 'TIME_OF_COLLECTION',
                      'message': 'Does not match a specific pattern',
+                     'severity': 'ERROR'},
+                    {'field': 'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION',
+                     'message': 'Does not match a specific pattern',
                      'severity': 'ERROR'}]
+                     
         results = validate_regexs(self.sample1)
         self.assertEqual(results, expected)
 
+        self.sample1.series = "26"
         self.sample1.time_of_collection = "12:00"
         self.sample1.rack_or_plate_id = "AV87654321"
         self.sample1.tube_or_well_id = "AV12345678"
+        self.sample1.time_elapsed_from_collection_to_preservation = "NOT_COLLECTED"
         results = validate_regexs(self.sample1)
         self.assertEqual(results, [])
 
