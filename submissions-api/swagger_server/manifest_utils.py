@@ -151,6 +151,19 @@ def validate_no_orphaned_symbionts(sample):
     return results
 
 
+def validate_no_specimens_with_different_taxons(sample):
+    results = []
+    if sample.specimen_id is not None and sample.taxonomy_id is not None \
+            and not sample.is_symbiont():
+        if sample.specimen_id in sample.manifest.target_specimen_taxons \
+                and sample.manifest.target_specimen_taxons[sample.specimen_id] != sample.taxonomy_id:  # noqa
+            results.append({'field': "TAXON_ID",
+                            'message': 'Targets must not use the same SPECIMEN_ID ' +
+                                       'with a different TAXON_ID',
+                            'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
@@ -162,6 +175,7 @@ def validate_sample(sample):
     results += validate_rack_plate_tube_well_not_both_na(sample)
     results += validate_rack_plate_tube_well_unique(sample)
     results += validate_no_orphaned_symbionts(sample)
+    results += validate_no_specimens_with_different_taxons(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

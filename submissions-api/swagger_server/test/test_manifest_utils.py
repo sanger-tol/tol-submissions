@@ -6,7 +6,8 @@ from swagger_server.manifest_utils import validate_manifest, validate_against_en
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
-    validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts
+    validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts, \
+    validate_no_specimens_with_different_taxons
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -247,6 +248,44 @@ class TestManifestUtils(BaseTestCase):
         sample2.tube_or_well_id = "TB12345678"
         manifest.reset_trackers()
         results = validate_no_orphaned_symbionts(sample2)
+        self.assertEqual(results, [])
+
+    def test_validate_no_specimens_with_different_taxons(self):
+        sample1 = SubmissionsSample(specimen_id="SAN12345678",
+                                    taxonomy_id=6344,
+                                    symbiont="TARGET",
+                                    row=1)
+        sample2 = SubmissionsSample(specimen_id="SAN12345678",
+                                    taxonomy_id=6355,
+                                    symbiont="TARGET",
+                                    row=2)
+        manifest = SubmissionsManifest()
+        sample1.manifest = manifest
+        sample2.manifest = manifest
+        manifest.reset_trackers()
+
+        expected = [{'field': 'TAXON_ID',
+                     'message': 'Targets must not use the same SPECIMEN_ID ' +
+                                'with a different TAXON_ID',
+                     'severity': 'ERROR'}]
+
+        results = validate_no_specimens_with_different_taxons(sample1)
+        self.assertEqual(results, [])
+
+        results = validate_no_specimens_with_different_taxons(sample2)
+        self.assertEqual(results, expected)
+
+        # Correct
+        sample2.taxonomy_id = 6344
+        manifest.reset_trackers()
+        results = validate_no_specimens_with_different_taxons(sample2)
+        self.assertEqual(results, [])
+
+        # Valid for symbionts
+        sample2.taxonomy_id = 6355
+        sample2.symbiont = "SYMBIONT"
+        manifest.reset_trackers()
+        results = validate_no_specimens_with_different_taxons(sample2)
         self.assertEqual(results, [])
 
     @responses.activate

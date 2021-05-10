@@ -16,6 +16,7 @@ class SubmissionsManifest(Base):
 
     target_rack_plate_tube_wells = set()
     duplicate_rack_plate_tube_wells = []
+    target_specimen_taxons = {}
 
     def reset_trackers(self):
         # Target rack/plate and tube/well ids
@@ -31,6 +32,14 @@ class SubmissionsManifest(Base):
         self.duplicate_rack_plate_tube_wells = set(x for x in all if x in
                                                    self.target_rack_plate_tube_wells
                                                    or seen_add(x))
+        # Target specimen/taxons
+        self.target_specimen_taxons = {}
+        for sample in self.samples:
+            if not sample.is_symbiont() and sample.specimen_id is not None \
+                    and sample.taxonomy_id is not None:
+                # Only add the first one
+                if sample.specimen_id not in self.target_specimen_taxons:
+                    self.target_specimen_taxons[sample.specimen_id] = sample.taxonomy_id
 
     def to_dict(cls):
         return {'manifestId': cls.manifest_id,
