@@ -395,6 +395,11 @@ def get_ena_checklist():
                             "field": "HABITAT"},
                 "identifier_affiliation": {"mandatory": True,
                                            "field": "IDENTIFIER_AFFILIATION"},
+                "original collection date": {"mandatory": False,
+                                             "field": "ORIGINAL_COLLECTION_DATE",
+                                             "regex": r"^[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?(/[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?)?$"},  # noqa
+                "original geographic location": {"mandatory": False,
+                                                 "field": "ORIGINAL_GEOGRAPHIC_LOCATION"},
                 "sample derived from": {"mandatory": False,
                                         "regex": r"(^[ESD]R[SR]\d{6,}(,[ESD]R[SR]\d{6,})*$)|(^SAM[END][AG]?\d+(,SAM[END][AG]?\d+)*$)|(^EGA[NR]\d{11}(,EGA[NR]\d{11})*$)|(^[ESD]R[SR]\d{6,}-[ESD]R[SR]\d{6,}$)|(^SAM[END][AG]?\d+-SAM[END][AG]?\d+$)|(^EGA[NR]\d{11}-EGA[NR]\d{11}$)"},  # noqa
                 "sample same as": {"mandatory": False,

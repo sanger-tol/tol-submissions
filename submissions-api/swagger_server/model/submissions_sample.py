@@ -121,6 +121,10 @@ class SubmissionsSample(Base):
                                                       "units": "m"}
         ret["habitat"] = {"value": cls.habitat.replace("_", " ")}
         ret["identifier_affiliation"] = {"value": cls.identifier_affiliation.replace("_", " ")}
+        if cls.original_collection_date is not None:
+            ret["original collection date"] = {"value": cls.original_collection_date}
+        if cls.original_geographic_location is not None:
+            ret["original geographic location"] = {"value": cls.original_geographic_location.replace("_", " ")}  # noqa
         if cls.sample_derived_from is not None:
             ret["sample derived from"] = {"value": cls.sample_derived_from}
         if cls.sample_same_as is not None:
