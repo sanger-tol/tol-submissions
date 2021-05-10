@@ -45,6 +45,11 @@ def create_manifest_from_json(json, user):
 def validate_manifest(manifest, full=True):
     results = []
     number_of_errors = 0
+
+    # Reset the lists we might use for tracking previously seen rows
+    manifest.reset_trackers()
+
+    # Sample-level checks
     for sample in manifest.samples:
         if full:
             sample_results = validate_sample(sample)
@@ -111,6 +116,41 @@ def validate_specimen_id(sample):
     return results
 
 
+def validate_rack_plate_tube_well_not_both_na(sample):
+    results = []
+    blank_vals = ["NOT_COLLECTED", "NOT_PROVIDED", "NOT_APPLICABLE", "NA"]
+    if sample.rack_or_plate_id in blank_vals and sample.tube_or_well_id in blank_vals:
+        results.append({'field': "TUBE_OR_WELL_ID",
+                        'message': 'Cannot be NA if RACK_OR_PLATE_ID is NA',
+                        'severity': 'ERROR'})
+    return results
+
+
+def validate_rack_plate_tube_well_unique(sample):
+    results = []
+    if sample.rack_or_plate_id is not None and sample.tube_or_well_id is not None:
+        concatenated = sample.rack_or_plate_id + '/' + sample.tube_or_well_id
+        if concatenated in sample.manifest.duplicate_rack_plate_tube_wells:
+            results.append({'field': "SYMBIONT",
+                            'message': 'Must only be one target specimen id per ' +
+                                       'rack/tube or plate/well',
+                            'severity': 'ERROR'})
+    return results
+
+
+def validate_no_orphaned_symbionts(sample):
+    results = []
+    if sample.rack_or_plate_id is not None and sample.tube_or_well_id is not None \
+            and sample.symbiont == "SYMBIONT":
+        concatenated = sample.rack_or_plate_id + '/' + sample.tube_or_well_id
+        if concatenated not in sample.manifest.target_rack_plate_tube_wells:
+            results.append({'field': "SYMBIONT",
+                            'message': 'All symbionts must have a TARGET with same ' +
+                                       'rack/plate and tube/well',
+                            'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
@@ -119,6 +159,9 @@ def validate_sample(sample):
     results += validate_allowed_values(sample)
     results += validate_regexs(sample)
     results += validate_specimen_id(sample)
+    results += validate_rack_plate_tube_well_not_both_na(sample)
+    results += validate_rack_plate_tube_well_unique(sample)
+    results += validate_no_orphaned_symbionts(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

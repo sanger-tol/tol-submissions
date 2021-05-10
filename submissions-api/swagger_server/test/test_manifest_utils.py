@@ -5,7 +5,8 @@ from swagger_server.test import BaseTestCase
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
-    validate_regexs, validate_specimen_id
+    validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
+    validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -170,6 +171,84 @@ class TestManifestUtils(BaseTestCase):
         results = validate_specimen_id(self.sample1)
         self.assertEqual(results, [])
 
+    def test_validate_rack_plate_tube_well_not_both_na(self):
+        self.sample1 = SubmissionsSample(rack_or_plate_id="NA",
+                                         tube_or_well_id="NA",
+                                         row=1)
+        expected = [{'field': 'TUBE_OR_WELL_ID',
+                     'message': 'Cannot be NA if RACK_OR_PLATE_ID is NA',
+                     'severity': 'ERROR'}]
+
+        results = validate_rack_plate_tube_well_not_both_na(self.sample1)
+        self.assertEqual(results, expected)
+
+        self.sample1.rack_or_plate_id = "RR12345678"
+        self.sample1.tube_or_well_id = "TB12345678"
+        results = validate_rack_plate_tube_well_not_both_na(self.sample1)
+        self.assertEqual(results, [])
+
+    def test_validate_rack_plate_tube_well_unique(self):
+        sample1 = SubmissionsSample(rack_or_plate_id="RR12345678",
+                                    tube_or_well_id="TB12345678",
+                                    symbiont="TARGET",
+                                    row=1)
+        sample2 = SubmissionsSample(rack_or_plate_id="RR12345678",
+                                    tube_or_well_id="TB12345678",
+                                    symbiont="TARGET",
+                                    row=2)
+        manifest = SubmissionsManifest()
+        sample1.manifest = manifest
+        sample2.manifest = manifest
+        manifest.reset_trackers()
+
+        expected = [{'field': 'SYMBIONT',
+                     'message': 'Must only be one target specimen id per rack/tube or plate/well',
+                     'severity': 'ERROR'}]
+
+        results = validate_rack_plate_tube_well_unique(sample1)
+        self.assertEqual(results, expected)
+
+        results = validate_rack_plate_tube_well_unique(sample2)
+        self.assertEqual(results, expected)
+
+        # Symbionts are allowed
+        sample2.symbiont = "SYMBIONT"
+        manifest.reset_trackers()
+        results = validate_rack_plate_tube_well_unique(sample2)
+        self.assertEqual(results, [])
+
+    def test_validate_no_orphaned_symbionts(self):
+        sample1 = SubmissionsSample(rack_or_plate_id="RR12345678",
+                                    tube_or_well_id="TB12345678",
+                                    symbiont="TARGET",
+                                    row=1)
+        sample2 = SubmissionsSample(rack_or_plate_id="RR99999999",
+                                    tube_or_well_id="TB99999999",
+                                    symbiont="SYMBIONT",
+                                    row=2)
+        manifest = SubmissionsManifest()
+        sample1.manifest = manifest
+        sample2.manifest = manifest
+        manifest.reset_trackers()
+
+        expected = [{'field': 'SYMBIONT',
+                     'message': 'All symbionts must have a TARGET with ' +
+                                'same rack/plate and tube/well',
+                     'severity': 'ERROR'}]
+
+        results = validate_no_orphaned_symbionts(sample1)
+        self.assertEqual(results, [])
+
+        results = validate_no_orphaned_symbionts(sample2)
+        self.assertEqual(results, expected)
+
+        # Symbiont has a target
+        sample2.rack_or_plate_id = "RR12345678"
+        sample2.tube_or_well_id = "TB12345678"
+        manifest.reset_trackers()
+        results = validate_no_orphaned_symbionts(sample2)
+        self.assertEqual(results, [])
+
     @responses.activate
     def test_validate_manifest(self):
         mock_response_from_ena = {"taxId": "6344",
@@ -221,6 +300,8 @@ class TestManifestUtils(BaseTestCase):
                                          specimen_id="SAN0000100",
                                          taxonomy_id=6344,
                                          voucher_id="voucher1",
+                                         rack_or_plate_id="RR12345678",
+                                         tube_or_well_id="TB12345678",
                                          row=1)
         self.sample1.manifest = self.manifest1
         db.session.add(self.manifest1)

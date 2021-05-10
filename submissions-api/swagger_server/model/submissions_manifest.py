@@ -14,6 +14,24 @@ class SubmissionsManifest(Base):
     sts_manifest_id = db.Column(db.String(), nullable=True)
     excel_file = db.Column(db.String(), nullable=True)
 
+    target_rack_plate_tube_wells = set()
+    duplicate_rack_plate_tube_wells = []
+
+    def reset_trackers(self):
+        # Target rack/plate and tube/well ids
+        all = []
+        for sample in self.samples:
+            if not sample.is_symbiont() and sample.rack_or_plate_id is not None \
+                    and sample.tube_or_well_id is not None:
+                concatenated = sample.rack_or_plate_id + '/' + sample.tube_or_well_id
+                all.append(concatenated)
+        self.target_rack_plate_tube_wells = set()
+        seen_add = self.target_rack_plate_tube_wells.add
+        # adds all elements it doesn't know yet to seen and all other to seen_twice
+        self.duplicate_rack_plate_tube_wells = set(x for x in all if x in
+                                                   self.target_rack_plate_tube_wells
+                                                   or seen_add(x))
+
     def to_dict(cls):
         return {'manifestId': cls.manifest_id,
                 'projectName': cls.project_name,
