@@ -122,7 +122,7 @@ class TestManifestUtils(BaseTestCase):
                     {'field': 'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION',
                      'message': 'Does not match a specific pattern',
                      'severity': 'ERROR'}]
-                     
+
         results = validate_regexs(self.sample1)
         self.assertEqual(results, expected)
 
