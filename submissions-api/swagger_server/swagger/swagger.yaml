@@ -647,7 +647,7 @@ components:
         ORIGINAL_COLLECTION_DATE:
           type: string
           example: "2020-01-01"
-        ORIGINAL_COLLECTION_LOCATION:
+        ORIGINAL_GEOGRAPHIC_LOCATION:
           type: string
           example: UNITED KINGDOM | LIGHT FOREST
         BARCODE_HUB:
