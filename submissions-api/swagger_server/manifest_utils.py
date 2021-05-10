@@ -84,11 +84,30 @@ def validate_regexs(sample):
         field_value = getattr(sample, field["python_name"])
         for regex_type in ["error_regex", "warning_regex"]:
             if field.get(regex_type) is not None and field_value is not None:
-                if not re.match(field.get(regex_type), field_value):
+                if not re.search(field.get(regex_type), field_value):
                     results.append({'field': field["field_name"],
                                     'message': 'Does not match a specific pattern',
                                     'severity': 'ERROR' if regex_type == "error_regex"
                                     else "WARNING"})
+    return results
+
+
+def validate_specimen_id(sample):
+    results = []
+    gal = getattr(sample, "GAL")
+    specimen_id = getattr(sample, "specimen_id")
+    if gal in SubmissionsSample.specimen_id_patterns:
+        regexs = SubmissionsSample.specimen_id_patterns[gal]
+        if "prefix" in regexs:
+            if not re.match(regexs.get("prefix"), specimen_id):
+                results.append({'field': "SPECIMEN_ID",
+                                'message': 'Prefix does not match the required pattern for the GAL',  # noqa
+                                'severity': 'ERROR'})
+        if "suffix" in regexs:
+            if not re.search(regexs.get("suffix") + '$', specimen_id):
+                results.append({'field': "SPECIMEN_ID",
+                                'message': 'Suffix does not match the required pattern for the GAL',  # noqa
+                                'severity': 'ERROR'})
     return results
 
 
@@ -99,6 +118,7 @@ def validate_sample(sample):
 
     results += validate_allowed_values(sample)
     results += validate_regexs(sample)
+    results += validate_specimen_id(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

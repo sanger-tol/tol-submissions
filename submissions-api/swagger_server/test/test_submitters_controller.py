@@ -46,7 +46,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -57,7 +57,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -124,7 +124,7 @@ class TestSubmittersController(BaseTestCase):
                     'stsManifestId': None,  # Default - not given in body
                     'samples': [
                         {'row': 1,
-                         'SPECIMEN_ID': 'specimen9876',
+                         'SPECIMEN_ID': 'SAN1234567',
                          'TAXON_ID': 6344,
                          'SCIENTIFIC_NAME': 'Arenicola marina',
                          'GENUS': 'Arenicola',
@@ -135,7 +135,7 @@ class TestSubmittersController(BaseTestCase):
                          'SEX': 'FEMALE',
                          'ORGANISM_PART': 'MUSCLE',
                          'GAL': 'SANGER INSTITUTE',
-                         'GAL_SAMPLE_ID': 'SAN000100',
+                         'GAL_SAMPLE_ID': 'SAN0000100',
                          'COLLECTED_BY': 'ALEX COLLECTOR',
                          'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                          'DATE_OF_COLLECTION': '2020-09-01',
@@ -198,7 +198,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -209,7 +209,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -285,7 +285,7 @@ class TestSubmittersController(BaseTestCase):
                     'stsManifestId': '1234-4321',
                     'samples': [{
                         'row': 1,
-                        'SPECIMEN_ID': 'specimen9876',
+                        'SPECIMEN_ID': 'SAN1234567',
                         'TAXON_ID': 6344,
                         'SCIENTIFIC_NAME': 'Arenicola marina',
                         'GENUS': 'Arenicola',
@@ -296,7 +296,7 @@ class TestSubmittersController(BaseTestCase):
                         'SEX': 'FEMALE',
                         'ORGANISM_PART': 'MUSCLE',
                         'GAL': 'SANGER INSTITUTE',
-                        'GAL_SAMPLE_ID': 'SAN000100',
+                        'GAL_SAMPLE_ID': 'SAN0000100',
                         'COLLECTED_BY': 'ALEX COLLECTOR',
                         'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                         'DATE_OF_COLLECTION': '2020-09-01',
@@ -379,7 +379,7 @@ class TestSubmittersController(BaseTestCase):
                                     elevation="0",
                                     family="Arenicolidae",
                                     GAL="SANGER INSTITUTE",
-                                    GAL_sample_id="SAN000100",
+                                    GAL_sample_id="SAN0000100",
                                     genus="Arenicola",
                                     habitat="Woodland",
                                     identified_by="JO IDENTIFIER",
@@ -390,7 +390,7 @@ class TestSubmittersController(BaseTestCase):
                                     relationship="child of SAMEA1234567",
                                     scientific_name="Arenicola marina",
                                     sex="FEMALE",
-                                    specimen_id="SAN000100",
+                                    specimen_id="SAN0000100",
                                     taxonomy_id=6344,
                                     voucher_id="voucher1",
                                     row=1)
@@ -482,7 +482,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -493,7 +493,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -627,7 +627,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -638,7 +638,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -682,7 +682,7 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     def test_generate_ids(self):
         specimen = SubmissionsSpecimen()
-        specimen.specimen_id = "specimen9876"
+        specimen.specimen_id = "SAN1234567"
         specimen.biosample_accession = "SAMEA12345678"
         db.session.add(specimen)
         db.session.commit()
@@ -713,7 +713,7 @@ class TestSubmittersController(BaseTestCase):
                 "taxonomyId": 6344
             },
             "specimen": {
-                "specimenId": "specimen9876"
+                "specimenId": "SAN1234567"
             },
             "tolId": "wuAreMari1"
         }]
@@ -722,7 +722,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -733,7 +733,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -814,7 +814,7 @@ class TestSubmittersController(BaseTestCase):
                     'stsManifestId': None,
                     'samples': [{
                         'row': 1,
-                        'SPECIMEN_ID': 'specimen9876',
+                        'SPECIMEN_ID': 'SAN1234567',
                         'TAXON_ID': 6344,
                         'SCIENTIFIC_NAME': 'Arenicola marina',
                         'GENUS': 'Arenicola',
@@ -825,7 +825,7 @@ class TestSubmittersController(BaseTestCase):
                         'SEX': 'FEMALE',
                         'ORGANISM_PART': 'MUSCLE',
                         'GAL': 'SANGER INSTITUTE',
-                        'GAL_SAMPLE_ID': 'SAN000100',
+                        'GAL_SAMPLE_ID': 'SAN0000100',
                         'COLLECTED_BY': 'ALEX COLLECTOR',
                         'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                         'DATE_OF_COLLECTION': '2020-09-01',
@@ -885,7 +885,7 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     def test_submit_and_generate_manifest_json(self):
         specimen = SubmissionsSpecimen()
-        specimen.specimen_id = "specimen9876"
+        specimen.specimen_id = "SAN1234567"
         specimen.biosample_accession = "SAMEA12345678"
         db.session.add(specimen)
         db.session.commit()
@@ -916,7 +916,7 @@ class TestSubmittersController(BaseTestCase):
                 "taxonomyId": 6344
             },
             "specimen": {
-                "specimenId": "specimen9876"
+                "specimenId": "SAN1234567"
             },
             "tolId": "wuAreMari1"
         }]
@@ -929,7 +929,7 @@ class TestSubmittersController(BaseTestCase):
 
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -940,7 +940,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',
@@ -993,7 +993,7 @@ class TestSubmittersController(BaseTestCase):
                     'stsManifestId': None,
                     'samples': [{
                         'row': 1,
-                        'SPECIMEN_ID': 'specimen9876',
+                        'SPECIMEN_ID': 'SAN1234567',
                         'TAXON_ID': 6344,
                         'SCIENTIFIC_NAME': 'Arenicola marina',
                         'GENUS': 'Arenicola',
@@ -1004,7 +1004,7 @@ class TestSubmittersController(BaseTestCase):
                         'SEX': 'FEMALE',
                         'ORGANISM_PART': 'MUSCLE',
                         'GAL': 'SANGER INSTITUTE',
-                        'GAL_SAMPLE_ID': 'SAN000100',
+                        'GAL_SAMPLE_ID': 'SAN0000100',
                         'COLLECTED_BY': 'ALEX COLLECTOR',
                         'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                         'DATE_OF_COLLECTION': '2020-09-01',
@@ -1375,7 +1375,7 @@ class TestSubmittersController(BaseTestCase):
     def test_download_manifest_excel_originally_json(self):
         body = {'samples': [
                     {'row': 1,
-                     'SPECIMEN_ID': 'specimen9876',
+                     'SPECIMEN_ID': 'SAN1234567',
                      'TAXON_ID': 6344,
                      'SCIENTIFIC_NAME': 'Arenicola marina',
                      'GENUS': 'Arenicola',
@@ -1386,7 +1386,7 @@ class TestSubmittersController(BaseTestCase):
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
                      'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN000100',
+                     'GAL_SAMPLE_ID': 'SAN0000100',
                      'COLLECTED_BY': 'ALEX COLLECTOR',
                      'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
                      'DATE_OF_COLLECTION': '2020-09-01',

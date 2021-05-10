@@ -5,7 +5,7 @@ from swagger_server.test import BaseTestCase
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
-    validate_regexs
+    validate_regexs, validate_specimen_id
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -134,6 +134,42 @@ class TestManifestUtils(BaseTestCase):
         results = validate_regexs(self.sample1)
         self.assertEqual(results, [])
 
+    def test_validate_specimen_id(self):
+        self.sample1 = SubmissionsSample(GAL="SANGER INSTITUTE",
+                                         specimen_id="INVALID1234567",
+                                         row=1)
+        expected = [{'field': 'SPECIMEN_ID',
+                     'message': 'Prefix does not match the required pattern for the GAL',
+                     'severity': 'ERROR'}]
+
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, expected)
+
+        # Correct prefix, wrong suffix
+        self.sample1.specimen_id = "SAN_4_86723"
+        expected = [{'field': 'SPECIMEN_ID',
+                     'message': 'Suffix does not match the required pattern for the GAL',
+                     'severity': 'ERROR'}]
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, expected)
+
+        # Correct prefix and suffix
+        self.sample1.specimen_id = "SAN1234567"
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, [])
+
+        # Correct prefix, no suffix
+        self.sample1.GAL = "UNIVERSITY OF DERBY"
+        self.sample1.specimen_id = "UDUK12345"
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, [])
+
+        # GAL not in list - don't validate
+        self.sample1.GAL = "NEW GAL"
+        self.sample1.specimen_id = "UDUK12345"
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, [])
+
     @responses.activate
     def test_validate_manifest(self):
         mock_response_from_ena = {"taxId": "6344",
@@ -182,7 +218,7 @@ class TestManifestUtils(BaseTestCase):
                                          relationship="child of SAMEA1234567",
                                          scientific_name="Arenicola marina",
                                          sex="FEMALE",
-                                         specimen_id="SAN000100",
+                                         specimen_id="SAN0000100",
                                          taxonomy_id=6344,
                                          voucher_id="voucher1",
                                          row=1)
