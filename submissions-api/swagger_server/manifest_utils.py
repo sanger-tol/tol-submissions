@@ -78,12 +78,27 @@ def validate_allowed_values(sample):
     return results
 
 
+def validate_regexs(sample):
+    results = []
+    for field in sample.all_fields:
+        field_value = getattr(sample, field["python_name"])
+        for regex_type in ["error_regex", "warning_regex"]:
+            if field.get(regex_type) is not None and field_value is not None:
+                if not re.match(field.get(regex_type), field_value):
+                    results.append({'field': field["field_name"],
+                                    'message': 'Does not match a specific pattern',
+                                    'severity': 'ERROR' if regex_type == "error_regex"
+                                    else "WARNING"})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
     results += validate_required_fields(sample)
 
     results += validate_allowed_values(sample)
+    results += validate_regexs(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER

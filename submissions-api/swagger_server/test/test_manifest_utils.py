@@ -4,7 +4,8 @@ from swagger_server.test import BaseTestCase
 
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
-    generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values
+    generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
+    validate_regexs
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -97,6 +98,29 @@ class TestManifestUtils(BaseTestCase):
         self.sample1.hazard_group = "HG1"
         self.sample1.regulatory_compliance = "Y"
         results = validate_allowed_values(self.sample1)
+        self.assertEqual(results, [])
+
+    def test_validate_regexs(self):
+        self.sample1 = SubmissionsSample(time_of_collection="INVALID",
+                                         rack_or_plate_id="AJV1234",
+                                         tube_or_well_id="AJV5678",
+                                         row=1)
+        expected = [{'field': 'RACK_OR_PLATE_ID',
+                     'message': 'Does not match a specific pattern',
+                     'severity': 'WARNING'},
+                    {'field': 'TUBE_OR_WELL_ID',
+                     'message': 'Does not match a specific pattern',
+                     'severity': 'WARNING'},
+                    {'field': 'TIME_OF_COLLECTION',
+                     'message': 'Does not match a specific pattern',
+                     'severity': 'ERROR'}]
+        results = validate_regexs(self.sample1)
+        self.assertEqual(results, expected)
+
+        self.sample1.time_of_collection = "12:00"
+        self.sample1.rack_or_plate_id = "AV87654321"
+        self.sample1.tube_or_well_id = "AV12345678"
+        results = validate_regexs(self.sample1)
         self.assertEqual(results, [])
 
     @responses.activate
