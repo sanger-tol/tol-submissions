@@ -7,7 +7,7 @@ from swagger_server.manifest_utils import validate_manifest, validate_against_en
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
     validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts, \
-    validate_no_specimens_with_different_taxons
+    validate_no_specimens_with_different_taxons, validate_barcoding
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -278,6 +278,8 @@ class TestManifestUtils(BaseTestCase):
         # Correct
         sample2.taxonomy_id = 6344
         manifest.reset_trackers()
+        results = validate_no_specimens_with_different_taxons(sample1)
+        self.assertEqual(results, [])
         results = validate_no_specimens_with_different_taxons(sample2)
         self.assertEqual(results, [])
 
@@ -285,7 +287,42 @@ class TestManifestUtils(BaseTestCase):
         sample2.taxonomy_id = 6355
         sample2.symbiont = "SYMBIONT"
         manifest.reset_trackers()
+        results = validate_no_specimens_with_different_taxons(sample1)
+        self.assertEqual(results, [])
         results = validate_no_specimens_with_different_taxons(sample2)
+        self.assertEqual(results, [])
+
+    def test_validate_barcoding(self):
+        sample1 = SubmissionsSample(tissue_removed_for_barcoding="N",
+                                    plate_id_for_barcoding="PL12345678",
+                                    tube_or_well_id_for_barcoding="TB87654321",
+                                    tissue_for_barcoding="MUSCLE",
+                                    barcode_plate_preservative="VINEGAR",
+                                    row=1)
+
+        expected = [{'field': 'PLATE_ID_FOR_BARCODING',
+                     'message': 'If TISSUE_REMOVED_FOR_BARCODING is N, other ' +
+                                'barcoding fields must be NOT_APPLICABLE',
+                     'severity': 'ERROR'},
+                    {'field': 'TUBE_OR_WELL_ID_FOR_BARCODING',
+                     'message': 'If TISSUE_REMOVED_FOR_BARCODING is N, other ' +
+                                'barcoding fields must be NOT_APPLICABLE',
+                     'severity': 'ERROR'},
+                    {'field': 'TISSUE_FOR_BARCODING',
+                     'message': 'If TISSUE_REMOVED_FOR_BARCODING is N, other ' +
+                                'barcoding fields must be NOT_APPLICABLE',
+                     'severity': 'ERROR'},
+                    {'field': 'BARCODE_PLATE_PRESERVATIVE',
+                     'message': 'If TISSUE_REMOVED_FOR_BARCODING is N, other ' +
+                                'barcoding fields must be NOT_APPLICABLE',
+                     'severity': 'ERROR'}]
+
+        results = validate_barcoding(sample1)
+        self.assertEqual(results, expected)
+
+        # Correct
+        sample1.tissue_removed_for_barcoding = 'Y'
+        results = validate_barcoding(sample1)
         self.assertEqual(results, [])
 
     @responses.activate

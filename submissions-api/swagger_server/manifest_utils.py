@@ -164,6 +164,20 @@ def validate_no_specimens_with_different_taxons(sample):
     return results
 
 
+def validate_barcoding(sample):
+    results = []
+    if sample.tissue_removed_for_barcoding is None or sample.tissue_removed_for_barcoding != 'Y':
+        for field_name in ["PLATE_ID_FOR_BARCODING", "TUBE_OR_WELL_ID_FOR_BARCODING",
+                           "TISSUE_FOR_BARCODING", "BARCODE_PLATE_PRESERVATIVE"]:
+            value = getattr(sample, field_name.lower())  # Bit of a hack
+            if value is not None and value != "NOT_APPLICABLE":
+                results.append({'field': field_name,
+                                'message': 'If TISSUE_REMOVED_FOR_BARCODING is N, other ' +
+                                           'barcoding fields must be NOT_APPLICABLE',
+                                'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
@@ -176,6 +190,7 @@ def validate_sample(sample):
     results += validate_rack_plate_tube_well_unique(sample)
     results += validate_no_orphaned_symbionts(sample)
     results += validate_no_specimens_with_different_taxons(sample)
+    results += validate_barcoding(sample)
 
     # Validate ToLID species exists
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER
