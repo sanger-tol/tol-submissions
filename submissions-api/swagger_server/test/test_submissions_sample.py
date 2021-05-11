@@ -14,6 +14,11 @@ class TestSubmissionsSample(BaseTestCase):
         self.assertEqual(sample.collection_country(), "United Kingdom")
         self.assertEqual(sample.collection_region(), "England | Cambridge")
 
+        # No space near delimiter
+        sample.collection_location = "United Kingdom| England |Cambridge"
+        self.assertEqual(sample.collection_country(), "United Kingdom")
+        self.assertEqual(sample.collection_region(), "England | Cambridge")
+
         # Only country
         sample.collection_location = "United Kingdom"
         self.assertEqual(sample.collection_country(), "United Kingdom")

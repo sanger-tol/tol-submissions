@@ -1,4 +1,5 @@
 from .base import Base, db
+import re
 
 
 class SubmissionsSample(Base):
@@ -80,10 +81,10 @@ class SubmissionsSample(Base):
                                     lazy=False, order_by='SubmissionsSampleField.name')
 
     def collection_country(self):
-        return self.collection_location.split(' | ')[0]
+        return re.split(r'\s*\|\s*', self.collection_location)[0]
 
     def collection_region(self):
-        return ' | '.join(self.collection_location.split(' | ')[1:])
+        return ' | '.join(re.split(r'\s*\|\s*', self.collection_location)[1:])
 
     def to_dict(cls):
         return {**{'row': cls.row},
