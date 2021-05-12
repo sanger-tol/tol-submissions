@@ -203,6 +203,9 @@ def validate_sample(sample):
     # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER
     results += validate_against_tolid(sample)
 
+    # Validate SPECIMEN_ID
+    results += validate_specimen_against_tolid(sample)
+
     # Validate against ENA checklist
     results += validate_against_ena_checklist(sample)
 
@@ -259,6 +262,38 @@ def validate_against_tolid(sample):
                         + data['order'] + ')',
                         'severity': 'ERROR'})
 
+    return(results)
+
+
+def validate_specimen_against_tolid(sample):
+    results = []
+    # Do not do this check for symbionts
+    if sample.is_symbiont():
+        return results
+
+    response = requests.get(os.environ['TOLID_URL'] + '/specimens/'
+                            + str(sample.specimen_id))
+    if (response.status_code == 404):
+        # Haven't used this Specimen ID before - nothing to check
+        return results
+
+    if (response.status_code != 200):
+        results.append({'field': 'SPECIMEN_ID',
+                        'message': 'Communication failed with the ToLID service: status code '
+                        + str(response.status_code),
+                        'severity': 'ERROR'})
+        return results
+
+    tolids = response.json()[0]["tolIds"]
+    taxons = set()
+    for tolid in tolids:
+        taxons.add(tolid["species"]["taxonomyId"])
+
+    # Has this taxonomy ID been used before?
+    if sample.taxonomy_id not in taxons:
+        results.append({'field': 'SPECIMEN_ID',
+                        'message': 'Has been used before but with different taxonomy ID',
+                        'severity': 'ERROR'})
     return(results)
 
 

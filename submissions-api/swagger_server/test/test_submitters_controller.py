@@ -483,6 +483,28 @@ class TestSubmittersController(BaseTestCase):
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
                       json=mock_response_from_tolid, status=200)
 
+        mock_response_from_tolid_specimen = [{
+            "specimenId": "SAN1234567",
+            "tolIds": [{
+                "species": {
+                    "commonName": "lugworm",
+                    "currentHighestTolidNumber": 2,
+                    "family": "Arenicolidae",
+                    "genus": "Arenicola",
+                    "kingdom": "Metazoa",
+                    "order": "Capitellida",
+                    "phylum": "Annelida",
+                    "prefix": "wuAreMari",
+                    "scientificName": "Arenicola marina",
+                    "taxaClass": "Polychaeta",
+                    "taxonomyId": 6344
+                },
+                "tolId": "wuAreMari1"
+            }]
+        }]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
+                      json=mock_response_from_tolid_specimen, status=200)
+
         body = {'samples': [
                     {'row': 1,
                      'SPECIMEN_ID': 'SAN1234567',
@@ -598,6 +620,28 @@ class TestSubmittersController(BaseTestCase):
                                      "order": "None"}]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
                       json=mock_response_from_tolid, status=200)
+
+        mock_response_from_tolid_specimen = [{
+            "specimenId": "SAN1234567",
+            "tolIds": [{
+                "species": {
+                    "commonName": "lugworm",
+                    "currentHighestTolidNumber": 2,
+                    "family": "Arenicolidae",
+                    "genus": "Arenicola",
+                    "kingdom": "Metazoa",
+                    "order": "Capitellida",
+                    "phylum": "Annelida",
+                    "prefix": "wuAreMari",
+                    "scientificName": "Arenicola marina",
+                    "taxaClass": "Polychaeta",
+                    "taxonomyId": 6344
+                },
+                "tolId": "wuAreMari1"
+            }]
+        }]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
+                      json=mock_response_from_tolid_specimen, status=200)
 
         # No authorisation token given
         body = []
