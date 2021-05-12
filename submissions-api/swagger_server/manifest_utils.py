@@ -188,8 +188,8 @@ def validate_barcoding(sample):
 def validate_sample(sample):
     results = []
 
+    # Validations that don't require external calls
     results += validate_required_fields(sample)
-
     results += validate_allowed_values(sample)
     results += validate_regexs(sample)
     results += validate_specimen_id(sample)
@@ -199,11 +199,11 @@ def validate_sample(sample):
     results += validate_no_specimens_with_different_taxons(sample)
     results += validate_barcoding(sample)
 
-    # Validate ToLID species exists
-    # Validate SCIENTIFIC_NAME, FAMILY, GENUS, ORDER
-    results += validate_against_tolid(sample)
+    # STS for rack/plate and tube/well
+    results += validate_sts_rack_plate_tube_well(sample)
 
-    # Validate SPECIMEN_ID
+    # ToLID service
+    results += validate_against_tolid(sample)
     results += validate_specimen_against_tolid(sample)
 
     # Validate against ENA checklist
@@ -213,6 +213,31 @@ def validate_sample(sample):
     results += validate_ena_submittable(sample)
 
     return results
+
+
+def validate_sts_rack_plate_tube_well(sample):
+    results = []
+    response = requests.get(os.environ['STS_URL'] + '/samples/detail',
+                            params={"rack_id": sample.rack_or_plate_id,
+                                    "tube_id": sample.tube_or_well_id},
+                            headers={'Project': 'ALL',
+                                     'Authorization': os.getenv("STS_API_KEY")})
+    if (response.status_code == 400):
+        # This is fine - not used before
+        return results
+
+    if (response.status_code != 200):
+        results.append({'field': 'TUBE_OR_WELL_ID',
+                        'message': 'Communication failed with the STS service: status code '
+                        + str(response.status_code),
+                        'severity': 'ERROR'})
+        return results
+
+    # If we are here we have found that a sample has this rack/tube already, therefore fail
+    results.append({'field': 'TUBE_OR_WELL_ID',
+                    'message': 'Already exists in STS so cannot be used again',
+                    'severity': 'ERROR'})
+    return(results)
 
 
 def validate_against_tolid(sample):

@@ -505,6 +505,10 @@ class TestSubmittersController(BaseTestCase):
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
                       json=mock_response_from_tolid_specimen, status=200)
 
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=400)
+
         body = {'samples': [
                     {'row': 1,
                      'SPECIMEN_ID': 'SAN1234567',
@@ -642,6 +646,10 @@ class TestSubmittersController(BaseTestCase):
         }]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
                       json=mock_response_from_tolid_specimen, status=200)
+
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=400)
 
         # No authorisation token given
         body = []

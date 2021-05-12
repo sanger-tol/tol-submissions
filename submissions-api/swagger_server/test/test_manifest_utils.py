@@ -8,7 +8,7 @@ from swagger_server.manifest_utils import validate_manifest, validate_against_en
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
     validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts, \
     validate_no_specimens_with_different_taxons, validate_barcoding, \
-    validate_specimen_against_tolid
+    validate_specimen_against_tolid, validate_sts_rack_plate_tube_well
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -383,6 +383,10 @@ class TestManifestUtils(BaseTestCase):
         }]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0000100',
                       json=mock_response_from_tolid_specimen, status=200)
+
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=400)
 
         self.manifest1 = SubmissionsManifest()
         self.manifest1.project_name = "TestProj1"
@@ -1027,6 +1031,55 @@ class TestManifestUtils(BaseTestCase):
         results = validate_specimen_against_tolid(sample)
 
         self.assertEqual(results, [])
+
+    @responses.activate
+    def test_validate_rack_plate_tube_well_sts_exists(self):
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=200)
+
+        sample = SubmissionsSample()
+        sample.rack_or_plate_id = "RR12345678"
+        sample.tube_or_well_id = "TB12345678"
+
+        results = validate_sts_rack_plate_tube_well(sample)
+        expected = [{"field": "TUBE_OR_WELL_ID",
+                     "message": "Already exists in STS so cannot be used again",
+                     'severity': 'ERROR'}]
+
+        self.assertEqual(results, expected)
+
+    @responses.activate
+    def test_validate_rack_plate_tube_well_sts_not_exists(self):
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=400)
+
+        sample = SubmissionsSample()
+        sample.rack_or_plate_id = "RR12345678"
+        sample.tube_or_well_id = "TB12345678"
+
+        results = validate_sts_rack_plate_tube_well(sample)
+        expected = []
+
+        self.assertEqual(results, expected)
+
+    @responses.activate
+    def test_validate_rack_plate_tube_well_sts_cant_communicate(self):
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=500)
+
+        sample = SubmissionsSample()
+        sample.rack_or_plate_id = "RR12345678"
+        sample.tube_or_well_id = "TB12345678"
+
+        results = validate_sts_rack_plate_tube_well(sample)
+        expected = [{"field": "TUBE_OR_WELL_ID",
+                     "message": "Communication failed with the STS service: status code 500",
+                     'severity': 'ERROR'}]
+
+        self.assertEqual(results, expected)
 
     @responses.activate
     def test_generate_tolids_for_manifest(self):
