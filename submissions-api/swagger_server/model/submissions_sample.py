@@ -31,6 +31,7 @@ class SubmissionsSample(Base):
     identified_by = db.Column(db.String(), nullable=False)
     identifier_affiliation = db.Column(db.String(), nullable=False)
     voucher_id = db.Column(db.String(), nullable=False)
+    other_information = db.Column(db.String(), nullable=True)
     elevation = db.Column(db.String(), nullable=True)
     depth = db.Column(db.String(), nullable=True)
     relationship = db.Column(db.String(), nullable=True)
@@ -241,6 +242,9 @@ class SubmissionsSample(Base):
                   {"python_name": "voucher_id",
                    "field_name": "VOUCHER_ID",
                    "required": True},
+                  {"python_name": "other_information",
+                   "field_name": "OTHER_INFORMATION",
+                   "required": False},
                   {"python_name": "elevation",
                    "field_name": "ELEVATION",
                    "required": False},

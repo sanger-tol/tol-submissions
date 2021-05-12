@@ -548,6 +548,9 @@ components:
         VOUCHER_ID:
           type: string
           example: voucher1
+        OTHER_INFORMATION:
+          type: string
+          example: Special instructions
         ELEVATION:
           type: string
           example: "1500"
