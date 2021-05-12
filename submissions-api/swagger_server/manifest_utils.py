@@ -76,10 +76,17 @@ def validate_allowed_values(sample):
     for field in sample.all_fields:
         field_value = getattr(sample, field["python_name"])
         if field.get("allowed_values") is not None and field_value is not None:
-            if field_value not in field.get("allowed_values"):
-                results.append({'field': field["field_name"],
-                                'message': 'Must be an allowed value',
-                                'severity': 'ERROR'})
+            if field.get("split_pattern") is not None:
+                values_to_check = re.split(field.get("split_pattern"), field_value)
+            else:
+                values_to_check = [field_value]
+
+            for value_to_check in values_to_check:
+                if value_to_check not in field.get("allowed_values"):
+                    results.append({'field': field["field_name"],
+                                    'message': 'Must be an allowed value',
+                                    'severity': 'ERROR'})
+                    break
     return results
 
 

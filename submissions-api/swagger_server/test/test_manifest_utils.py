@@ -102,6 +102,19 @@ class TestManifestUtils(BaseTestCase):
         results = validate_allowed_values(self.sample1)
         self.assertEqual(results, [])
 
+        # Multiple values correct
+        self.sample1.organism_part = "SPORE | MUSCLE | LEG"
+        results = validate_allowed_values(self.sample1)
+        self.assertEqual(results, [])
+
+        # Multiple values incorrect
+        self.sample1.organism_part = "SPORE | INVALID | NOTHING"
+        results = validate_allowed_values(self.sample1)
+        expected = [{'field': 'ORGANISM_PART',
+                     'message': 'Must be an allowed value',
+                     'severity': 'ERROR'}]
+        self.assertEqual(results, expected)
+
     def test_validate_regexs(self):
         self.sample1 = SubmissionsSample(series="INVALID",
                                          time_of_collection="INVALID",

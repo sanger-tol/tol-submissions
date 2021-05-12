@@ -186,6 +186,7 @@ class SubmissionsSample(Base):
                   {"python_name": "organism_part",
                    "field_name": "ORGANISM_PART",
                    "required": True,
+                   "split_pattern": r'\s*\|\s*',
                    "allowed_values": ["WHOLE_ORGANISM", "HEAD", "THORAX", "ABDOMEN",
                                       "CEPHALOTHORAX", "BRAIN", "EYE", "FAT_BODY", "INTESTINE",
                                       "BODYWALL", "TERMINAL_BODY", "ANTERIOR_BODY", "MID_BODY",
