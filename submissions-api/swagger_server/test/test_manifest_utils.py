@@ -8,7 +8,8 @@ from swagger_server.manifest_utils import validate_manifest, validate_against_en
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
     validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts, \
     validate_no_specimens_with_different_taxons, validate_barcoding, \
-    validate_specimen_against_tolid, validate_sts_rack_plate_tube_well
+    validate_specimen_against_tolid, validate_sts_rack_plate_tube_well, \
+    validate_whole_organisms_unique
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
@@ -337,6 +338,34 @@ class TestManifestUtils(BaseTestCase):
         # Correct
         sample1.tissue_removed_for_barcoding = 'Y'
         results = validate_barcoding(sample1)
+        self.assertEqual(results, [])
+
+    def test_whole_organisms_unique(self):
+        sample1 = SubmissionsSample(specimen_id="SAN1234567",
+                                    organism_part="WHOLE_ORGANISM",
+                                    row=1)
+        sample2 = SubmissionsSample(specimen_id="SAN1234567",
+                                    organism_part="WHOLE_ORGANISM",
+                                    row=2)
+        manifest = SubmissionsManifest()
+        sample1.manifest = manifest
+        sample2.manifest = manifest
+        manifest.reset_trackers()
+
+        expected = [{'field': 'SPECIMEN_ID',
+                     'message': 'WHOLE_ORGANISM can only be used once',
+                     'severity': 'ERROR'}]
+
+        results = validate_whole_organisms_unique(sample1)
+        self.assertEqual(results, expected)
+
+        results = validate_whole_organisms_unique(sample2)
+        self.assertEqual(results, expected)
+
+        # Symbionts are allowed
+        sample2.specimen_id = "SAN7654321"
+        manifest.reset_trackers()
+        results = validate_whole_organisms_unique(sample2)
         self.assertEqual(results, [])
 
     @responses.activate

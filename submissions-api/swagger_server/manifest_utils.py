@@ -185,6 +185,15 @@ def validate_barcoding(sample):
     return results
 
 
+def validate_whole_organisms_unique(sample):
+    results = []
+    if sample.specimen_id in sample.manifest.duplicate_whole_organisms:
+        results.append({'field': "SPECIMEN_ID",
+                        'message': 'WHOLE_ORGANISM can only be used once',
+                        'severity': 'ERROR'})
+    return results
+
+
 def validate_sample(sample):
     results = []
 
@@ -198,6 +207,7 @@ def validate_sample(sample):
     results += validate_no_orphaned_symbionts(sample)
     results += validate_no_specimens_with_different_taxons(sample)
     results += validate_barcoding(sample)
+    results += validate_whole_organisms_unique(sample)
 
     # STS for rack/plate and tube/well
     results += validate_sts_rack_plate_tube_well(sample)

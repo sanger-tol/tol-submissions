@@ -17,6 +17,8 @@ class SubmissionsManifest(Base):
     target_rack_plate_tube_wells = set()
     duplicate_rack_plate_tube_wells = []
     target_specimen_taxons = {}
+    whole_organisms = set()
+    duplicate_whole_organisms = []
 
     def reset_trackers(self):
         # Target rack/plate and tube/well ids
@@ -40,6 +42,18 @@ class SubmissionsManifest(Base):
                 # Only add the first one
                 if sample.specimen_id not in self.target_specimen_taxons:
                     self.target_specimen_taxons[sample.specimen_id] = sample.taxonomy_id
+
+        # Whole organisms
+        all = []
+        for sample in self.samples:
+            if sample.organism_part == "WHOLE_ORGANISM":
+                all.append(sample.specimen_id)
+        self.whole_organisms = set()
+        seen_add = self.whole_organisms.add
+        # adds all elements it doesn't know yet to seen and all other to seen_twice
+        self.duplicate_whole_organisms = set(x for x in all if x in
+                                             self.whole_organisms
+                                             or seen_add(x))
 
     def to_dict(cls):
         return {'manifestId': cls.manifest_id,
