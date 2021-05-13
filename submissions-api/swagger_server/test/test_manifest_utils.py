@@ -156,7 +156,7 @@ class TestManifestUtils(BaseTestCase):
                                          specimen_id="INVALID1234567",
                                          row=1)
         expected = [{'field': 'SPECIMEN_ID',
-                     'message': 'Prefix does not match the required pattern for the GAL',
+                     'message': 'Does not match the required pattern for the GAL',
                      'severity': 'ERROR'}]
 
         results = validate_specimen_id(self.sample1)
@@ -165,13 +165,18 @@ class TestManifestUtils(BaseTestCase):
         # Correct prefix, wrong suffix
         self.sample1.specimen_id = "SAN_4_86723"
         expected = [{'field': 'SPECIMEN_ID',
-                     'message': 'Suffix does not match the required pattern for the GAL',
+                     'message': 'Does not match the required pattern for the GAL',
                      'severity': 'ERROR'}]
         results = validate_specimen_id(self.sample1)
         self.assertEqual(results, expected)
 
         # Correct prefix and suffix
         self.sample1.specimen_id = "SAN1234567"
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, [])
+
+        # Correct prefix and suffix - second option
+        self.sample1.specimen_id = "BLAX1234567"
         results = validate_specimen_id(self.sample1)
         self.assertEqual(results, [])
 

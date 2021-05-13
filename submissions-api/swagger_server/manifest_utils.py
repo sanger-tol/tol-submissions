@@ -109,17 +109,34 @@ def validate_specimen_id(sample):
     gal = getattr(sample, "GAL")
     specimen_id = getattr(sample, "specimen_id")
     if gal in SubmissionsSample.specimen_id_patterns:
-        regexs = SubmissionsSample.specimen_id_patterns[gal]
-        if "prefix" in regexs:
-            if not re.match(regexs.get("prefix"), specimen_id):
-                results.append({'field': "SPECIMEN_ID",
-                                'message': 'Prefix does not match the required pattern for the GAL',  # noqa
-                                'severity': 'ERROR'})
-        if "suffix" in regexs:
-            if not re.search(regexs.get("suffix") + '$', specimen_id):
-                results.append({'field': "SPECIMEN_ID",
-                                'message': 'Suffix does not match the required pattern for the GAL',  # noqa
-                                'severity': 'ERROR'})
+        # If here, must match one of the patterns
+        patterns = SubmissionsSample.specimen_id_patterns[gal]
+        matches = False
+        for pattern in patterns:
+            # Does it match this pattern?
+            prefix_matches = False
+            suffix_matches = False
+            if "prefix" in pattern:
+                if re.match(pattern.get("prefix"), specimen_id):
+                    prefix_matches = True
+            else:
+                # Not checking prefix
+                prefix_matches = True
+
+            if "suffix" in pattern:
+                if re.search(pattern.get("suffix") + '$', specimen_id):
+                    suffix_matches = True
+            else:
+                suffix_matches = True
+
+            # Only if both parts match this pattern
+            if prefix_matches and suffix_matches:
+                matches = True
+
+        if not matches:
+            results.append({'field': "SPECIMEN_ID",
+                            'message': 'Does not match the required pattern for the GAL',
+                            'severity': 'ERROR'})
     return results
 
 
