@@ -244,6 +244,10 @@ def validate_sample(sample):
 
 def validate_sts_rack_plate_tube_well(sample):
     results = []
+    if sample.rack_or_plate_id is None or sample.tube_or_well_id is None:
+        # Cannot do this check
+        return results
+
     response = requests.get(os.environ['STS_URL'] + '/samples/detail',
                             params={"rack_id": sample.rack_or_plate_id,
                                     "tube_id": sample.tube_or_well_id},
