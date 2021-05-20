@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
 function Home() {
   return (
@@ -24,7 +23,8 @@ function Home() {
             <div className="col-lg-12 order-lg-1">
               <div className="p-5">
                 <h2 className="display-4">What are submissions?</h2>
-                <p>Submissions is a Sanger internal service for generating ENA and BioSamples accessions from sample manifests.
+                <p>Submissions is a Sanger internal service for validating sample manifests and generating ENA and BioSamples
+                  accessions from them.
                   It is called from STS but can also be used on its own. It's developed and maintained by the
                   <a href="mailto:tol-platforms@sanger.ac.uk">Tree of Life Enabling Platforms team</a>.
                 </p>
@@ -32,6 +32,20 @@ function Home() {
                 <p>At the moment, all use is via the API. To start using the API you'll need to ask us for an API key.
                   Once you have this you can call all the API endpoints.
                 </p>
+                <h3>Starting with an Excel manifest</h3>
+                <ul>
+                  <li>Use the <code>manifests/upload-excel</code> endpoint to upload the manifest. This returns the manifest ID as part of the returned JSON.</li>
+                  <li>Use the <code>manifests/{'{'}manifestId{'}'}/validate</code> endpoint to validate the manifest contents. This will return a list of errors and warnings.</li>
+                  <li>If validation is successful, the <code>manifests/{'{'}manifestId{'}'}/generate</code> endpoint will generate and return the ENA and BioSamples accessions.</li>
+                  <li>If validation is not successful, correct the errors in the Excel manifest and re-upload, noting that this will result in a new manifest ID.</li>
+                </ul>
+                <h3>Starting with a JSON manifest</h3>
+                <ul>
+                  <li>Use the <code>manifests</code> POST endpoint to upload the manifest. This returns the manifest ID as part of the returned JSON.</li>
+                  <li>Use the <code>manifests/{'{'}manifestId{'}'}/validate</code> endpoint to validate the manifest contents. This will return a list of errors and warnings.</li>
+                  <li>If validation is successful, the <code>manifests/{'{'}manifestId{'}'}/generate</code> endpoint will generate and return the ENA and BioSamples accessions.</li>
+                  <li>If validation is not successful, correct the errors in the JSON manifest and re-upload, noting that this will result in a new manifest ID.</li>
+                </ul>
               </div>
             </div>
           </div>
