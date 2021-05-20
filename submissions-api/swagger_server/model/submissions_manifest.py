@@ -55,6 +55,9 @@ class SubmissionsManifest(Base):
                                              self.whole_organisms
                                              or seen_add(x))
 
+    def unique_taxonomy_ids(cls):
+        return set([x.taxonomy_id for x in cls.samples])
+
     def to_dict(cls):
         return {'manifestId': cls.manifest_id,
                 'projectName': cls.project_name,

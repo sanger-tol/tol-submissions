@@ -7,6 +7,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import xml.etree.ElementTree as ET
 import logging
+from Bio import Entrez
 
 
 def create_manifest_from_json(json, user):
@@ -46,8 +47,14 @@ def validate_manifest(manifest, full=True):
     results = []
     number_of_errors = 0
 
-    # Reset the lists we might use for tracking previously seen rows
-    manifest.reset_trackers()
+    # Only need these for a full validation
+    if full:
+        # Reset the lists we might use for tracking previously seen rows
+        manifest.reset_trackers()
+
+        # Get the NCBI taxonomy info for the whole manifest to use later
+        manifest_results = get_ncbi_data(manifest)
+        manifest.ncbi_data = manifest_results
 
     # Sample-level checks
     for sample in manifest.samples:
@@ -229,8 +236,11 @@ def validate_sample(sample):
     # STS for rack/plate and tube/well
     results += validate_sts_rack_plate_tube_well(sample)
 
+    # NCBI service
+    results += validate_against_ncbi(sample)
+
     # ToLID service
-    results += validate_against_tolid(sample)
+    results += validate_species_known_in_tolid(sample)
     results += validate_specimen_against_tolid(sample)
 
     # Validate against ENA checklist
@@ -271,7 +281,7 @@ def validate_sts_rack_plate_tube_well(sample):
     return(results)
 
 
-def validate_against_tolid(sample):
+def validate_species_known_in_tolid(sample):
     results = []
     response = requests.get(os.environ['TOLID_URL'] + '/species/'
                             + str(sample.taxonomy_id))
@@ -288,36 +298,96 @@ def validate_against_tolid(sample):
                         'severity': 'ERROR'})
         return results
 
-    data = response.json()[0]
+    # Won't actually check anything here
+
+    return(results)
+
+
+# This function actually retrieves the NCBI taxonomy data for the whole manifest
+def get_ncbi_data(manifest):
+    Entrez.api_key = os.getenv("NIH_API_KEY")
+    taxonomy_dict = {}
+    taxon_id_list = [str(x) for x in list(manifest.unique_taxonomy_ids())]
+    if any(id for id in taxon_id_list):
+        i = 0
+        while i < len(taxon_id_list):
+            window_list = taxon_id_list[i: i + 200]
+            i += 200
+            handle = Entrez.efetch(db="Taxonomy", id=window_list, retmode="xml")
+            records = Entrez.read(handle)
+            for element in records:
+                taxonomy_dict[int(element['TaxId'])] = element
+    return taxonomy_dict
+
+
+def validate_against_ncbi(sample):
+    results = []
+
+    if sample.taxonomy_id not in sample.manifest.ncbi_data:
+        results.append({'field': 'TAXON_ID',
+                        'message': 'Species not known in the NCBI service',
+                        'severity': 'ERROR'})
+        return results
+
+    ncbi_result = sample.manifest.ncbi_data[sample.taxonomy_id]
+
+    if not sample.is_symbiont() and ncbi_result['Rank'] != 'species':
+        results.append({'field': 'TAXON_ID',
+                        'message': 'All TARGETs must be of NCBI rank species',
+                        'severity': 'ERROR'})
+        return results
 
     # Does the SCIENTIFIC_NAME match?
-    if data['scientificName'] != sample.scientific_name:
+    if sample.scientific_name.upper() != ncbi_result['ScientificName'].upper():
         results.append({'field': 'SCIENTIFIC_NAME',
-                        'message': 'Does not match that in the ToLID service (expecting '
-                        + data['scientificName'] + ')',
+                        'message': 'Does not match that in the NCBI service (expecting '
+                        + ncbi_result['ScientificName'] + ')',
                         'severity': 'ERROR'})
 
-    # Does the GENUS match?
-    if data['genus'] != sample.genus:
+    # Go through the lineage
+    genus_checked = family_checked = order_checked = False
+    for element in ncbi_result['LineageEx']:
+        rank = element.get('Rank')
+        # Does the GENUS match?
+        if rank == 'genus':
+            genus_checked = True
+            if sample.genus.upper() != element.get('ScientificName').upper():
+                results.append({'field': 'GENUS',
+                                'message': 'Does not match that in the NCBI service (expecting '
+                                + element.get('ScientificName') + ')',
+                                'severity': 'ERROR'})
+        # Does the FAMILY match?
+        elif rank == "family":
+            family_checked = True
+            if sample.family.upper() != element.get('ScientificName').upper():
+                results.append({'field': 'FAMILY',
+                                'message': 'Does not match that in the NCBI service (expecting '
+                                + element.get('ScientificName') + ')',
+                                'severity': 'ERROR'})
+        # Does the ORDER match?
+        elif rank == 'order':
+            order_checked = True
+            if sample.order_or_group.upper() != element.get('ScientificName').upper():
+                results.append({'field': 'ORDER_OR_GROUP',
+                                'message': 'Does not match that in the NCBI service (expecting '
+                                + element.get('ScientificName') + ')',
+                                'severity': 'ERROR'})
+    # Everything else should be None
+    if not genus_checked and sample.genus != "None":
         results.append({'field': 'GENUS',
-                        'message': 'Does not match that in the ToLID service (expecting '
-                        + data['genus'] + ')',
+                        'message': 'Does not match that in the NCBI service (expecting '
+                        + 'None)',
                         'severity': 'ERROR'})
-
-    # Does the FAMILY match?
-    if data['family'] != sample.family:
+    if not family_checked and sample.family != "None":
         results.append({'field': 'FAMILY',
-                        'message': 'Does not match that in the ToLID service (expecting '
-                        + data['family'] + ')',
+                        'message': 'Does not match that in the NCBI service (expecting '
+                        + 'None)',
                         'severity': 'ERROR'})
-
-    # Does the ORDER match?
-    if data['order'] != sample.order_or_group:
+    if not order_checked and sample.order_or_group != "None":
         results.append({'field': 'ORDER_OR_GROUP',
-                        'message': 'Does not match that in the ToLID service (expecting '
-                        + data['order'] + ')',
+                        'message': 'Does not match that in the NCBI service (expecting '
+                        + 'None)',
                         'severity': 'ERROR'})
-
     return(results)
 
 

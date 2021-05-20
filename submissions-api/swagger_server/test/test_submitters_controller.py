@@ -10,6 +10,7 @@ import tempfile
 import filecmp
 import datetime
 from openpyxl import load_workbook
+from unittest.mock import patch
 
 
 class TestSubmittersController(BaseTestCase):
@@ -461,7 +462,8 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
     @responses.activate
-    def test_validate_manifest_json(self):
+    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    def test_validate_manifest_json(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
                                   "commonName": "lugworm",
@@ -508,6 +510,57 @@ class TestSubmittersController(BaseTestCase):
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
                       json=mock_response_from_sts, status=400)
+
+        get_ncbi_data.return_value = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
 
         body = {'samples': [
                     {'row': 1,
@@ -603,7 +656,8 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
     @responses.activate
-    def test_submit_and_validate_manifest_json(self):
+    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    def test_submit_and_validate_manifest_json(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
                                   "commonName": "lugworm",
@@ -650,6 +704,57 @@ class TestSubmittersController(BaseTestCase):
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
                       json=mock_response_from_sts, status=400)
+
+        get_ncbi_data.return_value = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
 
         # No authorisation token given
         body = []

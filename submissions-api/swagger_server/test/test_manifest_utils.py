@@ -3,17 +3,18 @@ from __future__ import absolute_import
 from swagger_server.test import BaseTestCase
 
 from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
-    validate_ena_submittable, validate_against_tolid, generate_tolids_for_manifest, \
+    validate_ena_submittable, validate_species_known_in_tolid, generate_tolids_for_manifest, \
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
     validate_rack_plate_tube_well_unique, validate_no_orphaned_symbionts, \
     validate_no_specimens_with_different_taxons, validate_barcoding, \
     validate_specimen_against_tolid, validate_sts_rack_plate_tube_well, \
-    validate_whole_organisms_unique
+    validate_whole_organisms_unique, validate_against_ncbi
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
 import responses
+from unittest.mock import patch
 
 
 class TestManifestUtils(BaseTestCase):
@@ -374,7 +375,8 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(results, [])
 
     @responses.activate
-    def test_validate_manifest(self):
+    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    def test_validate_manifest(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
                                   "commonName": "lugworm",
@@ -421,6 +423,57 @@ class TestManifestUtils(BaseTestCase):
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
                       json=mock_response_from_sts, status=400)
+
+        get_ncbi_data.return_value = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
 
         self.manifest1 = SubmissionsManifest()
         self.manifest1.project_name = "TestProj1"
@@ -798,7 +851,7 @@ class TestManifestUtils(BaseTestCase):
         sample.depth = "1000"
         sample.relationship = "child of 1234"
 
-        results = validate_against_tolid(sample)
+        results = validate_species_known_in_tolid(sample)
         expected = []
 
         self.assertEqual(results, expected)
@@ -837,7 +890,7 @@ class TestManifestUtils(BaseTestCase):
         sample.depth = "1000"
         sample.relationship = "child of 1234"
 
-        results = validate_against_tolid(sample)
+        results = validate_species_known_in_tolid(sample)
         expected = [{"field": "TAXON_ID",
                      "message": "Species not known in the ToLID service",
                      'severity': 'WARNING'}]
@@ -878,24 +931,277 @@ class TestManifestUtils(BaseTestCase):
         sample.depth = "1000"
         sample.relationship = "child of 1234"
 
-        results = validate_against_tolid(sample)
+        results = validate_species_known_in_tolid(sample)
         expected = [{"field": "TAXON_ID",
                      "message": "Communication failed with the ToLID service: status code 500",
                      'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)
 
-    # The real version of this does a call to the ToLID service. We mock that call here
-    @responses.activate
-    def test_validate_tolid_name_genus_family_order(self):
-        mock_response_from_tolid = [{"taxonomyId": "6344",
-                                     "scientificName": "Arenicola marina",
-                                     "commonName": "lugworm",
-                                     "family": "Arenicolidae",
-                                     "genus": "Arenicola",
-                                     "order": "None"}]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
-                      json=mock_response_from_tolid, status=200)
+    def test_validate_ncbi_correct(self):
+        manifest = SubmissionsManifest()
+        manifest.ncbi_data = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        results = validate_against_ncbi(sample)
+        expected = []
+
+        self.assertEqual(results, expected)
+
+    def test_validate_ncbi_species_missing(self):
+        manifest = SubmissionsManifest()
+        manifest.ncbi_data = {}
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        results = validate_against_ncbi(sample)
+        expected = [{"field": "TAXON_ID",
+                     "message": "Species not known in the NCBI service",
+                     'severity': 'ERROR'}]
+
+        self.assertEqual(results, expected)
+
+    def test_validate_ncbi_species_not_species(self):
+        manifest = SubmissionsManifest()
+        manifest.ncbi_data = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'subspecies',  # Here is the fake change
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
+
+        sample = SubmissionsSample()
+        sample.specimen_id = "specimen1234"
+        sample.taxonomy_id = 6344
+        sample.scientific_name = "Arenicola marina"
+        sample.family = "Arenicolidae"
+        sample.genus = "Arenicola"
+        sample.order_or_group = "None"
+        sample.common_name = "lugworm"
+        sample.lifestage = "ADULT"
+        sample.sex = "FEMALE"
+        sample.organism_part = "MUSCLE"
+        sample.GAL = "Sanger Institute"
+        sample.GAL_sample_id = "SAN000100"
+        sample.collected_by = "ALEX COLLECTOR"
+        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
+        sample.date_of_collection = "2020-09-01"
+        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
+        sample.decimal_latitude = "+50.12345678"
+        sample.decimal_longitude = "-1.98765432"
+        sample.habitat = "WOODLAND"
+        sample.identified_by = "JO IDENTIFIER"
+        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
+        sample.voucher_id = "voucher1"
+        sample.elevation = "1500"
+        sample.depth = "1000"
+        sample.relationship = "child of 1234"
+        sample.manifest = manifest
+
+        results = validate_against_ncbi(sample)
+        expected = [{"field": "TAXON_ID",
+                     "message": "All TARGETs must be of NCBI rank species",
+                     'severity': 'ERROR'}]
+
+        self.assertEqual(results, expected)
+
+    def test_validate_ncbi_name_genus_family_order(self):
+        manifest = SubmissionsManifest()
+        manifest.ncbi_data = {6344: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
 
         sample = SubmissionsSample()
         sample.specimen_id = "specimen1234"
@@ -923,21 +1229,22 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = "1500"
         sample.depth = "1000"
         sample.relationship = "child of 1234"
+        sample.manifest = manifest
 
-        results = validate_against_tolid(sample)
+        results = validate_against_ncbi(sample)
         expected = [{"field": "SCIENTIFIC_NAME",
-                     "message": "Does not match that in the ToLID service "
+                     "message": "Does not match that in the NCBI service "
                      + "(expecting Arenicola marina)",
                      'severity': 'ERROR'},
-                    {"field": "GENUS",
-                     "message": "Does not match that in the ToLID service (expecting Arenicola)",
-                     'severity': 'ERROR'},
                     {"field": "FAMILY",
-                     "message": "Does not match that in the ToLID service "
+                     "message": "Does not match that in the NCBI service "
                      + "(expecting Arenicolidae)",
                      'severity': 'ERROR'},
+                    {"field": "GENUS",
+                     "message": "Does not match that in the NCBI service (expecting Arenicola)",
+                     'severity': 'ERROR'},
                     {"field": "ORDER_OR_GROUP",
-                     "message": "Does not match that in the ToLID service (expecting None)",
+                     "message": "Does not match that in the NCBI service (expecting None)",
                      'severity': 'ERROR'}]
 
         self.assertEqual(results, expected)

@@ -9,3 +9,4 @@ openpyxl == 3.0.6
 jwt
 et-xmlfile==1.0.1
 minio==6.0.0
+biopython==1.73
