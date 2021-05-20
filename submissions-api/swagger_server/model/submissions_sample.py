@@ -320,7 +320,7 @@ class SubmissionsSample(Base):
                   {"python_name": "time_elapsed_from_collection_to_preservation",
                    "field_name": "TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION",
                    "required": False,
-                   "error_regex": r'^([0-1][0-9]|2[0-4]):[0-5]\d|NOT_COLLECTED|NOT_PROVIDED|NOT_APPLICABLE$'},  # noqa
+                   "error_regex": r'^\d+|NOT_COLLECTED|NOT_PROVIDED|NOT_APPLICABLE$'},  # noqa
                   {"python_name": "date_of_preservation",
                    "field_name": "DATE_OF_PRESERVATION",
                    "required": False},

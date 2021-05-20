@@ -484,7 +484,7 @@ components:
           example: 1
         SPECIMEN_ID:
           type: string
-          example: SAN000100
+          example: SAN0000100
         TAXON_ID:
           type: integer
           example: 6344
@@ -562,7 +562,7 @@ components:
           example: host
         SYMBIONT:
           type: string
-          example: N
+          example: TARGET
         CULTURE_OR_STRAIN_ID:
           type: string
           example: ABC1234
@@ -625,7 +625,7 @@ components:
           example: VS
         TISSUE_REMOVED_FOR_BARCODING:
           type: string
-          example: N
+          example: Y
         PLATE_ID_FOR_BARCODING:
           type: string
           example: Plate_3456
