@@ -823,6 +823,7 @@ def generate_tolids_for_manifest(manifest):
             .filter(SubmissionsSample.manifest == manifest) \
             .filter(SubmissionsSample.specimen_id == tolid["specimen"]["specimenId"]) \
             .filter(SubmissionsSample.taxonomy_id == tolid["species"]["taxonomyId"]) \
+            .order_by(SubmissionsSample.row) \
             .all()
         for sample_to_update in samples_to_update:
             if "tolId" in tolid:
