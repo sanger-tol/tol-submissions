@@ -120,6 +120,7 @@ class TestManifestUtils(BaseTestCase):
 
     def test_validate_regexs(self):
         self.sample1 = SubmissionsSample(series="INVALID",
+                                         date_of_collection="NOT_COLLECTED",  # Should pass
                                          time_of_collection="INVALID",
                                          rack_or_plate_id="AJV1234",
                                          tube_or_well_id="AJV5678",
