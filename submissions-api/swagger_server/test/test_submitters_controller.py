@@ -222,7 +222,9 @@ class TestSubmittersController(BaseTestCase):
                      'HABITAT': 'Woodland',
                      'IDENTIFIED_BY': 'JO IDENTIFIER',
                      'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
+                     'VOUCHER_ID': 'voucher1',
+                     'ELEVATION': None,  # Test None is same as missing
+                     'DEPTH': ''}  # Test "" is the same as missing
                 ],
                 'projectName': 'TestProj',
                 'stsManifestId': '1234-4321'}

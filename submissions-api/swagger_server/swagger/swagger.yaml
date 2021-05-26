@@ -553,108 +553,143 @@ components:
           example: Special instructions
         ELEVATION:
           type: string
+          nullable: true
           example: "1500"
         DEPTH:
           type: string
+          nullable: true
           example: "100"
         RELATIONSHIP:
           type: string
+          nullable: true
           example: host
         SYMBIONT:
           type: string
+          nullable: true
           example: TARGET
         CULTURE_OR_STRAIN_ID:
           type: string
+          nullable: true
           example: ABC1234
         SERIES:
           type: string
+          nullable: true
           example: "1"
         RACK_OR_PLATE_ID:
           type: string
+          nullable: true
           example: RACK1234
         TUBE_OR_WELL_ID:
           type: string
+          nullable: true
           example: Tube_6
         TAXON_REMARKS:
           type: string
+          nullable: true
           example: ABC1234
         INFRASPECIFIC_EPITHET:
           type: string
+          nullable: true
           example: ABC1234
         COLLECTOR_SAMPLE_ID:
           type: string
+          nullable: true
           example: MySample678
         GRID_REFERENCE:
           type: string
+          nullable: true
           example: TL 1234 5678
         TIME_OF_COLLECTION:
           type: string
+          nullable: true
           example: "16:00"
         DESCRIPTION_OF_COLLECTION_METHOD:
           type: string
+          nullable: true
           example: Picked from a tree
         DIFFICULT_OR_HIGH_PRIORITY_SAMPLE:
           type: string
+          nullable: true
           example: HIGH_PRIORITY
         IDENTIFIED_HOW:
           type: string
+          nullable: true
           example: Looking
         SPECIMEN_ID_RISK:
           type: string
+          nullable: true
           example: Y
         PRESERVED_BY:
           type: string
+          nullable: true
           example: A PICKLER
         PRESERVER_AFFILIATION:
           type: string
+          nullable: true
           example: THE SAMPLE PRESERVATION SOCIETY
         PRESERVATION_APPROACH:
           type: string
+          nullable: true
           example: snap frozen
         PRESERVATIVE_SOLUTION:
           type: string
+          nullable: true
           example: Water
         TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION:
           type: string
+          nullable: true
           example: "60"
         DATE_OF_PRESERVATION:
           type: string
+          nullable: true
           example: "2020-01-01"
         SIZE_OF_TISSUE_IN_TUBE:
           type: string
+          nullable: true
           example: VS
         TISSUE_REMOVED_FOR_BARCODING:
           type: string
+          nullable: true
           example: Y
         PLATE_ID_FOR_BARCODING:
           type: string
+          nullable: true
           example: Plate_3456
         TUBE_OR_WELL_ID_FOR_BARCODING:
           type: string
+          nullable: true
           example: Well_4567
         TISSUE_FOR_BARCODING:
           type: string
+          nullable: true
           example: LEG
         BARCODE_PLATE_PRESERVATIVE:
           type: string
+          nullable: true
           example: Ethanol
         PURPOSE_OF_SPECIMEN:
           type: string
+          nullable: true
           example: REFERENCE_GENOME
         HAZARD_GROUP:
           type: string
+          nullable: true
           example: HG1
         REGULATORY_COMPLIANCE:
           type: string
+          nullable: true
           example: Y
         ORIGINAL_COLLECTION_DATE:
           type: string
+          nullable: true
           example: "2020-01-01"
         ORIGINAL_GEOGRAPHIC_LOCATION:
           type: string
+          nullable: true
           example: UNITED KINGDOM | LIGHT FOREST
         BARCODE_HUB:
           type: string
+          nullable: true
           example: SANGER INSTITUTE
         tolId:
           type: string
