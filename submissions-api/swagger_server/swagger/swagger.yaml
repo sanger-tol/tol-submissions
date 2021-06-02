@@ -502,6 +502,7 @@ components:
           example: None
         COMMON_NAME:
           type: string
+          nullable: true
           example: lugworm
         LIFESTAGE:
           type: string
@@ -550,6 +551,7 @@ components:
           example: voucher1
         OTHER_INFORMATION:
           type: string
+          nullable: true
           example: Special instructions
         ELEVATION:
           type: string
