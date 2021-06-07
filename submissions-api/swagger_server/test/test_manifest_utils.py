@@ -638,7 +638,6 @@ class TestManifestUtils(BaseTestCase):
 
         self.assertEqual(results, expected)
 
-
     # The real version of this does a call to the ENA service. We mock that call here
     @responses.activate
     def test_validate_ena_submittable_correct(self):
