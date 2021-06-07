@@ -345,12 +345,11 @@ def validate_against_ncbi(sample):
                         'severity': 'ERROR'})
 
     # Go through the lineage
-    genus_checked = family_checked = order_checked = False
+    order_checked = False
     for element in ncbi_result['LineageEx']:
         rank = element.get('Rank')
         # Does the GENUS match?
         if rank == 'genus':
-            genus_checked = True
             if sample.genus.upper() != element.get('ScientificName').upper():
                 results.append({'field': 'GENUS',
                                 'message': 'Does not match that in the NCBI service (expecting '
@@ -358,7 +357,6 @@ def validate_against_ncbi(sample):
                                 'severity': 'ERROR'})
         # Does the FAMILY match?
         elif rank == "family":
-            family_checked = True
             if sample.family.upper() != element.get('ScientificName').upper():
                 results.append({'field': 'FAMILY',
                                 'message': 'Does not match that in the NCBI service (expecting '
@@ -372,22 +370,20 @@ def validate_against_ncbi(sample):
                                 'message': 'Does not match that in the NCBI service (expecting '
                                 + element.get('ScientificName') + ')',
                                 'severity': 'ERROR'})
-    # Everything else should be None
-    if not genus_checked and sample.genus != "None":
-        results.append({'field': 'GENUS',
-                        'message': 'Does not match that in the NCBI service (expecting '
-                        + 'None)',
-                        'severity': 'ERROR'})
-    if not family_checked and sample.family != "None":
-        results.append({'field': 'FAMILY',
-                        'message': 'Does not match that in the NCBI service (expecting '
-                        + 'None)',
-                        'severity': 'ERROR'})
-    if not order_checked and sample.order_or_group != "None":
-        results.append({'field': 'ORDER_OR_GROUP',
-                        'message': 'Does not match that in the NCBI service (expecting '
-                        + 'None)',
-                        'severity': 'ERROR'})
+
+    # If there isn't an order node, check the ORDER_OR_GROUP is one of the other nodes
+    # This is quite a blunt check!
+    order_is_a_clade = False
+    if not order_checked:
+        for element in ncbi_result['LineageEx']:
+            rank = element.get('Rank')
+            if sample.order_or_group.upper() == element.get('ScientificName').upper():
+                order_is_a_clade = True
+                break
+        if not order_is_a_clade:
+            results.append({'field': 'ORDER_OR_GROUP',
+                            'message': 'Does not match a node in the NCBI service',
+                            'severity': 'ERROR'})
     return(results)
 
 
