@@ -105,7 +105,7 @@ class SubmissionsSample(Base):
         ret["project name"] = {"value": cls.manifest.project_name}
         ret["tolid"] = {"value": cls.tolid}
         ret["collected by"] = {"value": cls.collected_by.replace("_", " ")}
-        ret["collection date"] = {"value": cls.date_of_collection.replace("_", " ")}
+        ret["collection date"] = {"value": cls.date_of_collection.replace("_", " ").lower()}
         ret["geographic location (country and/or sea)"] = {
             "value": cls.collection_country().replace("_", " ")}
         ret["geographic location (latitude)"] = {"value": cls.decimal_latitude.replace("_", " ").lower(),  # noqa
