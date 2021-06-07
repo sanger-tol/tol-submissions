@@ -1215,7 +1215,7 @@ class TestManifestUtils(BaseTestCase):
         sample.scientific_name = "Arenicola marina"
         sample.family = "Arenicolidae"
         sample.genus = "Arenicola"
-        sample.order_or_group = "Nothing" # Here is the error
+        sample.order_or_group = "Nothing"  # Here is the error
         sample.common_name = "lugworm"
         sample.lifestage = "ADULT"
         sample.sex = "FEMALE"
