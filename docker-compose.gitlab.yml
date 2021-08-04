@@ -25,7 +25,7 @@ services:
     ports: 
       - 8000:80
   submissions-dbutils:
-    image: $CI_REGISTRY/tol/sts/dbutils:1.0.1
+    image: $CI_REGISTRY/tol/sts/dbutils:1.0.2
     restart: always
     networks:
       - submissions
