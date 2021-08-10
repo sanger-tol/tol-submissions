@@ -80,6 +80,7 @@ test-api:
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
     - sleep 90
     - docker service ls
+    - docker service logs submissions_submissions-api
     - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
 
 test-ui:
