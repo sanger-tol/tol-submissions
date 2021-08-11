@@ -71,6 +71,9 @@ test-api:
     - docker swarm init
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
     - sleep 60
+    - docker service ls
+    - docker ps
+    - docker service logs submissions_submissions-db
     - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
 
 test-ui:
