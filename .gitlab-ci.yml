@@ -70,7 +70,7 @@ test-api:
   script:
     - docker swarm init
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
-    - sleep 60
+    - sleep 180
     - docker service ls
     - docker ps
     - docker service logs submissions_submissions-db
