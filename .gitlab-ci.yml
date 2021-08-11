@@ -7,7 +7,8 @@ stages:
 
 variables:
   DOCKER_IMAGE: $CI_REGISTRY/tol/sts/build-base:1.0.0
-  DIND_IMAGE: $CI_REGISTRY/tol/sts/dind:1.0.0
+  DIND_IMAGE: $CI_REGISTRY/isg/gitlab-ci-docker-docker
+  BUILD_IMAGE: $CI_REGISTRY/isg/gitlab-ci-docker-docker
 
 lint:
   tags:
@@ -18,18 +19,24 @@ lint:
     - pip install flake8
     - flake8 submissions-api/swagger_server/
 
-.build-template: &build-template
+.job_template: &start_docker
   tags:
-    - autoscale
-  image: $DOCKER_IMAGE
+   - openstack-autoscale-theta-docker-in-docker
+  retry: 2
+  before_script:
+   - mkdir -p /etc/docker
+   - echo '{"bip":"192.168.5.3/24","registry-mirrors":["https://docker-hub-mirror.internal.sanger.ac.uk:5000"],"default-address-pools":[{"base":"192.168.4.0/16","size":24}]}' > /etc/docker/daemon.json
+   - dockerd > /var/log/dockerd.log 2>&1 &
+   - sleep 10
+   - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+
+
+.build-template: &build-template
+  <<: *start_docker
+  image: $BUILD_IMAGE
   variables:
     DOCKER_TLS_CERTDIR: ''
   stage: build
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker pull $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG || true
     - docker build --pull --cache-from $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG -t $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA -f $DOCKERFILE $PART
@@ -38,8 +45,6 @@ lint:
 build-api:
   <<: *build-template
   variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     PART: "submissions-api"
     DOCKERFILE: "submissions-api/Dockerfile"
     NAME: "submissions-api"
@@ -47,8 +52,6 @@ build-api:
 build-ui:
   <<: *build-template
   variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     PART: "submissions-ui"
     DOCKERFILE: 'submissions-ui/Dockerfile'
     NAME: "submissions-ui"
@@ -56,63 +59,33 @@ build-ui:
 build-ui-test:
   <<: *build-template
   variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     PART: "submissions-ui"
     DOCKERFILE: 'submissions-ui/Dockerfile.dev'
     NAME: "submissions-ui-test"
 
 test-api:
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
+  <<: *start_docker
+  image: $BUILD_IMAGE
   stage: test
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker swarm init
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
-    - sleep 240
-    - docker service ls
-    - docker service logs submissions_submissions-api
-    - docker ps
+    - sleep 60
     - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
 
 test-ui:
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
+  <<: *start_docker
+  image: $BUILD_IMAGE
   stage: test
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker run -e CI=true $CI_REGISTRY_IMAGE/submissions-ui-test:$CI_COMMIT_SHA yarn test
 
 .push-template: &push-template
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
+  <<: *start_docker
+  image: $BUILD_IMAGE
   stage: push
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
   variables:
     GIT_STRATEGY: none
-    DOCKER_TLS_CERTDIR: ''
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker pull $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA
     - docker tag $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG
@@ -122,39 +95,31 @@ push-api:
   <<: *push-template
   variables:
     GIT_STRATEGY: none
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     NAME: submissions-api
 
 push-ui:
   <<: *push-template
   variables:
     GIT_STRATEGY: none
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     NAME: submissions-ui
 
 push-ui-test:
   <<: *push-template
   variables:
     GIT_STRATEGY: none
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
     NAME: submissions-ui-test
 
 .deploy-template: &deploy-template
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
-  variables:
-    DOCKER_TLS_CERTDIR: ''
+  <<: *start_docker
+  image: $BUILD_IMAGE
   stage: deploy
+  variables:
+    GIT_STRATEGY: none
   script:
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | ssh-add -
     - mkdir -p ~/.ssh
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - docker stack rm submissions
     - sleep 20
     - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-logging.yml submissions
