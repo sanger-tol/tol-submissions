@@ -1,6 +1,6 @@
 import React, { useState }  from "react";
 import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Navigation, Footer, Home, Login, Callback } from "./pages";
+import { Navigation, Footer, Home, Login, Callback, Search } from "./pages";
 import { getTokenFromLocalStorage,
   getUserFromLocalStorage} from './services/localStorage/localStorageService';
 import { AuthProvider } from './contexts/auth.context';
@@ -27,6 +27,7 @@ function App() {
           <Navigation />
           <Switch>
             <Route path="/" exact component={() => <Home />} />
+            <Route path="/search" exact><Search /></Route>
             <Route path="/login" exact><Login /></Route>
             <Route path="/callback" exact><Callback /></Route>
           </Switch>

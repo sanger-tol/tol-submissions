@@ -37,7 +37,17 @@ function Navigation(props: NavigationProps) {
           </button>
           <div className="collapse navbar-collapse" id="navbarResponsive">
             <ul className="navbar-nav ml-auto">
+              <li
+                className={`nav-item  ${
+                  props.location.pathname === "/search" ? "active" : ""
+                }`}
+              >
+                <Link className="nav-link" to="/search">
+                  Search
+                </Link>
+              </li>
               {(!token || tokenHasExpired(token)) &&
+                
                 <li
                   className={`nav-item  ${
                     props.location.pathname === "/login" ? "active" : ""
