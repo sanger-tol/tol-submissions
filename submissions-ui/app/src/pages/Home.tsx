@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 function Home() {
   return (
@@ -9,6 +10,7 @@ function Home() {
             <h1 className="masthead-heading mb-0">ToL Submissions</h1>
             <h2 className="masthead-subheading mb-0">Tree of Life Submissions</h2>
             <a href="api/v1/ui/" className="btn btn-primary btn-xl rounded-pill mt-5">Use the API</a>
+            <Link to="/search" className="btn btn-primary btn-xl rounded-pill mt-5">Search</Link>
           </div>
         </div>
         <div className="bg-circle-1 bg-circle"></div>

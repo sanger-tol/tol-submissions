@@ -64,7 +64,10 @@ class BaseTestCase(TestCase):
         db.session.remove()
 
     def create_app(self):
-        logging.getLogger('connexion.operation').setLevel('ERROR')
+        # the two below were changed to prevent from spamming
+        # the test STOUT with DEBUG messages
+        logging.getLogger('connexion').setLevel('ERROR')
+        logging.getLogger('openapi_spec_validator').setLevel('ERROR')
         app = connexion.App(__name__, specification_dir='../swagger/')
         app.app.json_encoder = JSONEncoder
         app.add_api('swagger.yaml', pythonic_params=True)

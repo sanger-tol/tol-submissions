@@ -1,0 +1,33 @@
+#searchForm {
+  margin-top: 10px;
+}
+.identifier {
+  font-size: 2.5em;
+  color: green;
+}
+.label {
+  font-style: italic;
+}
+.search-result-main-heading {
+  font-weight: bold;
+  font-size: large;
+}
+.search-result-heading {
+  font-weight: bold;
+}
+.specimen-sample-list {
+  list-style: none;
+}
+.sample-search-result {
+  margin-top: 15px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.specimen-search-result {
+  margin-top: 15px;
+  margin-left: auto;
+  margin-right: auto;
+  li.specimen-sample {
+    margin-bottom: 25px;
+  }
+}

@@ -11,6 +11,8 @@ info:
 servers:
   - url: http://0.0.0.0:8081/api/v1
 tags:
+- name: users
+  description: Unauthenticated Usage
 - name: submitters
   description: Submitting
 - name: auth
@@ -313,6 +315,90 @@ paths:
         "403":
           description: user not authorised to use this function
       x-openapi-router-controller: swagger_server.controllers.submitters_controller
+  /specimens/specimenId/{specimenId}/samples:
+    get:
+      tags:
+      - users
+      summary: Get the samples of a specimen
+      description: |
+        Get all samples matching the specimen of specified ID
+      operationId: get_samples_by_specimen_id
+      parameters:
+      - name: specimenId
+        in: path
+        description: a specimen ID
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Details of the samples
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+                x-content-type: application/json
+        "404":
+          description: specimen not found
+      x-openapi-router-controller: swagger_server.controllers.users_controller
+  /specimens/biospecimenId/{biospecimenId}/samples:
+    get:
+      tags:
+      - users
+      summary: Get the samples of a specimen
+      description: |
+        Get all samples matching the specimen with specified biospecimen ID
+      operationId: get_samples_by_biospecimen_id
+      parameters:
+      - name: biospecimenId
+        in: path
+        description: a biospecimen ID
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Details of the samples
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Specimen'
+                x-content-type: application/json
+        "404":
+          description: specimen not found
+      x-openapi-router-controller: swagger_server.controllers.users_controller
+  /samples/{biosampleId}:
+    get:
+      tags:
+      - users
+      summary: Get a sample
+      description: |
+        Get the sample matching the specified biosample ID
+      operationId: get_sample
+      parameters:
+      - name: biosampleId
+        in: path
+        description: a biosample ID
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: The fetched sample
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Sample'
+                x-content-type: application/json
+        "404":
+          description: sample not found
+      x-openapi-router-controller: swagger_server.controllers.users_controller
   /auth/login:
     get:
       tags:
@@ -808,6 +894,24 @@ components:
           type: string
           enum: [ERROR,WARNING]
           example: "ERROR"
+    Specimen:
+      required:
+        - specimenId
+        - biospecimenId
+        - samples
+      type: object
+      additionalProperties: false
+      properties:
+        specimenId:
+          type: string
+          example: "SPECIMEN_ID"
+        biospecimenId:
+          type: string
+          example: "BIOSPECIMEN_ID"
+        samples:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sample'
   securitySchemes:
     ApiKeyAuth:        # name for the security scheme
       type: apiKey
