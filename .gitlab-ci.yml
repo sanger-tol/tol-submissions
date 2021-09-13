@@ -1,42 +1,23 @@
+# This file assumes that staging and master commits will have previously been built and
+# tested in the dev branch (deployment will fail otherwise)
+#
+# test-integration will deploy a test instance and run tests. It uses a resource_group
+# to ensure that other pipelines cannot run this task at the same time
+include:
+  - project: 'tol/tol-core'
+    ref: main
+    file: '/gitlab/main.yml'
+
 stages:
   - lint
   - build
-  - test
+  - unit test
   - push
   - deploy
-
-variables:
-  DOCKER_IMAGE: $CI_REGISTRY/tol/sts/build-base:1.0.0
-  DIND_IMAGE: $CI_REGISTRY/tol/sts/dind:1.0.0
-
-lint:
-  tags:
-    - autoscale
-  image: python:3.7
-  stage: lint
-  script:
-    - pip install flake8
-    - flake8 submissions-api/swagger_server/
-
-.build-template: &build-template
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
-  variables:
-    DOCKER_TLS_CERTDIR: ''
-  stage: build
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker pull $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG || true
-    - docker build --pull --cache-from $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG -t $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA -f $DOCKERFILE $PART
-    - docker push $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA
+  - integration test
 
 build-api:
-  <<: *build-template
+  extends: .build-template
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
@@ -45,7 +26,7 @@ build-api:
     NAME: "submissions-api"
 
 build-ui:
-  <<: *build-template
+  extends: .build-template
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
@@ -54,7 +35,7 @@ build-ui:
     NAME: "submissions-ui"
 
 build-ui-test:
-  <<: *build-template
+  extends: .build-template
   variables:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
@@ -62,30 +43,9 @@ build-ui-test:
     DOCKERFILE: 'submissions-ui/Dockerfile.dev'
     NAME: "submissions-ui-test"
 
-test-api:
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
-  stage: test
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  variables:
-    DOCKER_HOST: "tcp://docker:2375"
-    DOCKER_TLS_CERTDIR: ''
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker swarm init
-    - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-test.yml submissions
-    - sleep 60
-    - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
-
 test-ui:
-  tags:
-    - autoscale
   image: $DOCKER_IMAGE
-  stage: test
+  stage: unit test
   services:
     - name: $DIND_IMAGE
       alias: docker
@@ -96,27 +56,12 @@ test-ui:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker run -e CI=true $CI_REGISTRY_IMAGE/submissions-ui-test:$CI_COMMIT_SHA yarn test
-
-.push-template: &push-template
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
-  stage: push
-  services:
-    - name: $DIND_IMAGE
-      alias: docker
-  variables:
-    GIT_STRATEGY: none
-    DOCKER_TLS_CERTDIR: ''
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker pull $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA
-    - docker tag $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_SHA $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG
-    - docker push $CI_REGISTRY_IMAGE/$NAME:$CI_COMMIT_REF_SLUG
+  except:
+    - production
+    - staging
 
 push-api:
-  <<: *push-template
+  extends: .push-template
   variables:
     GIT_STRATEGY: none
     DOCKER_HOST: "tcp://docker:2375"
@@ -124,7 +69,7 @@ push-api:
     NAME: submissions-api
 
 push-ui:
-  <<: *push-template
+  extends: .push-template
   variables:
     GIT_STRATEGY: none
     DOCKER_HOST: "tcp://docker:2375"
@@ -132,47 +77,60 @@ push-ui:
     NAME: submissions-ui
 
 push-ui-test:
-  <<: *push-template
+  extends: .push-template
   variables:
     GIT_STRATEGY: none
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
     NAME: submissions-ui-test
 
-.deploy-template: &deploy-template
-  tags:
-    - autoscale
-  image: $DOCKER_IMAGE
-  variables:
-    DOCKER_TLS_CERTDIR: ''
-  stage: deploy
-  script:
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | ssh-add -
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker stack rm submissions
-    - sleep 20
-    - docker stack deploy --with-registry-auth -c docker-compose.gitlab.yml -c docker-compose.gitlab-logging.yml submissions
-
 deploy-staging:
-  <<: *deploy-template
+  extends: .swarm-deploy-template
   environment:
     name: staging
     url: https://submissions-staging.tol.sanger.ac.uk
   variables:
     DOCKER_HOST: "ssh://ubuntu@172.27.22.28"
+    EXTRA_DEPLOY_FILES: "-c docker-compose.gitlab-logging.yml"
+    STACK_NAME: submissions
+  script:
+    - echo "Deployed to staging"
   only:
     - staging
 
 deploy-production:
-  <<: *deploy-template
+  extends: .swarm-deploy-template
   environment:
     name: production
     url: https://submissions.tol.sanger.ac.uk/
   variables:
     DOCKER_HOST: "ssh://ubuntu@172.27.22.202"
+    EXTRA_DEPLOY_FILES: "-c docker-compose.gitlab-logging.yml"
+    STACK_NAME: submissions
+  script:
+    - echo "Deployed to production"
   only:
-    - master
+    - production
   when: manual
+
+test-api:
+  extends: .swarm-deploy-template
+  image: $DOCKER_IMAGE
+  stage: integration test
+  resource_group: testing
+  services:
+    - name: $DIND_IMAGE
+      alias: docker
+  environment:
+    name: testing
+    url: http://172.27.21.168:8000
+  variables:
+    DOCKER_HOST: "ssh://ubuntu@172.27.21.168"
+    EXTRA_DEPLOY_FILES: "-c docker-compose.gitlab-test.yml"
+    STACK_NAME: submissions
+  script:
+    - sleep 60
+    - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
+  except:
+    - staging
+    - production
