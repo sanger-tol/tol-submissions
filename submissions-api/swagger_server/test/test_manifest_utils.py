@@ -152,9 +152,11 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(results, [])
 
     def test_validate_specimen_id(self):
+        self.manifest1 = SubmissionsManifest(project_name="MyProj")
         self.sample1 = SubmissionsSample(GAL="SANGER INSTITUTE",
                                          specimen_id="INVALID1234567",
                                          row=1)
+        self.sample1.manifest = self.manifest1
         expected = [{'field': 'SPECIMEN_ID',
                      'message': 'Does not match the required pattern for the GAL',
                      'severity': 'ERROR'}]
@@ -189,6 +191,21 @@ class TestManifestUtils(BaseTestCase):
         # GAL not in list - don't validate
         self.sample1.GAL = "NEW GAL"
         self.sample1.specimen_id = "UDUK12345"
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, [])
+
+        # ERGA - not in ERGA project
+        self.sample1.GAL = "SANGER INSTITUTE"
+        self.sample1.specimen_id = "ERGA_SP_PI_1234"
+        expected = [{'field': 'SPECIMEN_ID',
+                     'message': 'Does not match the required pattern for the GAL',
+                     'severity': 'ERROR'}]
+        results = validate_specimen_id(self.sample1)
+        self.assertEqual(results, expected)
+
+        # ERGA - in ERGA project
+        self.manifest1.project_name = "ERGA"
+        print(self.sample1.manifest.project_name)
         results = validate_specimen_id(self.sample1)
         self.assertEqual(results, [])
 

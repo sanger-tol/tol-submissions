@@ -113,6 +113,11 @@ def validate_regexs(sample):
 
 def validate_specimen_id(sample):
     results = []
+
+    # If the project is ERGA, we won't validate the specimen ID for the GAL
+    if sample.manifest.project_name[0:4] == "ERGA":
+        return results
+
     gal = getattr(sample, "GAL")
     specimen_id = getattr(sample, "specimen_id")
     if gal in SubmissionsSample.specimen_id_patterns:
