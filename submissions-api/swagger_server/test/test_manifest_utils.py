@@ -14,6 +14,7 @@ from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
 import responses
+import json
 from unittest.mock import patch
 
 
@@ -1846,6 +1847,15 @@ class TestManifestUtils(BaseTestCase):
         responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
+        # mock specimen not found
+        mock_response_from_sts = json.dumps({
+            'data': {
+                'list': []
+            }
+        })
+        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id=specimen1234',
+                      body=mock_response_from_sts, status=200)
+
         error_count, results = set_relationships_for_manifest(manifest)
         self.assertEqual(None, manifest.samples[0].sample_derived_from)
         self.assertEqual("SAMEA8521239", manifest.samples[0].sample_same_as)
@@ -1900,6 +1910,15 @@ class TestManifestUtils(BaseTestCase):
         sample.depth = "1000"
         sample.relationship = "child of 1234"
         sample.manifest = manifest
+
+        # mock specimen not found
+        mock_response_from_sts = json.dumps({
+            'data': {
+                'list': []
+            }
+        })
+        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id=specimen1234',
+                      body=mock_response_from_sts, status=200)
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
         responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',

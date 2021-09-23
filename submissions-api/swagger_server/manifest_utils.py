@@ -1,6 +1,7 @@
 from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen, SubmissionsSampleField
 from swagger_server.xml_utils import build_bundle_sample_xml, build_submission_xml
+from swagger_server.specimen_utils import get_specimen_sts
 import re
 import os
 import requests
@@ -726,8 +727,8 @@ def set_relationships_for_sample(sample):
         .one_or_none()
 
     if specimen is None:
-        # Look up in BioSamples
-        pass
+        # Look up in STS
+        specimen = get_specimen_sts(sample.specimen_id)
 
     if specimen is not None:
         if sample.is_symbiont():

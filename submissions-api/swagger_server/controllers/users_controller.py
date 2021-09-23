@@ -1,6 +1,7 @@
 from flask import jsonify
 from sqlalchemy import or_
-from swagger_server.model import db, SubmissionsSample, SubmissionsSpecimen
+from swagger_server.model import db, SubmissionsSample
+from swagger_server.specimen_utils import get_specimen_sts, get_biospecimen_sts
 
 
 def get_samples_from_specimen(specimen):
@@ -25,9 +26,7 @@ def get_samples_from_specimen(specimen):
 
 def get_samples_by_specimen_id(specimen_id):
     # Does the specimen exist?
-    specimen = db.session.query(SubmissionsSpecimen) \
-        .filter(SubmissionsSpecimen.specimen_id == specimen_id) \
-        .one_or_none()
+    specimen = get_specimen_sts(specimen_id)
     if specimen is None:
         return jsonify({'detail': "Specimen does not exist"}), 404
 
@@ -41,10 +40,7 @@ def get_samples_by_biospecimen_id(biospecimen_id):
     of a specimen
     """
     # Does the specimen exist?
-    specimen = db.session.query(SubmissionsSpecimen) \
-        .filter(
-            SubmissionsSpecimen.biosample_accession == biospecimen_id) \
-        .one_or_none()
+    specimen = get_biospecimen_sts(biospecimen_id)
     if specimen is None:
         return jsonify({'detail': "Specimen does not exist"}), 404
 
