@@ -3,22 +3,24 @@ version: '3'
 services: 
   submissions-api:
     image: $CI_REGISTRY_IMAGE/submissions-api:$CI_COMMIT_SHA
-    restart: always
     networks:
       - submissions
     deploy:
       replicas: 1
+      restart_policy:
+        condition: any
     env_file:
       - ${ENV_FILE}
     ports: 
       - 5000:8080
   submissions-ui:
     image: $CI_REGISTRY_IMAGE/submissions-ui:$CI_COMMIT_SHA
-    restart: always
     networks:
       - submissions
     deploy:
       replicas: 1
+      restart_policy:
+        condition: any
     env_file:
       - ${ENV_FILE}
 #    entrypoint: /bin/sh -c "envsubst "\\$$STS_API_LOCATION" < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf && cat /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
@@ -28,20 +30,22 @@ services:
       - schema-html:/var/www/schema
   submissions-dbutils:
     image: $CI_REGISTRY/tol/sts/dbutils:1.0.2
-    restart: always
     networks:
       - submissions
     deploy:
       replicas: 1
+      restart_policy:
+        condition: any
     env_file:
       - ${ENV_FILE}
   submissions-schema:
     image: $CI_REGISTRY/tol/sts/schemaspy:0.2.0
-    restart: "no"
     networks:
       - submissions
     deploy:
       replicas: 1
+      restart_policy:
+        condition: none
     env_file:
       - ${ENV_FILE}
     volumes:
