@@ -1,9 +1,9 @@
 from flask import jsonify, send_from_directory
 from sqlalchemy import or_
-from swagger_server.model import db, SubmissionsRole, \
+from main.model import db, SubmissionsRole, \
     SubmissionsManifest, SubmissionsSample, SubmissionsUser
-import swagger_server.manifest_utils as manifest_utils
-import swagger_server.excel_utils as excel_utils
+import main.manifest_utils as manifest_utils
+import main.excel_utils as excel_utils
 import connexion
 import tempfile
 

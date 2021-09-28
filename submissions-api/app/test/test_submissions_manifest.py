@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
-from swagger_server.model import SubmissionsSample, SubmissionsManifest
+from test import BaseTestCase
+from main.model import SubmissionsSample, SubmissionsManifest
 
 
 class TestSubmissionsSample(BaseTestCase):

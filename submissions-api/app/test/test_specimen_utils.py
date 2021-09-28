@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
+from test import BaseTestCase
 
-from swagger_server.specimen_utils import get_specimen_sts, get_biospecimen_sts
+from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
 
 import responses
 import os

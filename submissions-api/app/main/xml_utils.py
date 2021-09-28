@@ -9,7 +9,7 @@ def build_bundle_sample_xml(manifest):
     dir = tempfile.TemporaryDirectory()
 
     filename = dir.name + "bundle_" + str(manifest.manifest_id) + ".xml"
-    shutil.copy("swagger_server/templates/sample.xml", filename)
+    shutil.copy("main/templates/sample.xml", filename)
     update_bundle_sample_xml(manifest, filename)
     return filename
 
@@ -51,7 +51,7 @@ def update_bundle_sample_xml(manifest, bundlefile):
 
 def build_submission_xml(manifest):
     # build submission XML
-    tree = ET.parse("swagger_server/templates/submission.xml")
+    tree = ET.parse("main/templates/submission.xml")
     root = tree.getroot()
     # set submission attributes
     # root.set("submission_date", datetime.utcnow()

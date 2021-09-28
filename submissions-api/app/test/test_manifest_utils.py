@@ -1,8 +1,8 @@
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
+from test import BaseTestCase
 
-from swagger_server.manifest_utils import validate_manifest, validate_against_ena_checklist, \
+from main.manifest_utils import validate_manifest, validate_against_ena_checklist, \
     validate_ena_submittable, validate_species_known_in_tolid, generate_tolids_for_manifest, \
     generate_ena_ids_for_manifest, set_relationships_for_manifest, validate_allowed_values, \
     validate_regexs, validate_specimen_id, validate_rack_plate_tube_well_not_both_na, \
@@ -10,7 +10,7 @@ from swagger_server.manifest_utils import validate_manifest, validate_against_en
     validate_no_specimens_with_different_taxons, validate_barcoding, \
     validate_specimen_against_tolid, validate_sts_rack_plate_tube_well, \
     validate_whole_organisms_unique, validate_against_ncbi
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
+from main.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen
 import os
 import responses
@@ -392,7 +392,7 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(results, [])
 
     @responses.activate
-    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    @patch('main.manifest_utils.get_ncbi_data')
     def test_validate_manifest(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",

@@ -1,4 +1,4 @@
-from swagger_server.model import db, SubmissionsUser, SubmissionsState
+from main.model import db, SubmissionsUser, SubmissionsState
 from flask import jsonify
 import uuid
 import urllib.parse

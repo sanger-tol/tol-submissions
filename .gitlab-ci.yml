@@ -130,7 +130,7 @@ test-api:
     STACK_NAME: submissions
   script:
     - sleep 60
-    - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pip3 install tox; tox"
+    - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pytest -v"
   except:
     - staging
     - production

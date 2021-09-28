@@ -1,5 +1,5 @@
-from swagger_server.test import BaseTestCase
-from swagger_server.model import db, SubmissionsSpecimen, \
+from test import BaseTestCase
+from main.model import db, SubmissionsSpecimen, \
     SubmissionsSample
 from flask import json
 

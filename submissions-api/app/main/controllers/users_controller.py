@@ -1,7 +1,7 @@
 from flask import jsonify
 from sqlalchemy import or_
-from swagger_server.model import db, SubmissionsSample
-from swagger_server.specimen_utils import get_specimen_sts, get_biospecimen_sts
+from main.model import db, SubmissionsSample
+from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
 
 
 def get_samples_from_specimen(specimen):

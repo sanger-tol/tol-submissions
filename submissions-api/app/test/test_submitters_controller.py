@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSpecimen, \
+from test import BaseTestCase
+from main.model import db, SubmissionsManifest, SubmissionsSpecimen, \
     SubmissionsSample
-import swagger_server.excel_utils as excel_utils
+import main.excel_utils as excel_utils
 import os
 import responses
 import tempfile
@@ -464,7 +464,7 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
     @responses.activate
-    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    @patch('main.manifest_utils.get_ncbi_data')
     def test_validate_manifest_json(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
@@ -658,7 +658,7 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
     @responses.activate
-    @patch('swagger_server.manifest_utils.get_ncbi_data')
+    @patch('main.manifest_utils.get_ncbi_data')
     def test_submit_and_validate_manifest_json(self, get_ncbi_data):
         mock_response_from_ena = {"taxId": "6344",
                                   "scientificName": "Arenicola marina",
@@ -1256,7 +1256,7 @@ class TestSubmittersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
         # Excel file with no taxon ID, specimen ID
-        file = open('swagger_server/test/test-manifest-field-missing.xlsx', 'rb')
+        file = open('test/test-manifest-field-missing.xlsx', 'rb')
         data = {
             'excelFile': (file, 'test_file.xlsx'),
         }
@@ -1278,7 +1278,7 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
         # User not a submitter
-        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        file = open('test/test-manifest.xlsx', 'rb')
         data = {
             'excelFile': (file, 'test_file.xlsx'),
         }
@@ -1291,7 +1291,7 @@ class TestSubmittersController(BaseTestCase):
         self.assert403(response, 'Not received a 403 response')
 
         # Excel file correct
-        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        file = open('test/test-manifest.xlsx', 'rb')
         data = {
             'excelFile': (file, 'test_file.xlsx'),
         }
@@ -1452,12 +1452,12 @@ class TestSubmittersController(BaseTestCase):
         dir = tempfile.TemporaryDirectory()
         excel_utils.load_excel(manifest=manifest, dirname=dir.name, filename="test.xlsx")
         self.assertTrue(filecmp.cmp(dir.name + "/test.xlsx",
-                                    'swagger_server/test/test-manifest.xlsx',
+                                    'test/test-manifest.xlsx',
                                     shallow=False))
 
     def test_download_manifest_excel(self):
         # Upload it first
-        file = open('swagger_server/test/test-manifest.xlsx', 'rb')
+        file = open('test/test-manifest.xlsx', 'rb')
         data = {
             'excelFile': (file, 'test_file.xlsx'),
         }
@@ -1525,10 +1525,10 @@ class TestSubmittersController(BaseTestCase):
                          response.content_type)
 
         # Save as Excel file
-        file = open('swagger_server/test/test-manifest-validated.xlsx', 'wb')
+        file = open('test/test-manifest-validated.xlsx', 'wb')
         file.write(response.get_data())
         file.close()
-        workbook = load_workbook(filename='swagger_server/test/test-manifest-validated.xlsx')
+        workbook = load_workbook(filename='test/test-manifest-validated.xlsx')
         sheet = workbook.active
         # Do we have the columns filled in that we expect
         for sample in manifest.samples:
@@ -1597,10 +1597,10 @@ class TestSubmittersController(BaseTestCase):
                          response.content_type)
 
         # Save as Excel file
-        file = open('swagger_server/test/test-manifest-validated.xlsx', 'wb')
+        file = open('test/test-manifest-validated.xlsx', 'wb')
         file.write(response.get_data())
         file.close()
-        workbook = load_workbook(filename='swagger_server/test/test-manifest-validated.xlsx')
+        workbook = load_workbook(filename='test/test-manifest-validated.xlsx')
         sheet = workbook.active
         # Do we have the columns filled in that we expect
         for sample in manifest.samples:

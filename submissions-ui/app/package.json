@@ -2,7 +2,7 @@
   "name": "submissions-ui",
   "version": "0.1.0",
   "private": true,
-  "proxy": "http://submissions-api:8080",
+  "proxy": "http://submissions-api:80",
   "dependencies": {
     "@emotion/react": "^11.1.5",
     "@emotion/styled": "^11.1.5",

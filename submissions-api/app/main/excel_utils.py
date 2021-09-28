@@ -3,7 +3,7 @@ import re
 import os
 import json
 import shutil
-from swagger_server.model import SubmissionsManifest, SubmissionsSample
+from main.model import SubmissionsManifest, SubmissionsSample
 from minio import Minio
 from minio.error import ResponseError, BucketAlreadyOwnedByYou, BucketAlreadyExists
 
@@ -169,7 +169,7 @@ def load_excel(manifest=None, dirname=None, filename=None):
 
 
 def create_excel(manifest=None, dirname=None, filename=None):
-    shutil.copyfile("swagger_server/templates/manifest_empty.xlsx",
+    shutil.copyfile("main/templates/manifest_empty.xlsx",
                     os.path.join(dirname, filename))
     add_columns(manifest=manifest, fields=SubmissionsSample.all_fields,
                 dirname=dirname, filename=filename)

@@ -1,9 +1,9 @@
 from __future__ import absolute_import
 
-from swagger_server.test import BaseTestCase
+from test import BaseTestCase
 
-from swagger_server.xml_utils import build_bundle_sample_xml, build_submission_xml
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSample
+from main.xml_utils import build_bundle_sample_xml, build_submission_xml
+from main.model import db, SubmissionsManifest, SubmissionsSample
 import os
 
 

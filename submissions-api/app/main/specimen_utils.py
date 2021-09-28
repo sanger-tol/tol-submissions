@@ -1,4 +1,4 @@
-from swagger_server.model.submissions_specimen import SubmissionsSpecimen
+from main.model.submissions_specimen import SubmissionsSpecimen
 
 import requests
 import os

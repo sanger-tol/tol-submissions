@@ -37,7 +37,7 @@ services:
       - STS_API_KEY
       - NIH_API_KEY
     ports:
-      - 8081:8080
+      - 8081:80
 
   submissions-ui:
     build:
@@ -66,9 +66,9 @@ services:
   submissions-api-test:
     image: submissions-api
     command: dockerize
-        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:8080 
+        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:80 
         -wait tcp://submissions-minio:9000 -timeout 10s
-        bash -c "pip3 install tox; tox"
+        bash -c "pytest -v"
     environment:
       - DB_URI
       - MINIO_URI

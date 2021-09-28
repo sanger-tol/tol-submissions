@@ -1,7 +1,7 @@
-from swagger_server.model import db, SubmissionsManifest, SubmissionsSample, \
+from main.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen, SubmissionsSampleField
-from swagger_server.xml_utils import build_bundle_sample_xml, build_submission_xml
-from swagger_server.specimen_utils import get_specimen_sts
+from main.xml_utils import build_bundle_sample_xml, build_submission_xml
+from main.specimen_utils import get_specimen_sts
 import re
 import os
 import requests

@@ -40,7 +40,7 @@ paths:
                 x-content-type: application/json
         "403":
           description: user not authorised to use this function
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
     post:
       security:
         - ApiKeyAuth: []
@@ -68,7 +68,7 @@ paths:
           description: invalid input, object invalid, or item already exists
         "403":
           description: user not authorised to use this function
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/upload-excel:
     post:
       security:
@@ -112,7 +112,7 @@ paths:
           description: invalid input, object invalid, or item already exists
         "403":
           description: user not authorised to use this function
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/validate:
     post:
       security:
@@ -141,7 +141,7 @@ paths:
           description: invalid input, object invalid, or item already exists
         "403":
           description: user not authorised to use this function
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/{manifestId}:
     get:
       security:
@@ -175,7 +175,7 @@ paths:
           description: user not authorised to use this function
         "404":
           description: manifest does not exist
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/{manifestId}/validate:
     get:
       security:
@@ -209,7 +209,7 @@ paths:
           description: user not authorised to use this function
         "404":
           description: manifest does not exist
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/{manifestId}/generate:
     patch:
       security:
@@ -248,7 +248,7 @@ paths:
           description: user not authorised to use this function
         "404":
           description: manifest does not exist
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/{manifestId}/download-excel:
     get:
       security:
@@ -280,7 +280,7 @@ paths:
           description: user not authorised to use this function
         "404":
           description: manifest does not exist
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/generate:
     post:
       security:
@@ -314,7 +314,7 @@ paths:
                 x-content-type: application/json
         "403":
           description: user not authorised to use this function
-      x-openapi-router-controller: swagger_server.controllers.submitters_controller
+      x-openapi-router-controller: main.controllers.submitters_controller
   /specimens/specimenId/{specimenId}/samples:
     get:
       tags:
@@ -342,7 +342,7 @@ paths:
                 x-content-type: application/json
         "404":
           description: specimen not found
-      x-openapi-router-controller: swagger_server.controllers.users_controller
+      x-openapi-router-controller: main.controllers.users_controller
   /specimens/biospecimenId/{biospecimenId}/samples:
     get:
       tags:
@@ -370,7 +370,7 @@ paths:
                 x-content-type: application/json
         "404":
           description: specimen not found
-      x-openapi-router-controller: swagger_server.controllers.users_controller
+      x-openapi-router-controller: main.controllers.users_controller
   /samples/{biosampleId}:
     get:
       tags:
@@ -398,7 +398,7 @@ paths:
                 x-content-type: application/json
         "404":
           description: sample not found
-      x-openapi-router-controller: swagger_server.controllers.users_controller
+      x-openapi-router-controller: main.controllers.users_controller
   /auth/login:
     get:
       tags:
@@ -419,7 +419,7 @@ paths:
                       type: string
         "400":
           description: bad input parameter
-      x-openapi-router-controller: swagger_server.controllers.auth_controller
+      x-openapi-router-controller: main.controllers.auth_controller
   /auth/token:
     post:
       tags:
@@ -451,7 +451,7 @@ paths:
                       type: string
         "400":
           description: bad input parameter
-      x-openapi-router-controller: swagger_server.controllers.auth_controller
+      x-openapi-router-controller: main.controllers.auth_controller
   /auth/profile:
     post:
       tags:
@@ -478,7 +478,7 @@ paths:
                   $ref: '#/components/schemas/User'
         "400":
           description: bad input parameter
-      x-openapi-router-controller: swagger_server.controllers.auth_controller
+      x-openapi-router-controller: main.controllers.auth_controller
 components:
   schemas:
     Manifest:
@@ -917,7 +917,7 @@ components:
       type: apiKey
       in: header       # can be "header", "query" or "cookie"
       name: api-key    # name of the header, query parameter or cookie
-      x-apikeyInfoFunc: swagger_server.controllers.auth_controller.apikey_auth
+      x-apikeyInfoFunc: main.controllers.auth_controller.apikey_auth
 # security:
 #   - ApiKeyAuth: []     # 2) Apply the API key globally to all operations
   
