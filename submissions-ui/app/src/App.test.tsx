@@ -4,5 +4,5 @@ import App from './App';
 
 test('renders home page link', () => {
   render(<App />);
-  expect(screen.queryAllByText("Login")).not.toHaveLength(0);
+  expect(screen.queryAllByText("Search")).not.toHaveLength(0);
 });
