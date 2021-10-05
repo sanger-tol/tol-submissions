@@ -1,4 +1,5 @@
 import React from "react";
+import { Container, Row, Col } from "react-bootstrap"; 
 import { Link } from "react-router-dom";
 
 function Home() {
@@ -6,12 +7,12 @@ function Home() {
     <div className="home">
       <header className="masthead text-center text-white">
         <div className="masthead-content">
-          <div className="container">
+          <Container>
             <h1 className="masthead-heading mb-0">ToL Submissions</h1>
             <h2 className="masthead-subheading mb-0">Tree of Life Submissions</h2>
             <a href="api/v1/ui/" className="btn btn-primary btn-xl rounded-pill mt-5">Use the API</a>
             <Link to="/search" className="btn btn-primary btn-xl rounded-pill mt-5">Search</Link>
-          </div>
+          </Container>
         </div>
         <div className="bg-circle-1 bg-circle"></div>
         <div className="bg-circle-2 bg-circle"></div>
@@ -20,9 +21,9 @@ function Home() {
       </header>
 
       <section>
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-12 order-lg-1">
+        <Container>
+          <Row className="align-items-center">
+            <Col lg="12" className="order-lg-1">
               <div className="p-5">
                 <h2 className="display-4">What are submissions?</h2>
                 <p>Submissions is a Sanger internal service for validating sample manifests and generating ENA and BioSamples
@@ -48,9 +49,9 @@ function Home() {
                   <li>If validation is not successful, correct the errors in the JSON manifest and re-upload, noting that this will result in a new manifest ID.</li>
                 </ul>
               </div>
-            </div>
-          </div>
-        </div>
+            </Col>
+          </Row>
+        </Container>
       </section>
     </div>
   );
