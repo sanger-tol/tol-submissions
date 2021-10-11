@@ -1716,11 +1716,11 @@ class TestManifestUtils(BaseTestCase):
         expected = [{"row": 1,
                      "results": [{"field": "TAXON_ID",
                                   "message": "A ToLID has not been generated",
-                                  'severity': 'WARNING'}]},
+                                  'severity': 'ERROR'}]},
                     {"row": 2,
                      "results": [{"field": "TAXON_ID",
                                   "message": "A ToLID has not been generated",
-                                  'severity': 'WARNING'}]}]
+                                  'severity': 'ERROR'}]}]
 
         number_of_errors, results = generate_tolids_for_manifest(manifest)
 

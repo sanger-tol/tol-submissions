@@ -835,7 +835,7 @@ def generate_tolids_for_manifest(manifest):
                 results.append({"row": sample_to_update.row,
                                 "results": [{'field': 'TAXON_ID',
                                              'message': 'A ToLID has not been generated',
-                                             'severity': 'WARNING'}]})
+                                             'severity': 'ERROR'}]})
                 error_count += 1
 
     if error_count > 0:
