@@ -532,13 +532,6 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(len(results), 1)
         self.assertEqual(len(results[0]["results"]), 0)
 
-        # Cause a validation failure
-        self.sample1.family = ""
-        number_of_errors, results = validate_manifest(self.manifest1)
-        self.assertEqual(number_of_errors, 1)
-        self.assertEqual(len(results), 1)
-        self.assertEqual(len(results[0]["results"]), 1)
-
     def test_validate_against_ena_checklist_fail(self):
         manifest = SubmissionsManifest()
         manifest.project_name = "MostExcellentProject"
