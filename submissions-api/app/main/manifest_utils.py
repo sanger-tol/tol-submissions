@@ -242,9 +242,6 @@ def validate_sample(sample):
     # STS for rack/plate and tube/well
     results += validate_sts_rack_plate_tube_well(sample)
 
-    # NCBI service
-    results += validate_against_ncbi(sample)
-
     # ToLID service
     results += validate_species_known_in_tolid(sample)
     results += validate_specimen_against_tolid(sample)
