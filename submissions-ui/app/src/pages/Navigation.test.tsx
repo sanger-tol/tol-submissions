@@ -41,4 +41,18 @@ test('Confirm no environment indicators on Production', async () => {
 
     // check that nothing like "Submissions-dev" is in the navigation bar
     expect(screen.queryAllByText(RegExp("^Submissions\-"))).toHaveLength(0);
-})
+});
+
+test('Confirm a non production environment shows indicators', async () => {
+    const fakeEnvironment = {
+        "environment": "staging"
+    }
+
+    mockFetchOnMatch("^/api/v1/environment", fakeEnvironment);
+    await act(async () => {
+        render(<BrowserRouter><Navigation/></BrowserRouter>)
+    });
+
+    // check that "Submissions-staging" is present
+    expect(screen.queryAllByText("Submissions-staging")).not.toHaveLength(0);
+});
