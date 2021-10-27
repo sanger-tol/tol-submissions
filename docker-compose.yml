@@ -36,6 +36,7 @@ services:
       - STS_URL
       - STS_API_KEY
       - NIH_API_KEY
+      - FLASK_ENV
     ports:
       - 8081:80
 

@@ -1,3 +1,4 @@
+import os
 from flask import jsonify
 from sqlalchemy import or_
 from main.model import db, SubmissionsSample
@@ -57,3 +58,11 @@ def get_sample(biosample_id):
         return jsonify({'detail': "Sample does not exist"}), 404
 
     return jsonify(sample)
+
+
+def get_environment():
+    flask_env = os.getenv("FLASK_ENV")
+    if flask_env is not None and flask_env != "":
+        return jsonify({'environment': flask_env})
+    # if unset, assume development
+    return jsonify({'environment': "dev"})
