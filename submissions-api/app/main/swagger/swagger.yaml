@@ -937,7 +937,7 @@ components:
       properties:
         environment:
           type: string
-          enum: [dev, uat, staging, production]
+          enum: [dev, test, staging, production]
           example: dev
   securitySchemes:
     ApiKeyAuth:        # name for the security scheme
