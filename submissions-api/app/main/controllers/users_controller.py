@@ -3,6 +3,7 @@ from flask import jsonify
 from sqlalchemy import or_
 from main.model import db, SubmissionsSample
 from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
+import logging
 
 
 def get_samples_from_specimen(specimen):
@@ -64,5 +65,7 @@ def get_environment():
     flask_env = os.getenv("FLASK_ENV")
     if flask_env is not None and flask_env != "":
         return jsonify({'environment': flask_env})
+
     # if unset, return error
+    logging.warn("FLASK_ENV is unset - this should probably be 'dev'")
     return jsonify({'detail': "Environment information not found"}), 500
