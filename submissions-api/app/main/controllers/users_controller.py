@@ -64,5 +64,5 @@ def get_environment():
     flask_env = os.getenv("FLASK_ENV")
     if flask_env is not None and flask_env != "":
         return jsonify({'environment': flask_env})
-    # if unset, assume production
-    return jsonify({'environment': "production"})
+    # if unset, return error
+    return jsonify({'detail': "Environment information not found"}), 500
