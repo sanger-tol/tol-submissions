@@ -14,10 +14,15 @@ interface NavigationProps {
 }
 
 interface Environment {
-  environment: string | null;
+  environment: string | undefined;
 }
 
-const fetchEnvironment = () => {
+const assumeProduction = (): string => {
+  console.log("Error fetching environment. Assuming production.");
+  return "production";
+}
+
+const fetchEnvironment = (): Promise<string> => {
   return fetch('/api/v1/environment')
       .then(res => {
           if (res.ok) {
@@ -26,11 +31,14 @@ const fetchEnvironment = () => {
           return null;
       })
       .then((res: Environment | null) => {
-          if (res === null) {
-              return null;
+          if (!res?.environment) {
+            return assumeProduction();
           }
           return res.environment;
       })
+      .catch((err: any) => {
+        return assumeProduction();
+      });
 }
 
 const getBackgroundClass = (environment: string): string => {
@@ -51,8 +59,8 @@ function Navigation(props: NavigationProps) {
   const [environment, setEnvironment] = useState("");
   React.useEffect(() => {
     fetchEnvironment()
-    .then((fetchedEnvironment: string | null) => {
-      setEnvironment(fetchedEnvironment ?? "");
+    .then((fetchedEnvironment: string) => {
+      setEnvironment(fetchedEnvironment);
     });
   })
 
