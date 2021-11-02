@@ -62,7 +62,7 @@ function Navigation(props: NavigationProps) {
     .then((fetchedEnvironment: string) => {
       setEnvironment(fetchedEnvironment);
     });
-  })
+  }, []);
 
   const isProduction = () => {
     return environment === "production";
