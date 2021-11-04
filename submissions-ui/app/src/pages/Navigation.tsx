@@ -45,7 +45,7 @@ const getBackgroundClass = (environment: string): string => {
   switch (environment) {
     case "dev":
       return "bg-warning"
-    case "test":
+    case "testing":
       return "bg-info"
     case "staging":
       return "bg-success";
