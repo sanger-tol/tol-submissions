@@ -1,8 +1,9 @@
-{/*
+/*
 SPDX-FileCopyrightText: 2021 Genome Research Ltd.
 
 SPDX-License-Identifier: MIT
-*/}
+*/
+
 import React, { useState } from "react";
 import { withRouter, useHistory } from "react-router-dom";
 import { Container, Navbar, Nav } from 'react-bootstrap';
