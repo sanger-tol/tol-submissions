@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Genome Research Ltd.
+#
+# SPDX-License-Identifier: MIT
+
 from main.model import db, SubmissionsManifest, SubmissionsSample, \
     SubmissionsSpecimen, SubmissionsSampleField
 from main.xml_utils import build_bundle_sample_xml, build_submission_xml

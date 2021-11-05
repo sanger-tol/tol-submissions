@@ -1,0 +1,7 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: COPO
+Source: https://github.com/collaborative-open-plant-omics/COPO
+
+Files: submissions-api/app/main/copo/*
+Copyright: 2020 COPO Development
+License: MIT

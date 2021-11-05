@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Genome Research Ltd.
+#
+# SPDX-License-Identifier: MIT
+
 from test import BaseTestCase
 from main.model import db, SubmissionsSpecimen, \
     SubmissionsSample

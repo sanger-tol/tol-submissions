@@ -1,3 +1,9 @@
+{/*
+SPDX-FileCopyrightText: 2021 Genome Research Ltd.
+
+SPDX-License-Identifier: MIT
+*/}
+
 import { Sample } from '../../models/Sample';
 import { Button, Table, Modal } from 'react-bootstrap';
 import { StyledSearchResultsSampleModal } from './SearchResultsSampleModalStyled';
