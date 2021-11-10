@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021 Genome Research Ltd.
+
+SPDX-License-Identifier: MIT
+-->
+
 # submissions
 
 Submit ToL data to EMBL-EBI ENA & BioSamples

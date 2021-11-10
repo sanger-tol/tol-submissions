@@ -1,9 +1,12 @@
-import os
+# SPDX-FileCopyrightText: 2021 Genome Research Ltd.
+#
+# SPDX-License-Identifier: MIT
 from flask import jsonify
 from sqlalchemy import or_
 from main.model import db, SubmissionsSample
 from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
 import logging
+import os
 
 
 def get_samples_from_specimen(specimen):
