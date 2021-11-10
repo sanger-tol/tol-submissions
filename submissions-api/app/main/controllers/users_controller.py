@@ -1,7 +1,9 @@
+import os
 from flask import jsonify
 from sqlalchemy import or_
 from main.model import db, SubmissionsSample
 from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
+import logging
 
 
 def get_samples_from_specimen(specimen):
@@ -57,3 +59,13 @@ def get_sample(biosample_id):
         return jsonify({'detail': "Sample does not exist"}), 404
 
     return jsonify(sample)
+
+
+def get_environment():
+    deployment_environment = os.getenv("ENVIRONMENT")
+    if deployment_environment is not None and deployment_environment != "":
+        return jsonify({'environment': deployment_environment})
+
+    # if unset, return error
+    logging.warn("$ENVIRONMENT is unset - this should probably be 'dev'")
+    return jsonify({'environment': 'dev'})

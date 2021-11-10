@@ -399,6 +399,23 @@ paths:
         "404":
           description: sample not found
       x-openapi-router-controller: main.controllers.users_controller
+  /environment:
+    get:
+      tags:
+      - users
+      summary: Gets the nature of the environment (e.g. production/dev)
+      description: |
+        Gets the nature of the environment (e.g. production/dev)
+      operationId: get_environment
+      responses:
+        "200":
+          description: The environment type
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Environment'
+                x-content-type: application/json
+      x-openapi-router-controller: main.controllers.users_controller
   /auth/login:
     get:
       tags:
@@ -912,6 +929,16 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Sample'
+    Environment:
+      required:
+        - environment
+      type: object
+      additionalProperties: false
+      properties:
+        environment:
+          type: string
+          enum: [dev, test, staging, production]
+          example: dev
   securitySchemes:
     ApiKeyAuth:        # name for the security scheme
       type: apiKey
