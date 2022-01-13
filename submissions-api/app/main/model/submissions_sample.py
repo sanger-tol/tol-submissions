@@ -420,7 +420,7 @@ class SubmissionsSample(Base):
 
     specimen_id_patterns = {
         "UNIVERSITY OF OXFORD": [{"prefix": "Ox", "suffix": r'\d{6}'}],
-        "MARINE BIOLOGICAL ASSOCIATION": [{"prefix": "MBA", "suffix": r'-\d{5}-\d{3}[A-Z]'}],
+        "MARINE BIOLOGICAL ASSOCIATION": [{"prefix": "MBA", "suffix": r'-\d{6}-\d{3}[A-Z]'}],
         "ROYAL BOTANIC GARDENS KEW": [{"prefix": "KDTOL", "suffix": r'\d{5}'}],
         "ROYAL BOTANIC GARDEN EDINBURGH": [{"prefix": "EDTOL", "suffix": r'\d{5}'}],
         "EARLHAM INSTITUTE": [{"prefix": "EI_", "suffix": r'\d{5}'}],
