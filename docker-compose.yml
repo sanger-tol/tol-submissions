@@ -40,6 +40,7 @@ services:
       - STS_URL
       - STS_API_KEY
       - NIH_API_KEY
+      - ENVIRONMENT
     ports:
       - 8081:80
 
