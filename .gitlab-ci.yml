@@ -93,7 +93,7 @@ deploy-qa:
   extends: .swarm-deploy-template
   environment:
     name: qa
-    url: http://172.27.17.15
+    url: http://172.27.17.15:8000
   variables:
     DOCKER_HOST: "ssh://ubuntu@172.27.17.15"
     EXTRA_DEPLOY_FILES: "-c docker-compose.gitlab-logging.yml"
