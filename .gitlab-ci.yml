@@ -61,8 +61,9 @@ test-ui:
   script:
     - docker run -e CI=true $CI_REGISTRY_IMAGE/submissions-ui-test:$CI_COMMIT_SHA yarn test
   except:
-    - production
+    - qa
     - staging
+    - production
 
 push-api:
   extends: .push-template
@@ -87,6 +88,20 @@ push-ui-test:
     DOCKER_HOST: "tcp://docker:2375"
     DOCKER_TLS_CERTDIR: ''
     NAME: submissions-ui-test
+
+deploy-qa:
+  extends: .swarm-deploy-template
+  environment:
+    name: qa
+    url: http://172.27.17.15
+  variables:
+    DOCKER_HOST: "ssh://ubuntu@172.27.17.15"
+    EXTRA_DEPLOY_FILES: "-c docker-compose.gitlab-logging.yml"
+    STACK_NAME: submissions
+  script:
+    - echo "Deployed to qa"
+  only:
+    - qa
 
 deploy-staging:
   extends: .swarm-deploy-template
@@ -136,5 +151,6 @@ test-api:
     - sleep 60
     - docker exec $(docker ps -q -f name="submissions_submissions-api") bash -c "pytest -v"
   except:
+    - qa
     - staging
     - production
