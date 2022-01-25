@@ -563,10 +563,10 @@ def get_ena_checklist():
                                    "not provided", "restricted access"]},
                 "geographic location (latitude)": {"mandatory": True,
                                                    "field": "DECIMAL_LATITUDE",
-                                                   "regex": r"(^.*[+-]?[0-9]+.?[0-9]*.*$)|(^not collected$)|(^not provided$)|(^restricted access$)"},  # noqa
+                                                   "regex": r"(^[+-]?[0-9]+.?[0-9]{0,8}$)|(^not collected$)|(^not provided$)|(^restricted access$)"},  # noqa
                 "geographic location (longitude)": {"mandatory": True,
                                                     "field": "DECIMAL_LONGITUDE",
-                                                    "regex": r"(^.*[+-]?[0-9]+.?[0-9]*.*$)|(^not collected$)|(^not provided$)|(^restricted access$)"},  # noqa
+                                                    "regex": r"(^[+-]?[0-9]+.?[0-9]{0,8}$)|(^not collected$)|(^not provided$)|(^restricted access$)"},  # noqa
                 "geographic location (region and locality)": {"mandatory": True,
                                                               "field": "COLLECTION_LOCATION"},
                 "identified_by": {"mandatory": True,

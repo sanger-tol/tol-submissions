@@ -557,7 +557,7 @@ class TestManifestUtils(BaseTestCase):
         sample.date_of_collection = "1st May 2021"
         sample.collection_location = "Moon | Sea of Tranquility"
         sample.decimal_latitude = ""
-        sample.decimal_longitude = "Greenwich meridian"
+        sample.decimal_longitude = "39ο 40΄ 06.89"
         sample.habitat = ""
         sample.identified_by = ""
         sample.identifier_affiliation = ""
