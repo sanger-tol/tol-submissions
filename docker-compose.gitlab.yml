@@ -35,7 +35,7 @@ services:
     volumes:
       - schema-html:/var/www/schema
   submissions-dbutils:
-    image: $CI_REGISTRY/tol/sts/dbutils:1.0.2
+    image: $CI_REGISTRY/tol/tol-core/dbutils:1.0.2
     networks:
       - submissions
     deploy:
@@ -45,7 +45,7 @@ services:
     env_file:
       - ${ENV_FILE}
   submissions-schema:
-    image: $CI_REGISTRY/tol/sts/schemaspy:0.2.0
+    image: $CI_REGISTRY/tol/tol-core/schemaspy:0.2.0
     networks:
       - submissions
     deploy:
