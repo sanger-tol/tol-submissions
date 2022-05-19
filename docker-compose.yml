@@ -16,9 +16,12 @@ services:
       - 5434:5432
 
   submissions-api:
-    build: submissions-api/.
+    build:
+      context: submissions-api/.
+      dockerfile: Dockerfile.dev
     image: submissions-api
-    #command: python3 -m swagger_server
+    # force amd64 emulation on M1 Macs
+    platform: linux/amd64
     environment:
       - DB_URI
       - MINIO_URI
@@ -43,13 +46,16 @@ services:
       - ENVIRONMENT
     ports:
       - 8081:80
+    volumes:
+      - './submissions-api/app/main:/app/main'
 
   submissions-ui:
     build:
       context: submissions-ui/.
       dockerfile: Dockerfile.dev
+    # force amd64 on M1 MacOS
+    platform: linux/amd64
     image: submissions-ui
-    #command: python3 -m swagger_server
     stdin_open: true
     environment:
       - NODE_ENV=development
