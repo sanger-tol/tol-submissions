@@ -27,7 +27,6 @@ RUN pip3 --no-cache-dir install 'connexion[swagger-ui]'
 
 COPY ./app /app
 
-ENV FLASK_APP=run:app
 ENV FLASK_ENV=development
 ENV PYTHONPATH=/app
 ENV PYTHONDONTWRITEBYTECODE 1

@@ -77,8 +77,7 @@ services:
   submissions-api-test:
     image: submissions-api
     command: dockerize
-        -wait tcp://submissions-db:5432 -wait tcp://submissions-api:80 
-        -wait tcp://submissions-minio:9000 -timeout 10s
+        -wait tcp://submissions-db:5432 -timeout 10s
         bash -c "pytest -v"
     environment:
       - DB_URI
