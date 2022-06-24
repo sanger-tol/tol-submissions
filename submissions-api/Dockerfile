@@ -21,3 +21,4 @@ RUN pip3 --no-cache-dir install -r requirements.txt
 RUN pip3 --no-cache-dir install 'connexion[swagger-ui]'
 
 COPY ./app /app
+COPY ./migrations /migrations
