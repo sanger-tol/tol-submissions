@@ -27,5 +27,3 @@ RUN rm -rf /var/www/submissions-ui/*
 COPY --from=builder /workspace/build/ /var/www/submissions-ui/
 
 EXPOSE 80
-
-ENTRYPOINT ["/etc/nginx/entrypoint.sh"]
