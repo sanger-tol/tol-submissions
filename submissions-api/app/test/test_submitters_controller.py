@@ -201,6 +201,100 @@ class TestSubmittersController(BaseTestCase):
         print(response.json)
         self.assertEqual(expected, response.json)
 
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 6344,
+                     'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 2,
+                    'submissionStatus': None,
+                    'projectName': 'ToL',  # Default - not given in body
+                    'stsManifestId': None,  # Default - not given in body
+                    'samples': [
+                        {'row': 1,
+                         'SPECIMEN_ID': 'SAN1234567',
+                         'TAXON_ID': 6344,
+                         'SCIENTIFIC_NAME': 'Arenicola marina',
+                         'GENUS': None,
+                         'FAMILY': None,
+                         'ORDER_OR_GROUP': None,
+                         'COMMON_NAME': None,
+                         'LIFESTAGE': 'ADULT',
+                         'SEX': 'FEMALE',
+                         'ORGANISM_PART': 'MUSCLE',
+                         'GAL': None,
+                         'GAL_SAMPLE_ID': None,
+                         'COLLECTED_BY': None,
+                         'COLLECTOR_AFFILIATION': None,
+                         'DATE_OF_COLLECTION': None,
+                         'COLLECTION_LOCATION': None,
+                         'DECIMAL_LATITUDE': None,
+                         'DECIMAL_LONGITUDE': None,
+                         'HABITAT': None,
+                         'IDENTIFIED_BY': None,
+                         'IDENTIFIER_AFFILIATION': None,
+                         'VOUCHER_ID': None,
+                         'OTHER_INFORMATION': None,
+                         'ELEVATION': None,
+                         'DEPTH': None,
+                         'RELATIONSHIP': None,
+                         'SYMBIONT': "SYMBIONT",
+                         'CULTURE_OR_STRAIN_ID': None,
+                         'SERIES': None,
+                         'RACK_OR_PLATE_ID': None,
+                         'TUBE_OR_WELL_ID': None,
+                         'TAXON_REMARKS': None,
+                         'INFRASPECIFIC_EPITHET': None,
+                         'COLLECTOR_SAMPLE_ID': None,
+                         'GRID_REFERENCE': None,
+                         'TIME_OF_COLLECTION': None,
+                         'DESCRIPTION_OF_COLLECTION_METHOD': None,
+                         'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': None,
+                         'IDENTIFIED_HOW': None,
+                         'SPECIMEN_ID_RISK': None,
+                         'PRESERVED_BY': None,
+                         'PRESERVER_AFFILIATION': None,
+                         'PRESERVATION_APPROACH': None,
+                         'PRESERVATIVE_SOLUTION': None,
+                         'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': None,
+                         'DATE_OF_PRESERVATION': None,
+                         'SIZE_OF_TISSUE_IN_TUBE': None,
+                         'TISSUE_REMOVED_FOR_BARCODING': None,
+                         'PLATE_ID_FOR_BARCODING': None,
+                         'TUBE_OR_WELL_ID_FOR_BARCODING': None,
+                         'TISSUE_FOR_BARCODING': None,
+                         'BARCODE_PLATE_PRESERVATIVE': None,
+                         'PURPOSE_OF_SPECIMEN': None,
+                         'HAZARD_GROUP': None,
+                         'REGULATORY_COMPLIANCE': None,
+                         'ORIGINAL_COLLECTION_DATE': None,
+                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
+                         'BARCODE_HUB': None,
+                         'tolId': None,
+                         'biosampleAccession': None,
+                         'sraAccession': None,
+                         'submissionAccession': None,
+                         'submissionError': None,
+                         'sampleSameAs': None,
+                         'sampleDerivedFrom': None,
+                         'sampleSymbiontOf': None}
+                    ]}
+        print(response.json)
+        self.assertEqual(expected, response.json)
+
     def test_get_manifest(self):
 
         body = {'samples': [
