@@ -13,9 +13,9 @@ class SubmissionsSample(Base):
     sample_id = db.Column(db.Integer, primary_key=True)
     taxonomy_id = db.Column(db.Integer, nullable=False)
     scientific_name = db.Column(db.String(), nullable=False)
-    family = db.Column(db.String(), nullable=False)
-    genus = db.Column(db.String(), nullable=False)
-    order_or_group = db.Column(db.String(), nullable=False)
+    family = db.Column(db.String(), nullable=True)
+    genus = db.Column(db.String(), nullable=True)
+    order_or_group = db.Column(db.String(), nullable=True)
     common_name = db.Column(db.String(), nullable=True)
     manifest_id = db.Column(db.Integer, db.ForeignKey('manifest.manifest_id'))
     manifest = db.relationship("SubmissionsManifest", back_populates="samples",
@@ -23,18 +23,18 @@ class SubmissionsSample(Base):
     lifestage = db.Column(db.String(), nullable=False)
     sex = db.Column(db.String(), nullable=False)
     organism_part = db.Column(db.String(), nullable=False)
-    GAL = db.Column(db.String(), nullable=False)
-    GAL_sample_id = db.Column(db.String(), nullable=False)
-    collected_by = db.Column(db.String(), nullable=False)
-    collector_affiliation = db.Column(db.String(), nullable=False)
-    date_of_collection = db.Column(db.String(), nullable=False)
-    collection_location = db.Column(db.String(), nullable=False)
-    decimal_latitude = db.Column(db.String(), nullable=False)
-    decimal_longitude = db.Column(db.String(), nullable=False)
-    habitat = db.Column(db.String(), nullable=False)
-    identified_by = db.Column(db.String(), nullable=False)
-    identifier_affiliation = db.Column(db.String(), nullable=False)
-    voucher_id = db.Column(db.String(), nullable=False)
+    GAL = db.Column(db.String(), nullable=True)
+    GAL_sample_id = db.Column(db.String(), nullable=True)
+    collected_by = db.Column(db.String(), nullable=True)
+    collector_affiliation = db.Column(db.String(), nullable=True)
+    date_of_collection = db.Column(db.String(), nullable=True)
+    collection_location = db.Column(db.String(), nullable=True)
+    decimal_latitude = db.Column(db.String(), nullable=True)
+    decimal_longitude = db.Column(db.String(), nullable=True)
+    habitat = db.Column(db.String(), nullable=True)
+    identified_by = db.Column(db.String(), nullable=True)
+    identifier_affiliation = db.Column(db.String(), nullable=True)
+    voucher_id = db.Column(db.String(), nullable=True)
     other_information = db.Column(db.String(), nullable=True)
     elevation = db.Column(db.String(), nullable=True)
     depth = db.Column(db.String(), nullable=True)
@@ -159,7 +159,8 @@ class SubmissionsSample(Base):
 
     all_fields = [{"python_name": "specimen_id",
                    "field_name": "SPECIMEN_ID",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "specimen_specimen_id"},
                   {"python_name": "taxonomy_id",
                    "field_name": "TAXON_ID",
                    "required": True},
@@ -213,52 +214,67 @@ class SubmissionsSample(Base):
                                       "MULTICELLULAR_ORGANISMS_IN_CULTURE"]},
                   {"python_name": "GAL",
                    "field_name": "GAL",  # Validated in ENA checklist
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "gal_name"},
                   {"python_name": "GAL_sample_id",
                    "field_name": "GAL_SAMPLE_ID",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "ext_id_value_GAL_SAMPLE_ID"},
                   {"python_name": "collected_by",
                    "field_name": "COLLECTED_BY",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "person_fullname_COLLECT"},
                   {"python_name": "collector_affiliation",
                    "field_name": "COLLECTOR_AFFILIATION",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "institution_name_COLLECT"},
                   {"python_name": "date_of_collection",
                    "field_name": "DATE_OF_COLLECTION",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "sample_col_date"},
                   {"python_name": "collection_location",
                    "field_name": "COLLECTION_LOCATION",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "location_location"},
                   {"python_name": "decimal_latitude",
                    "field_name": "DECIMAL_LATITUDE",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "location_lat"},
                   {"python_name": "decimal_longitude",
                    "field_name": "DECIMAL_LONGITUDE",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "location_long"},
                   {"python_name": "habitat",
                    "field_name": "HABITAT",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "location_habitat"},
                   {"python_name": "identified_by",
                    "field_name": "IDENTIFIED_BY",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "person_fullname_IDENTIFY"},
                   {"python_name": "identifier_affiliation",
                    "field_name": "IDENTIFIER_AFFILIATION",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "institution_name_IDENTIFY"},
                   {"python_name": "voucher_id",
                    "field_name": "VOUCHER_ID",
-                   "required": True},
+                   "required": True,
+                   "sts_api_name": "sample_voucherid"},
                   {"python_name": "other_information",
                    "field_name": "OTHER_INFORMATION",
                    "required": False},
                   {"python_name": "elevation",
                    "field_name": "ELEVATION",
-                   "required": False},
+                   "required": False,
+                   "sts_api_name": "location_elevation"},
                   {"python_name": "depth",
                    "field_name": "DEPTH",
-                   "required": False},
+                   "required": False,
+                   "sts_api_name": "location_depth"},
                   {"python_name": "relationship",
                    "field_name": "RELATIONSHIP",
-                   "required": False},
+                   "required": False,
+                   "sts_api_name": "sample_relationship"},
                   {"python_name": "symbiont",
                    "field_name": "SYMBIONT",
                    "required": False,
