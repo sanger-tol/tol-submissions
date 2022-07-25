@@ -561,36 +561,35 @@ class TestSubmittersController(BaseTestCase):
                     ]
         self.assertEqual(expected, response.json)
 
-
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
     def test_fill_manifest(self, get_ncbi_data):
         mock_response_from_sts = {
             "data": {
                 "list": [{
-                "specimen_specimen_id": "SAN1234567",
-                "sample_biosample_accession": "SAMEA7701758",
-                "sample_relationship": "",
-                "gal_name": "UNIVERSITY OF OXFORD",
-                "sample_col_date": "2020-07-24",
-                "location_location": "United Kingdom | Berkshire | Wytham woods",
-                "location_lat": "51.77",
-                "location_long": "-1.339",
-                "location_habitat": "On thistle | Grassland",
-                "location_depth": "",
-                "location_elevation": "150",
-                "sample_voucherid": "NOT_APPLICABLE",
-                "sample_symbiont": "TARGET",
-                "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
-                "ext_id_value_COL_SAMPLE_ID": "Ox000701",
-                "person_fullname_COLLECT": "Collector 1",
-                "person_fullname_IDENTIFY": "Identifier 1",
-                "institution_name_COLLECT": "University of Oxford",
-                "institution_name_IDENTIFY": "University of Oxford",
-                "specimen_bio_specimen_id": "SAMEA7701562",
-            }],
-            "total": 1
-        }}
+                    "specimen_specimen_id": "SAN1234567",
+                    "sample_biosample_accession": "SAMEA7701758",
+                    "sample_relationship": "",
+                    "gal_name": "UNIVERSITY OF OXFORD",
+                    "sample_col_date": "2020-07-24",
+                    "location_location": "United Kingdom | Berkshire | Wytham woods",
+                    "location_lat": "51.77",
+                    "location_long": "-1.339",
+                    "location_habitat": "On thistle | Grassland",
+                    "location_depth": "",
+                    "location_elevation": "150",
+                    "sample_voucherid": "NOT_APPLICABLE",
+                    "sample_symbiont": "TARGET",
+                    "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
+                    "ext_id_value_COL_SAMPLE_ID": "Ox000701",
+                    "person_fullname_COLLECT": "Collector 1",
+                    "person_fullname_IDENTIFY": "Identifier 1",
+                    "institution_name_COLLECT": "University of Oxford",
+                    "institution_name_IDENTIFY": "University of Oxford",
+                    "specimen_bio_specimen_id": "SAMEA7701562",
+                }],
+                "total": 1
+            }}
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 
@@ -746,7 +745,6 @@ class TestSubmittersController(BaseTestCase):
                     ]}
         self.assertEqual(expected, response.json)
 
-
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
     def test_fill_manifest_sample_not_in_sts(self, get_ncbi_data):
@@ -837,29 +835,29 @@ class TestSubmittersController(BaseTestCase):
         mock_response_from_sts = {
             "data": {
                 "list": [{
-                "specimen_specimen_id": "SAN1234567",
-                "sample_biosample_accession": "SAMEA7701758",
-                "sample_relationship": "",
-                "gal_name": "UNIVERSITY OF OXFORD",
-                "sample_col_date": "2020-07-24",
-                "location_location": "United Kingdom | Berkshire | Wytham woods",
-                "location_lat": "51.77",
-                "location_long": "-1.339",
-                "location_habitat": "On thistle | Grassland",
-                "location_depth": "",
-                "location_elevation": "150",
-                "sample_voucherid": "NOT_APPLICABLE",
-                "sample_symbiont": "TARGET",
-                "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
-                "ext_id_value_COL_SAMPLE_ID": "Ox000701",
-                "person_fullname_COLLECT": "Collector 1",
-                "person_fullname_IDENTIFY": "Identifier 1",
-                "institution_name_COLLECT": "University of Oxford",
-                "institution_name_IDENTIFY": "University of Oxford",
-                "specimen_bio_specimen_id": "SAMEA7701562",
-            }],
-            "total": 1
-        }}
+                    "specimen_specimen_id": "SAN1234567",
+                    "sample_biosample_accession": "SAMEA7701758",
+                    "sample_relationship": "",
+                    "gal_name": "UNIVERSITY OF OXFORD",
+                    "sample_col_date": "2020-07-24",
+                    "location_location": "United Kingdom | Berkshire | Wytham woods",
+                    "location_lat": "51.77",
+                    "location_long": "-1.339",
+                    "location_habitat": "On thistle | Grassland",
+                    "location_depth": "",
+                    "location_elevation": "150",
+                    "sample_voucherid": "NOT_APPLICABLE",
+                    "sample_symbiont": "TARGET",
+                    "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
+                    "ext_id_value_COL_SAMPLE_ID": "Ox000701",
+                    "person_fullname_COLLECT": "Collector 1",
+                    "person_fullname_IDENTIFY": "Identifier 1",
+                    "institution_name_COLLECT": "University of Oxford",
+                    "institution_name_IDENTIFY": "University of Oxford",
+                    "specimen_bio_specimen_id": "SAMEA7701562",
+                }],
+                "total": 1
+            }}
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 

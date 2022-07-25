@@ -130,11 +130,12 @@ def fill_manifest(manifest_id=None):
         # choose a sample from the specimen which only really works if we don't resample the
         # same specimen.
         response = requests.post(os.environ['STS_URL'] + '/samples',
-                                json={"specimen_specimen_id": sample.specimen_id},
-                                headers={'Project': 'ALL',
-                                        'Authorization': os.getenv("STS_API_KEY")})
+                                 json={"specimen_specimen_id": sample.specimen_id},
+                                 headers={'Project': 'ALL',
+                                          'Authorization': os.getenv("STS_API_KEY")})
         if (response.status_code != 200):
-            return jsonify({'detail': "Specimen does not exist in STS: " + sample.specimen_id}), 404
+            return jsonify({'detail': "Specimen does not exist in STS: "
+                           + sample.specimen_id}), 404
         samples = response.json()["data"]["list"]
         if len(samples) < 1:
             return jsonify({'detail': "Samples do not exist in STS: " + sample.specimen_id}), 404
@@ -147,12 +148,12 @@ def fill_manifest(manifest_id=None):
 
         # NCBI for the taxonomy
         if sample.taxonomy_id not in ncbi_data:
-            return jsonify({'detail': "Taxon ID does not exist in NCBI: " + sample.taxonomy_id}), 404
+            return jsonify({'detail': "Taxon ID does not exist in NCBI: "
+                           + sample.taxonomy_id}), 404
 
         ncbi_result = ncbi_data[sample.taxonomy_id]
 
         # Go through the lineage
-        order_checked = False
         for element in ncbi_result['LineageEx']:
             rank = element.get('Rank')
             if rank == 'genus':
@@ -160,8 +161,8 @@ def fill_manifest(manifest_id=None):
             elif rank == "family":
                 sample.family = element.get('ScientificName')
             elif rank == 'order':
-                sample.order_or_group =  element.get('ScientificName').upper()
-        
+                sample.order_or_group = element.get('ScientificName').upper()
+
     db.session.commit()
     return(jsonify(manifest))
 
