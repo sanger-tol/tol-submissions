@@ -653,7 +653,8 @@ class TestSubmittersController(BaseTestCase):
                      'LIFESTAGE': 'ADULT',
                      'SEX': 'FEMALE',
                      'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
+                     'SYMBIONT': 'SYMBIONT',
+                     'GAL': 'NATURAL HISTORY MUSEUM'}  # Can override GAL here
                 ]}
         response = self.client.open(
             '/api/v1/manifests',
@@ -686,7 +687,7 @@ class TestSubmittersController(BaseTestCase):
                          'LIFESTAGE': 'ADULT',
                          'SEX': 'FEMALE',
                          'ORGANISM_PART': 'MUSCLE',
-                         'GAL': 'UNIVERSITY OF OXFORD',
+                         'GAL': 'NATURAL HISTORY MUSEUM',
                          'GAL_SAMPLE_ID': 'Ox000701',
                          'COLLECTED_BY': 'Collector 1',
                          'COLLECTOR_AFFILIATION': 'University of Oxford',

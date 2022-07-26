@@ -144,7 +144,9 @@ def fill_manifest(manifest_id=None):
                 val = samples[0].get(field["sts_api_name"], None)
                 if val == "":
                     val = None
-                setattr(sample, field["python_name"], val)
+                current_val = getattr(sample, field["python_name"])
+                if current_val is None:
+                    setattr(sample, field["python_name"], val)
 
         # NCBI for the taxonomy
         if sample.taxonomy_id not in ncbi_data:
