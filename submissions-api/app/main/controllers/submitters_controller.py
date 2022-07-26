@@ -149,7 +149,7 @@ def fill_manifest(manifest_id=None):
         # NCBI for the taxonomy
         if sample.taxonomy_id not in ncbi_data:
             return jsonify({'detail': "Taxon ID does not exist in NCBI: "
-                           + sample.taxonomy_id}), 404
+                           + str(sample.taxonomy_id)}), 404
 
         ncbi_result = ncbi_data[sample.taxonomy_id]
 

@@ -861,6 +861,41 @@ class TestSubmittersController(BaseTestCase):
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 
+        get_ncbi_data.return_value = {}
+
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 63445,
+                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open(
+            '/api/v1/manifests/1/fill',
+            method='PATCH',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
+    def test_fill_manifest_sample_not_in_sts_2(self, get_ncbi_data):
+        mock_response_from_sts = {"data": {"list": []}}
+        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
+                      json=mock_response_from_sts, status=200)
+
         get_ncbi_data.return_value = {63445: {
             'TaxId': '6344',
             'ScientificName': 'Arenicola marina symbiont',
@@ -911,41 +946,6 @@ class TestSubmittersController(BaseTestCase):
             'UpdateDate': '2020/11/03 16: 20: 42',
             'PubDate': '1996/01/18 00: 00: 00'}
         }
-
-        # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 63445,
-                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
-                ]}
-        response = self.client.open(
-            '/api/v1/manifests',
-            method='POST',
-            headers={"api-key": self.user3.api_key},
-            json=body)
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-        response = self.client.open(
-            '/api/v1/manifests/1/fill',
-            method='PATCH',
-            headers={"api-key": self.user3.api_key},
-            json=body)
-        self.assert404(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
-    @responses.activate
-    @patch('main.manifest_utils.get_ncbi_data')
-    def test_fill_manifest_sample_not_in_sts_2(self, get_ncbi_data):
-        mock_response_from_sts = {"data": {"list": []}}
-        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
-                      json=mock_response_from_sts, status=200)
-
-        get_ncbi_data.return_value = {}
 
         # Correct, symbiont-only JSON
         body = {'samples': [
