@@ -613,7 +613,7 @@ def get_ena_checklist():
                             "The Sainsbury Laboratory", "University of British Columbia",
                             "University of California", "University of Cambridge",
                             "University of Derby", "University of Edinburgh",
-                            "University of Oregon", "University of Oxford"
+                            "University of Oregon", "University of Oxford",
                             "University of Rhode Island", "University of Vienna (Cephalopod)",
                             "University of Vienna (Mollusc)"]},
                 "specimen_voucher": {"mandatory": True,
@@ -806,10 +806,11 @@ def generate_tolids_for_manifest(manifest):
     # List of taxon-specimen pairs
     taxon_specimens = []
     for sample in manifest.samples:
-        taxon_specimen = {"taxonomyId": sample.taxonomy_id,
-                          "specimenId": sample.specimen_id}
-        if taxon_specimen not in taxon_specimens:
-            taxon_specimens.append(taxon_specimen)
+        if not sample.is_symbiont():
+            taxon_specimen = {"taxonomyId": sample.taxonomy_id,
+                              "specimenId": sample.specimen_id}
+            if taxon_specimen not in taxon_specimens:
+                taxon_specimens.append(taxon_specimen)
 
     response = requests.post(os.environ['TOLID_URL'] + '/tol-ids',
                              json=taxon_specimens,
