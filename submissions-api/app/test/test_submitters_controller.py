@@ -201,6 +201,100 @@ class TestSubmittersController(BaseTestCase):
         print(response.json)
         self.assertEqual(expected, response.json)
 
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 6344,
+                     'SCIENTIFIC_NAME': 'Arenicola marina',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 2,
+                    'submissionStatus': None,
+                    'projectName': 'ToL',  # Default - not given in body
+                    'stsManifestId': None,  # Default - not given in body
+                    'samples': [
+                        {'row': 1,
+                         'SPECIMEN_ID': 'SAN1234567',
+                         'TAXON_ID': 6344,
+                         'SCIENTIFIC_NAME': 'Arenicola marina',
+                         'GENUS': None,
+                         'FAMILY': None,
+                         'ORDER_OR_GROUP': None,
+                         'COMMON_NAME': None,
+                         'LIFESTAGE': 'ADULT',
+                         'SEX': 'FEMALE',
+                         'ORGANISM_PART': 'MUSCLE',
+                         'GAL': None,
+                         'GAL_SAMPLE_ID': None,
+                         'COLLECTED_BY': None,
+                         'COLLECTOR_AFFILIATION': None,
+                         'DATE_OF_COLLECTION': None,
+                         'COLLECTION_LOCATION': None,
+                         'DECIMAL_LATITUDE': None,
+                         'DECIMAL_LONGITUDE': None,
+                         'HABITAT': None,
+                         'IDENTIFIED_BY': None,
+                         'IDENTIFIER_AFFILIATION': None,
+                         'VOUCHER_ID': None,
+                         'OTHER_INFORMATION': None,
+                         'ELEVATION': None,
+                         'DEPTH': None,
+                         'RELATIONSHIP': None,
+                         'SYMBIONT': "SYMBIONT",
+                         'CULTURE_OR_STRAIN_ID': None,
+                         'SERIES': None,
+                         'RACK_OR_PLATE_ID': None,
+                         'TUBE_OR_WELL_ID': None,
+                         'TAXON_REMARKS': None,
+                         'INFRASPECIFIC_EPITHET': None,
+                         'COLLECTOR_SAMPLE_ID': None,
+                         'GRID_REFERENCE': None,
+                         'TIME_OF_COLLECTION': None,
+                         'DESCRIPTION_OF_COLLECTION_METHOD': None,
+                         'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': None,
+                         'IDENTIFIED_HOW': None,
+                         'SPECIMEN_ID_RISK': None,
+                         'PRESERVED_BY': None,
+                         'PRESERVER_AFFILIATION': None,
+                         'PRESERVATION_APPROACH': None,
+                         'PRESERVATIVE_SOLUTION': None,
+                         'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': None,
+                         'DATE_OF_PRESERVATION': None,
+                         'SIZE_OF_TISSUE_IN_TUBE': None,
+                         'TISSUE_REMOVED_FOR_BARCODING': None,
+                         'PLATE_ID_FOR_BARCODING': None,
+                         'TUBE_OR_WELL_ID_FOR_BARCODING': None,
+                         'TISSUE_FOR_BARCODING': None,
+                         'BARCODE_PLATE_PRESERVATIVE': None,
+                         'PURPOSE_OF_SPECIMEN': None,
+                         'HAZARD_GROUP': None,
+                         'REGULATORY_COMPLIANCE': None,
+                         'ORIGINAL_COLLECTION_DATE': None,
+                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
+                         'BARCODE_HUB': None,
+                         'tolId': None,
+                         'biosampleAccession': None,
+                         'sraAccession': None,
+                         'submissionAccession': None,
+                         'submissionError': None,
+                         'sampleSameAs': None,
+                         'sampleDerivedFrom': None,
+                         'sampleSymbiontOf': None}
+                    ]}
+        print(response.json)
+        self.assertEqual(expected, response.json)
+
     def test_get_manifest(self):
 
         body = {'samples': [
@@ -466,6 +560,419 @@ class TestSubmittersController(BaseTestCase):
                               'roles': []}}
                     ]
         self.assertEqual(expected, response.json)
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
+    def test_fill_manifest(self, get_ncbi_data):
+        mock_response_from_sts = {
+            "data": {
+                "list": [{
+                    "specimen_specimen_id": "SAN1234567",
+                    "sample_biosample_accession": "SAMEA7701758",
+                    "sample_relationship": "",
+                    "gal_name": "UNIVERSITY OF OXFORD",
+                    "sample_col_date": "2020-07-24",
+                    "location_location": "United Kingdom | Berkshire | Wytham woods",
+                    "location_lat": "51.77",
+                    "location_long": "-1.339",
+                    "location_habitat": "On thistle | Grassland",
+                    "location_depth": "",
+                    "location_elevation": "150",
+                    "sample_voucherid": "NOT_APPLICABLE",
+                    "sample_symbiont": "TARGET",
+                    "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
+                    "ext_id_value_COL_SAMPLE_ID": "Ox000701",
+                    "person_fullname_COLLECT": "Collector 1",
+                    "person_fullname_IDENTIFY": "Identifier 1",
+                    "institution_name_COLLECT": "University of Oxford",
+                    "institution_name_IDENTIFY": "University of Oxford",
+                    "specimen_bio_specimen_id": "SAMEA7701562",
+                }],
+                "total": 1
+            }}
+        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
+                      json=mock_response_from_sts, status=200)
+
+        get_ncbi_data.return_value = {63445: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina symbiont',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
+
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 63445,
+                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT',
+                     'GAL': 'NATURAL HISTORY MUSEUM'}  # Can override GAL here
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open(
+            '/api/v1/manifests/1/fill',
+            method='PATCH',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        expected = {'manifestId': 1,
+                    'submissionStatus': None,
+                    'projectName': 'ToL',  # Default - not given in body
+                    'stsManifestId': None,  # Default - not given in body
+                    'samples': [
+                        {'row': 1,
+                         'SPECIMEN_ID': 'SAN1234567',
+                         'TAXON_ID': 63445,
+                         'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                         'GENUS': 'Arenicola',
+                         'FAMILY': 'Arenicolidae',
+                         'ORDER_OR_GROUP': None,
+                         'COMMON_NAME': None,
+                         'LIFESTAGE': 'ADULT',
+                         'SEX': 'FEMALE',
+                         'ORGANISM_PART': 'MUSCLE',
+                         'GAL': 'NATURAL HISTORY MUSEUM',
+                         'GAL_SAMPLE_ID': 'Ox000701',
+                         'COLLECTED_BY': 'Collector 1',
+                         'COLLECTOR_AFFILIATION': 'University of Oxford',
+                         'DATE_OF_COLLECTION': '2020-07-24',
+                         'COLLECTION_LOCATION': 'United Kingdom | Berkshire | Wytham woods',
+                         'DECIMAL_LATITUDE': '51.77',
+                         'DECIMAL_LONGITUDE': '-1.339',
+                         'HABITAT': 'On thistle | Grassland',
+                         'IDENTIFIED_BY': 'Identifier 1',
+                         'IDENTIFIER_AFFILIATION': 'University of Oxford',
+                         'VOUCHER_ID': 'NOT_APPLICABLE',
+                         'OTHER_INFORMATION': None,
+                         'ELEVATION': '150',
+                         'DEPTH': None,
+                         'RELATIONSHIP': None,
+                         'SYMBIONT': "SYMBIONT",
+                         'CULTURE_OR_STRAIN_ID': None,
+                         'SERIES': None,
+                         'RACK_OR_PLATE_ID': None,
+                         'TUBE_OR_WELL_ID': None,
+                         'TAXON_REMARKS': None,
+                         'INFRASPECIFIC_EPITHET': None,
+                         'COLLECTOR_SAMPLE_ID': None,
+                         'GRID_REFERENCE': None,
+                         'TIME_OF_COLLECTION': None,
+                         'DESCRIPTION_OF_COLLECTION_METHOD': None,
+                         'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': None,
+                         'IDENTIFIED_HOW': None,
+                         'SPECIMEN_ID_RISK': None,
+                         'PRESERVED_BY': None,
+                         'PRESERVER_AFFILIATION': None,
+                         'PRESERVATION_APPROACH': None,
+                         'PRESERVATIVE_SOLUTION': None,
+                         'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': None,
+                         'DATE_OF_PRESERVATION': None,
+                         'SIZE_OF_TISSUE_IN_TUBE': None,
+                         'TISSUE_REMOVED_FOR_BARCODING': None,
+                         'PLATE_ID_FOR_BARCODING': None,
+                         'TUBE_OR_WELL_ID_FOR_BARCODING': None,
+                         'TISSUE_FOR_BARCODING': None,
+                         'BARCODE_PLATE_PRESERVATIVE': None,
+                         'PURPOSE_OF_SPECIMEN': None,
+                         'HAZARD_GROUP': None,
+                         'REGULATORY_COMPLIANCE': None,
+                         'ORIGINAL_COLLECTION_DATE': None,
+                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
+                         'BARCODE_HUB': None,
+                         'tolId': None,
+                         'biosampleAccession': None,
+                         'sraAccession': None,
+                         'submissionAccession': None,
+                         'submissionError': None,
+                         'sampleSameAs': None,
+                         'sampleDerivedFrom': None,
+                         'sampleSymbiontOf': None}
+                    ]}
+        self.assertEqual(expected, response.json)
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
+    def test_fill_manifest_sample_not_in_sts(self, get_ncbi_data):
+        mock_response_from_sts = {}
+        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
+                      json=mock_response_from_sts, status=400)
+
+        get_ncbi_data.return_value = {63445: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina symbiont',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
+
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 63445,
+                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open(
+            '/api/v1/manifests/1/fill',
+            method='PATCH',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
+    def test_fill_manifest_sample_not_in_ncbi(self, get_ncbi_data):
+        mock_response_from_sts = {
+            "data": {
+                "list": [{
+                    "specimen_specimen_id": "SAN1234567",
+                    "sample_biosample_accession": "SAMEA7701758",
+                    "sample_relationship": "",
+                    "gal_name": "UNIVERSITY OF OXFORD",
+                    "sample_col_date": "2020-07-24",
+                    "location_location": "United Kingdom | Berkshire | Wytham woods",
+                    "location_lat": "51.77",
+                    "location_long": "-1.339",
+                    "location_habitat": "On thistle | Grassland",
+                    "location_depth": "",
+                    "location_elevation": "150",
+                    "sample_voucherid": "NOT_APPLICABLE",
+                    "sample_symbiont": "TARGET",
+                    "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
+                    "ext_id_value_COL_SAMPLE_ID": "Ox000701",
+                    "person_fullname_COLLECT": "Collector 1",
+                    "person_fullname_IDENTIFY": "Identifier 1",
+                    "institution_name_COLLECT": "University of Oxford",
+                    "institution_name_IDENTIFY": "University of Oxford",
+                    "specimen_bio_specimen_id": "SAMEA7701562",
+                }],
+                "total": 1
+            }}
+        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
+                      json=mock_response_from_sts, status=200)
+
+        get_ncbi_data.return_value = {}
+
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 63445,
+                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open(
+            '/api/v1/manifests/1/fill',
+            method='PATCH',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
+    def test_fill_manifest_sample_not_in_sts_2(self, get_ncbi_data):
+        mock_response_from_sts = {"data": {"list": []}}
+        responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
+                      json=mock_response_from_sts, status=200)
+
+        get_ncbi_data.return_value = {63445: {
+            'TaxId': '6344',
+            'ScientificName': 'Arenicola marina symbiont',
+            'OtherNames': {
+                'Anamorph': [],
+                'CommonName': ['rock worm'],
+                'Misnomer': [],
+                'Inpart': [],
+                'GenbankAnamorph': [],
+                'Misspelling': [],
+                'Includes': [],
+                'EquivalentName': [],
+                'Name': [{
+                    'ClassCDE': 'authority',
+                    'DispName': 'Arenicola marina (Linnaeus, 1758)'
+                }, {
+                    'ClassCDE': 'authority',
+                    'DispName': 'Lumbricus marinus Linnaeus, 1758'
+                }],
+                'Synonym': ['Lumbricus marinus'],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Acronym': [],
+                'GenbankCommonName': 'lugworm'},
+            'ParentTaxId': '6343',
+            'Rank': 'species',
+            'Division': 'Invertebrates',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '5', 'MGCName': 'Invertebrate Mitochondrial'},
+            'Lineage': 'cellular organisms; Eukaryota; Opisthokonta; Metazoa; Eumetazoa; Bilateria; Protostomia; Spiralia; Lophotrochozoa; Annelida; Polychaeta; Sedentaria; Scolecida; Arenicolidae; Arenicola',  # noqa
+            'LineageEx': [
+                {'TaxId': '131567', 'ScientificName': 'cellular organisms', 'Rank': 'no rank'},
+                {'TaxId': '2759', 'ScientificName': 'Eukaryota', 'Rank': 'superkingdom'},
+                {'TaxId': '33154', 'ScientificName': 'Opisthokonta', 'Rank': 'clade'},
+                {'TaxId': '33208', 'ScientificName': 'Metazoa', 'Rank': 'kingdom'},
+                {'TaxId': '6072', 'ScientificName': 'Eumetazoa', 'Rank': 'clade'},
+                {'TaxId': '33213', 'ScientificName': 'Bilateria', 'Rank': 'clade'},
+                {'TaxId': '33317', 'ScientificName': 'Protostomia', 'Rank': 'clade'},
+                {'TaxId': '2697495', 'ScientificName': 'Spiralia', 'Rank': 'clade'},
+                {'TaxId': '1206795', 'ScientificName': 'Lophotrochozoa', 'Rank': 'clade'},
+                {'TaxId': '6340', 'ScientificName': 'Annelida', 'Rank': 'phylum'},
+                {'TaxId': '6341', 'ScientificName': 'Polychaeta', 'Rank': 'class'},
+                {'TaxId': '105389', 'ScientificName': 'Sedentaria', 'Rank': 'subclass'},
+                {'TaxId': '105387', 'ScientificName': 'Scolecida', 'Rank': 'infraclass'},
+                {'TaxId': '42115', 'ScientificName': 'Arenicolidae', 'Rank': 'family'},
+                {'TaxId': '6343', 'ScientificName': 'Arenicola', 'Rank': 'genus'}],
+            'CreateDate': '1995/02/27 09: 24: 00',
+            'UpdateDate': '2020/11/03 16: 20: 42',
+            'PubDate': '1996/01/18 00: 00: 00'}
+        }
+
+        # Correct, symbiont-only JSON
+        body = {'samples': [
+                    {'row': 1,
+                     'SPECIMEN_ID': 'SAN1234567',
+                     'TAXON_ID': 63445,
+                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+                     'LIFESTAGE': 'ADULT',
+                     'SEX': 'FEMALE',
+                     'ORGANISM_PART': 'MUSCLE',
+                     'SYMBIONT': 'SYMBIONT'}
+                ]}
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        response = self.client.open(
+            '/api/v1/manifests/1/fill',
+            method='PATCH',
+            headers={"api-key": self.user3.api_key},
+            json=body)
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
 
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')

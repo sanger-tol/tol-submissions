@@ -180,6 +180,40 @@ paths:
         "404":
           description: manifest does not exist
       x-openapi-router-controller: main.controllers.submitters_controller
+  /manifests/{manifestId}/fill:
+    patch:
+      security:
+        - ApiKeyAuth: []
+      tags:
+      - submitters
+      summary: Fills a manifest with data from the parent sample. This is only applicable for symbionts where the parent is already in STS and not in this manifest
+      description: |
+        Returns a manifest that has been uploaded (and possibly validated and had IDs generated)
+      operationId: fill_manifest
+      parameters:
+      - name: manifestId
+        in: path
+        description: a manifest ID (given when manifest created)
+        required: true
+        style: simple
+        explode: true
+        schema:
+          type: integer
+      responses:
+        "200":
+          description: the manifest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manifest'
+                x-content-type: application/json
+        "400":
+          description: bad input parameter
+        "403":
+          description: user not authorised to use this function
+        "404":
+          description: manifest does not exist
+      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/{manifestId}/validate:
     get:
       security:
@@ -560,24 +594,9 @@ components:
         - SPECIMEN_ID
         - TAXON_ID
         - SCIENTIFIC_NAME
-        - GENUS
-        - FAMILY
-        - ORDER_OR_GROUP
         - LIFESTAGE
         - SEX
         - ORGANISM_PART
-        - GAL
-        - GAL_SAMPLE_ID
-        - COLLECTED_BY
-        - COLLECTOR_AFFILIATION
-        - DATE_OF_COLLECTION
-        - COLLECTION_LOCATION
-        - DECIMAL_LATITUDE
-        - DECIMAL_LONGITUDE
-        - HABITAT
-        - IDENTIFIED_BY
-        - IDENTIFIER_AFFILIATION
-        - VOUCHER_ID
         - tolId
         - biosampleAccession
         - sraAccession

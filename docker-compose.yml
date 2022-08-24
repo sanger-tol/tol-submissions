@@ -114,3 +114,15 @@ services:
     volumes:
       - './submissions-ui/app:/usr/src/app'
       - '/usr/src/app/node_modules'
+
+  submissions-alembic:
+    image: submissions-api
+    container_name: submissions-alembic
+    restart: always
+    environment:
+      - DB_URI
+      - DB_LEGACY_TABLES
+    entrypoint: /migrations/alembic/docker-entrypoint.sh
+    working_dir: /migrations
+    volumes:
+      - ./submissions-api/migrations/alembic/versions:/migrations/alembic/versions
