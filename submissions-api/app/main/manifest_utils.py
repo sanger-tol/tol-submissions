@@ -285,7 +285,7 @@ def validate_sts_rack_plate_tube_well(sample):
     results.append({'field': 'TUBE_OR_WELL_ID',
                     'message': 'Already exists in STS so cannot be used again',
                     'severity': 'ERROR'})
-    return(results)
+    return results
 
 
 def validate_species_known_in_tolid(sample):
@@ -307,7 +307,7 @@ def validate_species_known_in_tolid(sample):
 
     # Won't actually check anything here
 
-    return(results)
+    return results
 
 
 # This function actually retrieves the NCBI taxonomy data for the whole manifest
@@ -391,7 +391,7 @@ def validate_against_ncbi(sample):
             results.append({'field': 'ORDER_OR_GROUP',
                             'message': 'Does not match a node in the NCBI service',
                             'severity': 'ERROR'})
-    return(results)
+    return results
 
 
 def validate_specimen_against_tolid(sample):
@@ -423,7 +423,7 @@ def validate_specimen_against_tolid(sample):
         results.append({'field': 'SPECIMEN_ID',
                         'message': 'Has been used before but with different taxonomy ID',
                         'severity': 'ERROR'})
-    return(results)
+    return results
 
 
 def validate_against_ena_checklist(sample):
@@ -673,7 +673,7 @@ def validate_ena_submittable(sample):
                         'message': 'Must match ENA (expected ' + data['scientificName'] + ')',
                         'severity': 'ERROR'})
 
-    return(results)
+    return results
 
 
 def set_relationships_for_manifest(manifest):

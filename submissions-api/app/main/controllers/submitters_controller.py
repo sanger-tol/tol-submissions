@@ -42,7 +42,7 @@ def upload_manifest_json(body={}, excel_file=None):  # noqa: E501
     manifest = manifest_utils.create_manifest_from_json(body, user)
     db.session.add(manifest)
     db.session.commit()
-    return(jsonify(manifest))
+    return jsonify(manifest)
 
 
 def upload_manifest_excel(excel_file=None, project_name=None):  # noqa: E501
@@ -71,9 +71,9 @@ def upload_manifest_excel(excel_file=None, project_name=None):  # noqa: E501
     # Quickly check for required fields - reject if any missing
     number_of_errors, validation_results = manifest_utils.validate_manifest(manifest, full=False)
     if number_of_errors > 0:
-        return(jsonify({'manifestId': manifest.manifest_id,
+        return jsonify({'manifestId': manifest.manifest_id,
                         'number_of_errors': number_of_errors,
-                        'validations': validation_results}), 400)
+                        'validations': validation_results}), 400
 
     # Passed the basic checks so save it
     db.session.add(manifest)
@@ -106,7 +106,7 @@ def get_manifest(manifest_id=None):
     if manifest is None:
         return jsonify({'detail': "Manifest does not exist"}), 404
 
-    return(jsonify(manifest))
+    return jsonify(manifest)
 
 
 def fill_manifest(manifest_id=None):
@@ -166,7 +166,7 @@ def fill_manifest(manifest_id=None):
                 sample.order_or_group = element.get('ScientificName').upper()
 
     db.session.commit()
-    return(jsonify(manifest))
+    return jsonify(manifest)
 
 
 def validate_manifest(manifest_id=None):
@@ -186,9 +186,9 @@ def validate_manifest(manifest_id=None):
         return jsonify({'detail': "Manifest does not exist"}), 404
 
     number_of_errors, validation_results = manifest_utils.validate_manifest(manifest)
-    return(jsonify({'manifestId': manifest.manifest_id,
+    return jsonify({'manifestId': manifest.manifest_id,
                     'number_of_errors': number_of_errors,
-                    'validations': validation_results}))
+                    'validations': validation_results})
 
 
 def submit_and_validate_manifest_json(body=None):
@@ -211,9 +211,9 @@ def submit_and_validate_manifest_json(body=None):
 
     # Validate the manifest
     number_of_errors, validation_results = manifest_utils.validate_manifest(manifest)
-    return(jsonify({'manifestId': manifest.manifest_id,
+    return jsonify({'manifestId': manifest.manifest_id,
                     'number_of_errors': number_of_errors,
-                    'validations': validation_results}))
+                    'validations': validation_results})
 
 
 def generate_ids_for_manifest(manifest_id=None):
@@ -235,11 +235,11 @@ def generate_ids_for_manifest(manifest_id=None):
     number_of_errors, validation_results = manifest_utils.generate_ids_for_manifest(manifest)
 
     if number_of_errors > 0:
-        return(jsonify({'manifestId': manifest.manifest_id,
+        return jsonify({'manifestId': manifest.manifest_id,
                         'number_of_errors': number_of_errors,
-                        'validations': validation_results}))
+                        'validations': validation_results})
 
-    return(jsonify(manifest))
+    return jsonify(manifest)
 
 
 def submit_and_generate_manifest_json(body=None):
@@ -263,11 +263,11 @@ def submit_and_generate_manifest_json(body=None):
     number_of_errors, validation_results = manifest_utils.generate_ids_for_manifest(manifest)
 
     if number_of_errors > 0:
-        return(jsonify({'manifestId': manifest.manifest_id,
+        return jsonify({'manifestId': manifest.manifest_id,
                         'number_of_errors': number_of_errors,
-                        'validations': validation_results}))
+                        'validations': validation_results})
 
-    return(jsonify(manifest))
+    return jsonify(manifest)
 
 
 def download_manifest_excel(manifest_id=None):
