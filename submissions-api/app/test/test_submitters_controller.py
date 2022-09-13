@@ -568,9 +568,7 @@ class TestSubmittersController(BaseTestCase):
             "data": {
                 "list": [{
                     "sample_rackid": "1234",
-                    "sample_tubeid": "5678"
-               }]
-           }
+                    "sample_tubeid": "5678"}]}
         }
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
@@ -867,9 +865,7 @@ class TestSubmittersController(BaseTestCase):
             "data": {
                 "list": [{
                     "sample_rackid": "1234",
-                    "sample_tubeid": "5678"
-               }]
-           }
+                    "sample_tubeid": "5678"}]}
         }
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
