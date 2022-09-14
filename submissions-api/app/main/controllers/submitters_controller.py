@@ -139,9 +139,26 @@ def fill_manifest(manifest_id=None):
         samples = response.json()["data"]["list"]
         if len(samples) < 1:
             return jsonify({'detail': "Samples do not exist in STS: " + sample.specimen_id}), 404
+
+        # We don't get all the info we need on this endpoint, so we will use this to call
+        # another endpoint which does have the details
+        rack_id = samples[0].get("sample_rackid", None)
+        tube_id = samples[0].get("sample_tubeid", None)
+        response = requests.get(os.environ['STS_URL'] + '/samples/detail',
+                                params={"rack_id": rack_id,
+                                        "tube_id": tube_id},
+                                headers={'Project': 'ALL',
+                                         'Authorization': os.getenv("STS_API_KEY")})
+        if (response.status_code != 200):
+            return jsonify({'detail': "Specimen does not exist in STS: "
+                           + sample.specimen_id}), 404
+        sample_from_sts = response.json()["data"]
+        if len(sample_from_sts) < 1:
+            return jsonify({'detail': "Sample does not exist in STS: " + sample.specimen_id}), 404
+
         for field in SubmissionsSample.all_fields:
             if "sts_api_name" in field:
-                val = samples[0].get(field["sts_api_name"], None)
+                val = sample_from_sts.get(field["sts_api_name"], None)
                 if val == "":
                     val = None
                 current_val = getattr(sample, field["python_name"])
