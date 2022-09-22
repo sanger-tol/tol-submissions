@@ -215,7 +215,7 @@ class SubmissionsSample(Base):
                   {"python_name": "GAL",
                    "field_name": "GAL",  # Validated in ENA checklist
                    "required": True,
-                   "sts_api_name": "gal_name"},
+                   "sts_api_name": "gal_name_raw"},
                   {"python_name": "GAL_sample_id",
                    "field_name": "GAL_SAMPLE_ID",
                    "required": True,
