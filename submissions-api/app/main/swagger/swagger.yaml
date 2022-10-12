@@ -589,6 +589,7 @@ components:
       type: object
       additionalProperties:
         type: string
+        nullable: true
       required:
         - row
         - SPECIMEN_ID
