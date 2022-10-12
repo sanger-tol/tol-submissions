@@ -40,10 +40,12 @@ def create_manifest_from_json(json, user):
         # Extra fields
         for field_name in s:
             if field_name not in ignore_fields:
-                sample_field = SubmissionsSampleField()
-                sample_field.sample = sample
-                sample_field.name = field_name
-                sample_field.value = s.get(field_name)
+                field_value = s.get(field_name)
+                if field_value is not None:
+                    sample_field = SubmissionsSampleField()
+                    sample_field.sample = sample
+                    sample_field.name = field_name
+                    sample_field.value = field_value
 
     return manifest
 

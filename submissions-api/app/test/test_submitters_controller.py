@@ -105,7 +105,8 @@ class TestSubmittersController(BaseTestCase):
                      'ORIGINAL_COLLECTION_DATE': '2021-05-05',
                      'ORIGINAL_GEOGRAPHIC_LOCATION': 'United Kingdom | Light Forest',
                      'BARCODE_HUB': 'SANGER INSTITUTE',
-                     'EXTRA_FIELD': 'extra1'}
+                     'EXTRA_FIELD': 'extra1',
+                     'EXTRA_FIELD_2': None}
                 ]}
         # Not a submitter
         response = self.client.open(
