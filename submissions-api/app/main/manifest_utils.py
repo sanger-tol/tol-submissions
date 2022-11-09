@@ -246,7 +246,7 @@ def validate_sample(sample):
     results += validate_whole_organisms_unique(sample)
 
     # STS for rack/plate and tube/well
-    results += validate_sts_rack_plate_tube_well(sample)
+    # results += validate_sts_rack_plate_tube_well(sample)
 
     # ToLID service
     results += validate_species_known_in_tolid(sample)
