@@ -14,9 +14,9 @@ class MailUtils:
     @staticmethod
     def get_requests_pending():
         requests_pending_html = MailUtils.__get_html_from_template('requests_pending')
-        url = f"{os['TOLID_URL']}"
+        url = f'{os["TOLID_URL"]}'
         requests_pending_html = requests_pending_html.format(url=url)
-        subject = "Requests pending"
+        subject = 'Requests pending'
         return requests_pending_html, subject
 
     @staticmethod
@@ -66,7 +66,7 @@ class MailUtils:
             fp = open(path_image, 'rb')
             msg_image = MIMEImage(fp.read())
             fp.close()
-            msg_image.add_header('Content-ID', f"<{image}>")
+            msg_image.add_header('Content-ID', f'<{image}>')
             msg_root.attach(msg_image)
 
         server = smtplib.SMTP(host, port)

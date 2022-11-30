@@ -1,12 +1,16 @@
 # SPDX-FileCopyrightText: 2021 Genome Research Ltd.
 #
 # SPDX-License-Identifier: MIT
-from flask import jsonify
-from sqlalchemy import or_
-from main.model import db, SubmissionsSample
-from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
+
 import logging
 import os
+
+from flask import jsonify
+
+from main.model import SubmissionsSample, db
+from main.specimen_utils import get_biospecimen_sts, get_specimen_sts
+
+from sqlalchemy import or_
 
 
 def get_samples_from_specimen(specimen):
@@ -23,9 +27,9 @@ def get_samples_from_specimen(specimen):
         .all()
 
     return jsonify({
-        "specimenId": specimen.specimen_id,
-        "biospecimenId": biosspecimen_id,
-        "samples": samples,
+        'specimenId': specimen.specimen_id,
+        'biospecimenId': biosspecimen_id,
+        'samples': samples,
     })
 
 
@@ -33,7 +37,7 @@ def get_samples_by_specimen_id(specimen_id):
     # Does the specimen exist?
     specimen = get_specimen_sts(specimen_id)
     if specimen is None:
-        return jsonify({'detail': "Specimen does not exist"}), 404
+        return jsonify({'detail': 'Specimen does not exist'}), 404
 
     # return the samples
     return get_samples_from_specimen(specimen)
@@ -47,7 +51,7 @@ def get_samples_by_biospecimen_id(biospecimen_id):
     # Does the specimen exist?
     specimen = get_biospecimen_sts(biospecimen_id)
     if specimen is None:
-        return jsonify({'detail': "Specimen does not exist"}), 404
+        return jsonify({'detail': 'Specimen does not exist'}), 404
 
     # return the samples
     return get_samples_from_specimen(specimen)
@@ -59,16 +63,16 @@ def get_sample(biosample_id):
         .filter(SubmissionsSample.biosample_accession == biosample_id) \
         .one_or_none()
     if sample is None:
-        return jsonify({'detail': "Sample does not exist"}), 404
+        return jsonify({'detail': 'Sample does not exist'}), 404
 
     return jsonify(sample)
 
 
 def get_environment():
-    deployment_environment = os.getenv("ENVIRONMENT")
-    if deployment_environment is not None and deployment_environment != "":
+    deployment_environment = os.getenv('ENVIRONMENT')
+    if deployment_environment is not None and deployment_environment != '':
         return jsonify({'environment': deployment_environment})
 
     # if unset, return error
-    logging.warn("$ENVIRONMENT is unset - this should probably be 'dev'")
+    logging.warn('$ENVIRONMENT is unset - this should probably be "dev"')
     return jsonify({'environment': 'dev'})
