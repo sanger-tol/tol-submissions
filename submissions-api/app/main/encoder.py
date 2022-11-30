@@ -7,7 +7,6 @@ from connexion.apps.flask_app import FlaskJSONEncoder
 from main.model import Base
 
 
-
 class JSONEncoder(FlaskJSONEncoder):
     include_nulls = False
 
