@@ -5,6 +5,4 @@
 [flake8]
 max-line-length = 99
 extend-exclude =
-    copo
-    submissions-api/migrations/alembic/versions
 extend-ignore = D
