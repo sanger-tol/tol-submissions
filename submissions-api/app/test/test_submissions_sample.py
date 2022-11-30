@@ -5,7 +5,8 @@
 from __future__ import absolute_import
 
 from test import BaseTestCase
-from main.model import SubmissionsSample, SubmissionsManifest
+
+from main.model import SubmissionsManifest, SubmissionsSample
 
 
 class TestSubmissionsSample(BaseTestCase):
@@ -14,58 +15,58 @@ class TestSubmissionsSample(BaseTestCase):
         sample = SubmissionsSample()
 
         # Correct
-        sample.collection_location = "United Kingdom | England | Cambridge"
-        self.assertEqual(sample.collection_country(), "United Kingdom")
-        self.assertEqual(sample.collection_region(), "England | Cambridge")
+        sample.collection_location = 'United Kingdom | England | Cambridge'
+        self.assertEqual(sample.collection_country(), 'United Kingdom')
+        self.assertEqual(sample.collection_region(), 'England | Cambridge')
 
         # No space near delimiter
-        sample.collection_location = "United Kingdom| England |Cambridge"
-        self.assertEqual(sample.collection_country(), "United Kingdom")
-        self.assertEqual(sample.collection_region(), "England | Cambridge")
+        sample.collection_location = 'United Kingdom| England |Cambridge'
+        self.assertEqual(sample.collection_country(), 'United Kingdom')
+        self.assertEqual(sample.collection_region(), 'England | Cambridge')
 
         # Only country
-        sample.collection_location = "United Kingdom"
-        self.assertEqual(sample.collection_country(), "United Kingdom")
-        self.assertEqual(sample.collection_region(), "")
+        sample.collection_location = 'United Kingdom'
+        self.assertEqual(sample.collection_country(), 'United Kingdom')
+        self.assertEqual(sample.collection_region(), '')
 
         # Blank
-        sample.collection_location = ""
-        self.assertEqual(sample.collection_country(), "")
-        self.assertEqual(sample.collection_region(), "")
+        sample.collection_location = ''
+        self.assertEqual(sample.collection_country(), '')
+        self.assertEqual(sample.collection_region(), '')
 
     def test_ena_dict(self):
         manifest = SubmissionsManifest()
         manifest.user = self.user1
-        manifest.project_name = "AwesomeProject"
+        manifest.project_name = 'AwesomeProject'
         sample = SubmissionsSample()
-        sample.specimen_id = "specimen1234"
+        sample.specimen_id = 'specimen1234'
         sample.taxonomy_id = 6344
-        sample.scientific_name = "Arenicola marina2"
-        sample.family = "Arenicolidae2"
-        sample.genus = "Arenicola2"
-        sample.order_or_group = "None2"
-        sample.common_name = "lugworm"
-        sample.lifestage = "ADULT"
-        sample.sex = "FEMALE"
-        sample.organism_part = "MUSCLE"
-        sample.GAL = "Sanger Institute"
-        sample.GAL_sample_id = "SAN000100"
-        sample.collected_by = "ALEX COLLECTOR"
-        sample.collector_affiliation = "THE COLLECTOR INSTUTUTE"
-        sample.date_of_collection = "2020-09-01"
-        sample.collection_location = "UNITED KINGDOM | DARK FOREST"
-        sample.decimal_latitude = "+50.12345678"
-        sample.decimal_longitude = "-1.98765432"
-        sample.habitat = "WOODLAND"
-        sample.identified_by = "JO IDENTIFIER"
-        sample.identifier_affiliation = "THE IDENTIFIER INSTITUTE"
-        sample.voucher_id = "voucher1"
-        sample.elevation = "1500"
-        sample.depth = "1000"
-        sample.relationship = "child of 1234"
+        sample.scientific_name = 'Arenicola marina2'
+        sample.family = 'Arenicolidae2'
+        sample.genus = 'Arenicola2'
+        sample.order_or_group = 'None2'
+        sample.common_name = 'lugworm'
+        sample.lifestage = 'ADULT'
+        sample.sex = 'FEMALE'
+        sample.organism_part = 'MUSCLE'
+        sample.GAL = 'Sanger Institute'
+        sample.GAL_sample_id = 'SAN000100'
+        sample.collected_by = 'ALEX COLLECTOR'
+        sample.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
+        sample.date_of_collection = '2020-09-01'
+        sample.collection_location = 'UNITED KINGDOM | DARK FOREST'
+        sample.decimal_latitude = '+50.12345678'
+        sample.decimal_longitude = '-1.98765432'
+        sample.habitat = 'WOODLAND'
+        sample.identified_by = 'JO IDENTIFIER'
+        sample.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
+        sample.voucher_id = 'voucher1'
+        sample.elevation = '1500'
+        sample.depth = '1000'
+        sample.relationship = 'child of 1234'
         sample.manifest = manifest
 
-        expected = {"ENA-CHECKLIST": {"value": "ERC000053"},
+        expected = {'ENA-CHECKLIST': {'value': 'ERC000053'},
                     'organism part': {'value': 'MUSCLE'},
                     'lifestage': {'value': 'ADULT'},
                     'project name': {'value': 'AwesomeProject'},
@@ -94,9 +95,9 @@ class TestSubmissionsSample(BaseTestCase):
         sample = SubmissionsSample()
         sample.symbiont = None
         self.assertFalse(sample.is_symbiont())
-        sample.symbiont = "TARGET"
+        sample.symbiont = 'TARGET'
         self.assertFalse(sample.is_symbiont())
-        sample.symbiont = "SYMBIONT"
+        sample.symbiont = 'SYMBIONT'
         self.assertTrue(sample.is_symbiont())
 
 

@@ -4,25 +4,25 @@
 
 from __future__ import absolute_import
 
+import os
 from test import BaseTestCase
 
-from main.specimen_utils import get_specimen_sts, get_biospecimen_sts
+from main.specimen_utils import get_biospecimen_sts, get_specimen_sts
 
 import responses
-import os
 
 
 class TestSpecimenUtils(BaseTestCase):
 
     @responses.activate
     def test_get_specimen_sts(self):
-        specimen_id = "a_great_specimen_id"
+        specimen_id = 'a_great_specimen_id'
         url = os.environ['STS_URL'] + '/specimens?specimen_id=' + specimen_id
 
         # no elements in list
         mock_no_elements = {
-            "data": {
-                "list": []
+            'data': {
+                'list': []
             }
         }
 
@@ -36,15 +36,15 @@ class TestSpecimenUtils(BaseTestCase):
 
         # too many elements in list
         mock_too_many = {
-            "data": {
-                "list": [
+            'data': {
+                'list': [
                     {
-                        "bio_specimen_id": "test_bio_specimen_id",
-                        "specimen_id": "test_specimen_id"
+                        'bio_specimen_id': 'test_bio_specimen_id',
+                        'specimen_id': 'test_specimen_id'
                     },
                     {
-                        "bio_specimen_id": "superfluous_bio_specimen_id",
-                        "specimen_id": "superfluous_specimen_id"
+                        'bio_specimen_id': 'superfluous_bio_specimen_id',
+                        'specimen_id': 'superfluous_specimen_id'
                     }
                 ]
             }
@@ -60,11 +60,11 @@ class TestSpecimenUtils(BaseTestCase):
 
         # successfully returning a single specimen
         mock_specimen_sts = {
-            "data": {
-                "list": [
+            'data': {
+                'list': [
                     {
-                        "bio_specimen_id": "test_bio_specimen_id",
-                        "specimen_id": "test_specimen_id"
+                        'bio_specimen_id': 'test_bio_specimen_id',
+                        'specimen_id': 'test_specimen_id'
                     }
                 ]
             }
@@ -72,21 +72,21 @@ class TestSpecimenUtils(BaseTestCase):
 
         responses.add(responses.GET, url, json=mock_specimen_sts, status=200)
         result = get_specimen_sts(specimen_id)
-        self.assertEqual(result.biosample_accession, "test_bio_specimen_id")
-        self.assertEqual(result.specimen_id, "test_specimen_id")
+        self.assertEqual(result.biosample_accession, 'test_bio_specimen_id')
+        self.assertEqual(result.specimen_id, 'test_specimen_id')
 
         # reset the mock
         responses.reset()
 
     @responses.activate
     def test_get_biospecimen_sts(self):
-        biospecimen_id = "a_great_biospecimen_id"
+        biospecimen_id = 'a_great_biospecimen_id'
         url = os.environ['STS_URL'] + '/specimens?bio_specimen_id=' + biospecimen_id
 
         # no elements in list
         mock_no_elements = {
-            "data": {
-                "list": []
+            'data': {
+                'list': []
             }
         }
 
@@ -100,15 +100,15 @@ class TestSpecimenUtils(BaseTestCase):
 
         # too many elements in list
         mock_too_many = {
-            "data": {
-                "list": [
+            'data': {
+                'list': [
                     {
-                        "bio_specimen_id": "test_bio_specimen_id",
-                        "specimen_id": "test_specimen_id"
+                        'bio_specimen_id': 'test_bio_specimen_id',
+                        'specimen_id': 'test_specimen_id'
                     },
                     {
-                        "bio_specimen_id": "superfluous_bio_specimen_id",
-                        "specimen_id": "superfluous_specimen_id"
+                        'bio_specimen_id': 'superfluous_bio_specimen_id',
+                        'specimen_id': 'superfluous_specimen_id'
                     }
                 ]
             }
@@ -124,11 +124,11 @@ class TestSpecimenUtils(BaseTestCase):
 
         # successfully returning a single specimen
         mock_specimen_sts = {
-            "data": {
-                "list": [
+            'data': {
+                'list': [
                     {
-                        "bio_specimen_id": "test_bio_specimen_id",
-                        "specimen_id": "test_specimen_id"
+                        'bio_specimen_id': 'test_bio_specimen_id',
+                        'specimen_id': 'test_specimen_id'
                     }
                 ]
             }
@@ -136,8 +136,8 @@ class TestSpecimenUtils(BaseTestCase):
 
         responses.add(responses.GET, url, json=mock_specimen_sts, status=200)
         result = get_biospecimen_sts(biospecimen_id)
-        self.assertEqual(result.biosample_accession, "test_bio_specimen_id")
-        self.assertEqual(result.specimen_id, "test_specimen_id")
+        self.assertEqual(result.biosample_accession, 'test_bio_specimen_id')
+        self.assertEqual(result.specimen_id, 'test_specimen_id')
 
         # reset the mock
         responses.reset()

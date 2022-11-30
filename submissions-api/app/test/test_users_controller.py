@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: MIT
 
+import os
 from test import BaseTestCase
-from main.model import db, SubmissionsSpecimen, \
-    SubmissionsSample
+
 from flask import json
 
+from main.model import SubmissionsSample, SubmissionsSpecimen, db
+
 import responses
-import os
 
 
 def create_sample(biosample_id):
@@ -70,14 +71,14 @@ def create_specimen(specimen_id, biospecimen_id):
     return specimen
 
 
-def assertSamplesAreSame(obj, inserted_sample, retrieved_sample_dict):
+def assert_samples_are_same(obj, inserted_sample, retrieved_sample_dict):
     # convert both to dictionaries
     inserted_sample_dict = inserted_sample.to_dict()
 
     obj.assertEqual(inserted_sample_dict, retrieved_sample_dict)
 
 
-def assertInsertedAndRetrievedAreSame(obj, inserted, retrieved):
+def assert_inserted_and_retrieved_are_same(obj, inserted, retrieved):
     """
     Compares the inserted samples, and retrived samples, by
     creating a list of json representations (dicts are not
@@ -85,7 +86,7 @@ def assertInsertedAndRetrievedAreSame(obj, inserted, retrieved):
     for different orderings
     """
     # get the set of inserted samples as json
-    inserted_set = set([json.dumps(p.to_dict()) for p in inserted])
+    inserted_set = {json.dumps(p.to_dict()) for p in inserted}
 
     # assert that the length is the same, to detect duplicates
     # in the inserted samples
@@ -95,7 +96,7 @@ def assertInsertedAndRetrievedAreSame(obj, inserted, retrieved):
     )
 
     # get the set of retrieved samples as json
-    retrieved_set = set([json.dumps(r) for r in retrieved])
+    retrieved_set = {json.dumps(r) for r in retrieved}
 
     # assert that the length is the same, to detect duplicates
     # in the retrieved samples
@@ -113,7 +114,7 @@ def assertInsertedAndRetrievedAreSame(obj, inserted, retrieved):
 class TestUsersController(BaseTestCase):
     def test_get_sample(self):
         # obviously invalid sample ID
-        invalid_biosample_id = "doesntMatterAtAll"
+        invalid_biosample_id = 'doesntMatterAtAll'
         response = self.client.open(
             f'/api/v1/samples/{invalid_biosample_id}',
             method='GET',
@@ -122,7 +123,7 @@ class TestUsersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
         # previously inserted sample ID
-        inserted_biosample_id = "aBrilliantBiosampleId"
+        inserted_biosample_id = 'aBrilliantBiosampleId'
         inserted_sample = create_sample(inserted_biosample_id)
         db.session.add(inserted_sample)
         db.session.commit()
@@ -134,16 +135,16 @@ class TestUsersController(BaseTestCase):
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         # assert that inserted and retrieved are the same
-        assertSamplesAreSame(self, inserted_sample, response.json)
+        assert_samples_are_same(self, inserted_sample, response.json)
 
     @responses.activate
     def test_get_samples_by_specimen_id(self):
         # obviously invalid specimen ID
-        invalid_specimen_id = "doesntMatterAtAll"
+        invalid_specimen_id = 'doesntMatterAtAll'
         # mock STS Call
         responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id='
                       + invalid_specimen_id,
-                      json={"data": {"list": []}},
+                      json={'data': {'list': []}},
                       status=200)
         response = self.client.open(
             f'/api/v1/specimens/specimenId/{invalid_specimen_id}/samples',
@@ -155,20 +156,20 @@ class TestUsersController(BaseTestCase):
         responses.reset()
 
         # insert specimen with one of each kind of sample
-        present_specimen_id = "specimenIdNova"
-        present_biospecimen_id = "biospecimenIdNova"
+        present_specimen_id = 'specimenIdNova'
+        present_biospecimen_id = 'biospecimenIdNova'
         present_biosample_ids = [
-            "thing1",
-            "thing2",
-            "thing3",
+            'thing1',
+            'thing2',
+            'thing3',
         ]
         # mock STS Call
         responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id='
                       + present_specimen_id,
-                      json={"data": {"list": [
-                               {"specimen_id": present_specimen_id,
-                                "bio_specimen_id": present_biospecimen_id}
-                            ]}},
+                      json={'data': {'list': [
+                          {'specimen_id': present_specimen_id,
+                           'bio_specimen_id': present_biospecimen_id}
+                      ]}},
                       status=200)
         present_samples = create_three_samples_for_specimen(
             present_biospecimen_id,
@@ -188,11 +189,11 @@ class TestUsersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
         # assert that the biospecimen ID is correct
-        self.assertEqual(present_biospecimen_id, response.json["biospecimenId"])
+        self.assertEqual(present_biospecimen_id, response.json['biospecimenId'])
 
         # assert that all 3 samples were found for this present specimen
         retrieved_samples = response.json['samples']
-        assertInsertedAndRetrievedAreSame(
+        assert_inserted_and_retrieved_are_same(
             self,
             present_samples,
             retrieved_samples,
@@ -204,11 +205,11 @@ class TestUsersController(BaseTestCase):
     @responses.activate
     def test_get_samples_by_biospecimen_id(self):
         # obviously invalid biospecimen ID
-        invalid_biospecimen_id = "andNothingElseMatters"
+        invalid_biospecimen_id = 'andNothingElseMatters'
         # mock STS Call
         responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?bio_specimen_id='
                       + invalid_biospecimen_id,
-                      json={"data": {"list": []}},
+                      json={'data': {'list': []}},
                       status=200)
         response = self.client.open(
             f'/api/v1/specimens/biospecimenId/{invalid_biospecimen_id}/samples',
@@ -220,20 +221,20 @@ class TestUsersController(BaseTestCase):
         responses.reset()
 
         # insert specimen with one of each kind of sample
-        present_specimen_id = "uberSpecimenId"
-        present_biospecimen_id = "uberBioSpecimenId"
+        present_specimen_id = 'uberSpecimenId'
+        present_biospecimen_id = 'uberBioSpecimenId'
         present_biosample_ids = [
-            "another1",
-            "another2",
-            "another3",
+            'another1',
+            'another2',
+            'another3',
         ]
         # mock STS Call
         responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?bio_specimen_id='
                       + present_biospecimen_id,
-                      json={"data": {"list": [
-                               {"specimen_id": present_specimen_id,
-                                "bio_specimen_id": present_biospecimen_id}
-                            ]}},
+                      json={'data': {'list': [
+                          {'specimen_id': present_specimen_id,
+                           'bio_specimen_id': present_biospecimen_id}
+                      ]}},
                       status=200)
         present_samples = create_three_samples_for_specimen(
             present_biospecimen_id,
@@ -253,11 +254,11 @@ class TestUsersController(BaseTestCase):
                        'Response body is : ' + response.data.decode('utf-8'))
 
         # assert that the specimen ID is correct
-        self.assertEqual(present_specimen_id, response.json["specimenId"])
+        self.assertEqual(present_specimen_id, response.json['specimenId'])
 
         # assert that all 3 samples were found for this present specimen
         retrieved_samples = response.json['samples']
-        assertInsertedAndRetrievedAreSame(
+        assert_inserted_and_retrieved_are_same(
             self,
             present_samples,
             retrieved_samples,

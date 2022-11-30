@@ -3,58 +3,56 @@
 # SPDX-License-Identifier: MIT
 
 import logging
-
-import connexion
-from flask_testing import TestCase
 import os
 
-from main.encoder import JSONEncoder
+import connexion
 
-from main.model import db, \
-    SubmissionsUser, SubmissionsRole, SubmissionsState, \
-    SubmissionsManifest, SubmissionsSample, SubmissionsSpecimen, \
-    SubmissionsSampleField
+from flask_testing import TestCase
+
+from main.encoder import JSONEncoder
+from main.model import SubmissionsManifest, SubmissionsRole, SubmissionsSample, \
+    SubmissionsSampleField, SubmissionsSpecimen, SubmissionsState, SubmissionsUser, db
 
 
 class BaseTestCase(TestCase):
 
-    api_key = "AnyThingBecAuseThIsIsATEST123456"
-    api_key2 = "AnyThingBecAuseThIsIsATEST567890"
-    api_key3 = "AnyThingBecAuseThIsIsATEST24680"
+    api_key = 'AnyThingBecAuseThIsIsATEST123456'
+    api_key2 = 'AnyThingBecAuseThIsIsATEST567890'
+    api_key3 = 'AnyThingBecAuseThIsIsATEST24680'
 
     def setUp(self):
         self.maxDiff = None
         db.create_all()
         self.tearDown()
         self.user1 = SubmissionsUser(user_id=100,
-                                     name="test_user_requester",
-                                     email="test_user_requester@sanger.ac.uk",
-                                     organisation="Sanger Institute",
-                                     api_key="AnyThingBecAuseThIsIsATEST123456")
+                                     name='test_user_requester',
+                                     email='test_user_requester@sanger.ac.uk',
+                                     organisation='Sanger Institute',
+                                     api_key='AnyThingBecAuseThIsIsATEST123456')
         db.session.add(self.user1)
         self.user2 = SubmissionsUser(user_id=200,
-                                     name="test_user_admin",
-                                     email="test_user_admin@sanger.ac.uk",
-                                     organisation="Sanger Institute",
-                                     api_key="AnyThingBecAuseThIsIsATEST567890")
+                                     name='test_user_admin',
+                                     email='test_user_admin@sanger.ac.uk',
+                                     organisation='Sanger Institute',
+                                     api_key='AnyThingBecAuseThIsIsATEST567890')
         db.session.add(self.user2)
         self.user3 = SubmissionsUser(user_id=300,
-                                     name="test_user_submitter",
-                                     email="test_user_submitter@sanger.ac.uk",
-                                     organisation="Sanger Institute",
-                                     api_key="AnyThingBecAuseThIsIsATEST24680")
+                                     name='test_user_submitter',
+                                     email='test_user_submitter@sanger.ac.uk',
+                                     organisation='Sanger Institute',
+                                     api_key='AnyThingBecAuseThIsIsATEST24680')
         db.session.add(self.user1)
         db.session.add(self.user2)
         db.session.add(self.user3)
-        self.role = SubmissionsRole(role="admin")
+        self.role = SubmissionsRole(role='admin')
         self.role.user = self.user2
         db.session.add(self.role)
-        self.role = SubmissionsRole(role="submitter")
+        self.role = SubmissionsRole(role='submitter')
         self.role.user = self.user3
         db.session.add(self.role)
         db.session.commit()
-        db.engine.execute("ALTER SEQUENCE manifest_manifest_id_seq RESTART WITH 1;")
-        db.engine.execute("ALTER SEQUENCE sample_sample_id_seq RESTART WITH 1;")
+        db.engine.execute('ALTER SEQUENCE manifest_manifest_id_seq RESTART WITH 1;')
+        db.engine.execute('ALTER SEQUENCE sample_sample_id_seq RESTART WITH 1;')
 
     def tearDown(self):
         db.session.query(SubmissionsSampleField).delete()

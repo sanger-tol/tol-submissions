@@ -5,7 +5,8 @@
 from __future__ import absolute_import
 
 from test import BaseTestCase
-from main.model import SubmissionsSample, SubmissionsManifest
+
+from main.model import SubmissionsManifest, SubmissionsSample
 
 
 class TestSubmissionsSample(BaseTestCase):
@@ -22,7 +23,7 @@ class TestSubmissionsSample(BaseTestCase):
         sample.taxonomy_id = 2
         sample.manifest = manifest
 
-        expected = set([1, 2])
+        expected = {1, 2}
 
         self.assertEqual(expected, manifest.unique_taxonomy_ids())
 
