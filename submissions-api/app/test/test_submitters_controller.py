@@ -4,17 +4,20 @@
 
 from __future__ import absolute_import
 
-from test import BaseTestCase
-from main.model import db, SubmissionsManifest, SubmissionsSpecimen, \
-    SubmissionsSample
-import main.excel_utils as excel_utils
-import os
-import responses
-import tempfile
-import filecmp
 import datetime
-from openpyxl import load_workbook
+import filecmp
+import os
+import tempfile
+from test import BaseTestCase
 from unittest.mock import patch
+
+import main.excel_utils as excel_utils
+from main.model import SubmissionsManifest, SubmissionsSample, \
+    SubmissionsSpecimen, db
+
+from openpyxl import load_workbook
+
+import responses
 
 
 class TestSubmittersController(BaseTestCase):
@@ -34,7 +37,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -44,75 +47,75 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert400(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': 'NOT_PROVIDED',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'OTHER_INFORMATION': 'Interesting',
-                     'ELEVATION': '',  # Expect this to be set to None
-                     'SERIES': '1',
-                     'RACK_OR_PLATE_ID': 'RR12345678',
-                     'TUBE_OR_WELL_ID': 'TU12345678',
-                     'TAXON_REMARKS': 'nice',
-                     'INFRASPECIFIC_EPITHET': 'ie1',
-                     'COLLECTOR_SAMPLE_ID': 'mysample1',
-                     'GRID_REFERENCE': 'TL 1234 5678',
-                     'TIME_OF_COLLECTION': '12:00',
-                     'DESCRIPTION_OF_COLLECTION_METHOD': 'picked it',
-                     'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': 'Y',
-                     'IDENTIFIED_HOW': 'looking',
-                     'SPECIMEN_ID_RISK': 'Y',
-                     'PRESERVED_BY': 'A Freezer',
-                     'PRESERVER_AFFILIATION': 'cold storage ltd',
-                     'PRESERVATION_APPROACH': 'Freezing',
-                     'PRESERVATIVE_SOLUTION': 'Water',
-                     'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': '60',
-                     'DATE_OF_PRESERVATION': '2021-04-04',
-                     'SIZE_OF_TISSUE_IN_TUBE': 'VS',
-                     'TISSUE_REMOVED_FOR_BARCODING': 'Y',
-                     'PLATE_ID_FOR_BARCODING': 'plate1',
-                     'TUBE_OR_WELL_ID_FOR_BARCODING': 'well1',
-                     'TISSUE_FOR_BARCODING': 'LEG',
-                     'BARCODE_PLATE_PRESERVATIVE': 'ethanol',
-                     'PURPOSE_OF_SPECIMEN': 'REFERENCE_GENOME',
-                     'HAZARD_GROUP': 'HG1',
-                     'REGULATORY_COMPLIANCE': 'Y',
-                     'ORIGINAL_COLLECTION_DATE': '2021-05-05',
-                     'ORIGINAL_GEOGRAPHIC_LOCATION': 'United Kingdom | Light Forest',
-                     'BARCODE_HUB': 'SANGER INSTITUTE',
-                     'EXTRA_FIELD': 'extra1',
-                     'EXTRA_FIELD_2': None}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'GENUS': 'Arenicola',
+            'FAMILY': 'Arenicolidae',
+            'ORDER_OR_GROUP': 'Scolecida',
+            'COMMON_NAME': 'lugworm',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': '+50.12345678',
+            'DECIMAL_LONGITUDE': 'NOT_PROVIDED',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': 'voucher1',
+            'OTHER_INFORMATION': 'Interesting',
+            'ELEVATION': '',  # Expect this to be set to None
+            'SERIES': '1',
+            'RACK_OR_PLATE_ID': 'RR12345678',
+            'TUBE_OR_WELL_ID': 'TU12345678',
+            'TAXON_REMARKS': 'nice',
+            'INFRASPECIFIC_EPITHET': 'ie1',
+            'COLLECTOR_SAMPLE_ID': 'mysample1',
+            'GRID_REFERENCE': 'TL 1234 5678',
+            'TIME_OF_COLLECTION': '12:00',
+            'DESCRIPTION_OF_COLLECTION_METHOD': 'picked it',
+            'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': 'Y',
+            'IDENTIFIED_HOW': 'looking',
+            'SPECIMEN_ID_RISK': 'Y',
+            'PRESERVED_BY': 'A Freezer',
+            'PRESERVER_AFFILIATION': 'cold storage ltd',
+            'PRESERVATION_APPROACH': 'Freezing',
+            'PRESERVATIVE_SOLUTION': 'Water',
+            'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': '60',
+            'DATE_OF_PRESERVATION': '2021-04-04',
+            'SIZE_OF_TISSUE_IN_TUBE': 'VS',
+            'TISSUE_REMOVED_FOR_BARCODING': 'Y',
+            'PLATE_ID_FOR_BARCODING': 'plate1',
+            'TUBE_OR_WELL_ID_FOR_BARCODING': 'well1',
+            'TISSUE_FOR_BARCODING': 'LEG',
+            'BARCODE_PLATE_PRESERVATIVE': 'ethanol',
+            'PURPOSE_OF_SPECIMEN': 'REFERENCE_GENOME',
+            'HAZARD_GROUP': 'HG1',
+            'REGULATORY_COMPLIANCE': 'Y',
+            'ORIGINAL_COLLECTION_DATE': '2021-05-05',
+            'ORIGINAL_GEOGRAPHIC_LOCATION': 'United Kingdom | Light Forest',
+            'BARCODE_HUB': 'SANGER INSTITUTE',
+            'EXTRA_FIELD': 'extra1',
+            'EXTRA_FIELD_2': None}
+        ]}
         # Not a submitter
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -121,7 +124,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -203,20 +206,20 @@ class TestSubmittersController(BaseTestCase):
         self.assertEqual(expected, response.json)
 
         # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'SYMBIONT': 'SYMBIONT'}
+        ]}
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -252,7 +255,7 @@ class TestSubmittersController(BaseTestCase):
                          'ELEVATION': None,
                          'DEPTH': None,
                          'RELATIONSHIP': None,
-                         'SYMBIONT': "SYMBIONT",
+                         'SYMBIONT': 'SYMBIONT',
                          'CULTURE_OR_STRAIN_ID': None,
                          'SERIES': None,
                          'RACK_OR_PLATE_ID': None,
@@ -298,41 +301,41 @@ class TestSubmittersController(BaseTestCase):
 
     def test_get_manifest(self):
 
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': 'NOT_PROVIDED',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1',
-                     'ELEVATION': None,  # Test None is same as missing
-                     'DEPTH': ''}  # Test "" is the same as missing
-                ],
-                'projectName': 'TestProj',
-                'stsManifestId': '1234-4321'}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'GENUS': 'Arenicola',
+            'FAMILY': 'Arenicolidae',
+            'ORDER_OR_GROUP': 'Scolecida',
+            'COMMON_NAME': 'lugworm',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': 'NOT_PROVIDED',
+            'DECIMAL_LONGITUDE': '-1.98765432',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': 'voucher1',
+            'ELEVATION': None,  # Test None is same as missing
+            'DEPTH': ''}],  # Test '' is the same as missing
+            'projectName': 'TestProj',
+            'stsManifestId': '1234-4321'
+        }
 
         # Submit the manifest
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -351,7 +354,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1',
             method='GET',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -361,7 +364,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/2',
             method='GET',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -370,7 +373,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1',
             method='GET',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -379,7 +382,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1',
             method='GET',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -461,43 +464,43 @@ class TestSubmittersController(BaseTestCase):
     def test_get_manifests(self):
 
         manifest1 = SubmissionsManifest()
-        manifest1.sts_manifest_id = "123-456-789"
-        manifest1.project_name = "WowProj"
+        manifest1.sts_manifest_id = '123-456-789'
+        manifest1.project_name = 'WowProj'
         manifest1.submission_status = True
         manifest1.created_at = datetime.datetime(2020, 5, 17)
         manifest1.user = self.user1
         db.session.add(manifest1)
         manifest2 = SubmissionsManifest()
-        manifest2.sts_manifest_id = "987-654-321"
-        manifest2.project_name = "DudProj"
+        manifest2.sts_manifest_id = '987-654-321'
+        manifest2.project_name = 'DudProj'
         manifest2.submission_status = False
         manifest2.created_at = datetime.datetime(2021, 6, 18)
         manifest2.user = self.user2
-        sample1 = SubmissionsSample(collected_by="ALEX COLLECTOR",
-                                    collection_location="UNITED KINGDOM | DARK FOREST",
-                                    collector_affiliation="THE COLLECTOR INSTITUTE",
-                                    common_name="lugworm",
-                                    date_of_collection="2020-09-01",
-                                    decimal_latitude="50.12345678",
-                                    decimal_longitude="-1.98765432",
-                                    depth="100",
-                                    elevation="0",
-                                    family="Arenicolidae",
-                                    GAL="SANGER INSTITUTE",
-                                    GAL_sample_id="SAN0000100",
-                                    genus="Arenicola",
-                                    habitat="Woodland",
-                                    identified_by="JO IDENTIFIER",
-                                    identifier_affiliation="THE IDENTIFIER INSTITUTE",
-                                    lifestage="ADULT",
-                                    organism_part="MUSCLE",
-                                    order_or_group="Scolecida",
-                                    relationship="child of SAMEA1234567",
-                                    scientific_name="Arenicola marina",
-                                    sex="FEMALE",
-                                    specimen_id="SAN0000100",
+        sample1 = SubmissionsSample(collected_by='ALEX COLLECTOR',
+                                    collection_location='UNITED KINGDOM | DARK FOREST',
+                                    collector_affiliation='THE COLLECTOR INSTITUTE',
+                                    common_name='lugworm',
+                                    date_of_collection='2020-09-01',
+                                    decimal_latitude='50.12345678',
+                                    decimal_longitude='-1.98765432',
+                                    depth='100',
+                                    elevation='0',
+                                    family='Arenicolidae',
+                                    GAL='SANGER INSTITUTE',
+                                    GAL_sample_id='SAN0000100',
+                                    genus='Arenicola',
+                                    habitat='Woodland',
+                                    identified_by='JO IDENTIFIER',
+                                    identifier_affiliation='THE IDENTIFIER INSTITUTE',
+                                    lifestage='ADULT',
+                                    organism_part='MUSCLE',
+                                    order_or_group='Scolecida',
+                                    relationship='child of SAMEA1234567',
+                                    scientific_name='Arenicola marina',
+                                    sex='FEMALE',
+                                    specimen_id='SAN0000100',
                                     taxonomy_id=6344,
-                                    voucher_id="voucher1",
+                                    voucher_id='voucher1',
                                     row=1)
         sample1.manifest = manifest1
         db.session.add(manifest2)
@@ -517,7 +520,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='GET',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -526,7 +529,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='GET',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -535,7 +538,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests',
             method='GET',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -566,57 +569,57 @@ class TestSubmittersController(BaseTestCase):
     @patch('main.manifest_utils.get_ncbi_data')
     def test_fill_manifest(self, get_ncbi_data):
         mock_response_from_sts = {
-            "data": {
-                "list": [{
-                    "sample_rackid": "1234",
-                    "sample_tubeid": "5678"}]}
+            'data': {
+                'list': [{
+                    'sample_rackid': '1234',
+                    'sample_tubeid': '5678'}]}
         }
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 
         mock_response_from_sts_details = {
-            "data": {
-                "specimen_specimen_id": "SAN1234567",
-                "sample_biosample_accession": "SAMEA7701758",
-                "sample_relationship": "",
-                "gal_name": "UNIVERSITY OF OXFORD",
-                "sample_col_date": "2020-07-24",
-                "location_location": "United Kingdom | Berkshire | Wytham woods",
-                "location_lat": "51.77",
-                "location_long": "-1.339",
-                "location_habitat": "On thistle | Grassland",
-                "location_depth": "",
-                "location_elevation": "150",
-                "sample_voucherid": "NOT_APPLICABLE",
-                "sample_symbiont": "TARGET",
-                "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
-                "ext_id_value_COL_SAMPLE_ID": "COL1",
-                "person_fullname_COLLECT": "Collector 1",
-                "person_fullname_IDENTIFY": "Identifier 1",
-                "institution_name_COLLECT": "University of Oxford",
-                "institution_name_IDENTIFY": "University of Oxford",
-                "specimen_bio_specimen_id": "SAMEA7701562",
-                "location_grid_reference": "GB123456",
-                "cmethod_method": "Grasped",
-                "imethod_method": "Looking",
-                "sample_specimen_risk": "Y",
-                "person_fullname_PRESERVE": "A Preserver",
-                "institution_name_PRESERVE": "Sample Preservation Society",
-                "papproach_approach": "solution",
-                "psolution_solution": "ethanol",
-                "sample_pre_elapsed": "1",
-                "sample_pre_date": "1/1/2020",
-                "tissue_size_size": "NOT_APPLICABLE",
-                "sample_tremoved": "Y",
-                "sample_bplateid": "PLATE1",
-                "sample_btubeid": "TUBE1",
-                "sample_bplate_pre": "Jelly",
-                "specimen_purpose_purpose": "DNA_BARCODING_ONLY",
-                "hazard_group_level": "HG1",
-                "sample_reg_compliance": "Y",
-                "sample_original_collection_date": "1/1/2021",
-                "sample_original_geographic_location": "United Kingdom | Cambridge",
-                "sample_barcode_hub": "London"
+            'data': {
+                'specimen_specimen_id': 'SAN1234567',
+                'sample_biosample_accession': 'SAMEA7701758',
+                'sample_relationship': '',
+                'gal_name': 'UNIVERSITY OF OXFORD',
+                'sample_col_date': '2020-07-24',
+                'location_location': 'United Kingdom | Berkshire | Wytham woods',
+                'location_lat': '51.77',
+                'location_long': '-1.339',
+                'location_habitat': 'On thistle | Grassland',
+                'location_depth': '',
+                'location_elevation': '150',
+                'sample_voucherid': 'NOT_APPLICABLE',
+                'sample_symbiont': 'TARGET',
+                'ext_id_value_GAL_SAMPLE_ID': 'Ox000701',
+                'ext_id_value_COL_SAMPLE_ID': 'COL1',
+                'person_fullname_COLLECT': 'Collector 1',
+                'person_fullname_IDENTIFY': 'Identifier 1',
+                'institution_name_COLLECT': 'University of Oxford',
+                'institution_name_IDENTIFY': 'University of Oxford',
+                'specimen_bio_specimen_id': 'SAMEA7701562',
+                'location_grid_reference': 'GB123456',
+                'cmethod_method': 'Grasped',
+                'imethod_method': 'Looking',
+                'sample_specimen_risk': 'Y',
+                'person_fullname_PRESERVE': 'A Preserver',
+                'institution_name_PRESERVE': 'Sample Preservation Society',
+                'papproach_approach': 'solution',
+                'psolution_solution': 'ethanol',
+                'sample_pre_elapsed': '1',
+                'sample_pre_date': '1/1/2020',
+                'tissue_size_size': 'NOT_APPLICABLE',
+                'sample_tremoved': 'Y',
+                'sample_bplateid': 'PLATE1',
+                'sample_btubeid': 'TUBE1',
+                'sample_bplate_pre': 'Jelly',
+                'specimen_purpose_purpose': 'DNA_BARCODING_ONLY',
+                'hazard_group_level': 'HG1',
+                'sample_reg_compliance': 'Y',
+                'sample_original_collection_date': '1/1/2021',
+                'sample_original_geographic_location': 'United Kingdom | Cambridge',
+                'sample_barcode_hub': 'London'
             }
         }
         responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
@@ -674,28 +677,28 @@ class TestSubmittersController(BaseTestCase):
         }
 
         # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 63445,
-                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT',
-                     'GAL': 'NATURAL HISTORY MUSEUM'}  # Can override GAL here
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 63445,
+            'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'SYMBIONT': 'SYMBIONT',
+            'GAL': 'NATURAL HISTORY MUSEUM'}  # Can override GAL here
+        ]}
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/api/v1/manifests/1/fill',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -732,38 +735,38 @@ class TestSubmittersController(BaseTestCase):
                          'ELEVATION': '150',
                          'DEPTH': None,
                          'RELATIONSHIP': None,
-                         'SYMBIONT': "SYMBIONT",
+                         'SYMBIONT': 'SYMBIONT',
                          'CULTURE_OR_STRAIN_ID': None,
                          'SERIES': None,
                          'RACK_OR_PLATE_ID': None,
                          'TUBE_OR_WELL_ID': None,
                          'TAXON_REMARKS': None,
                          'INFRASPECIFIC_EPITHET': None,
-                         'COLLECTOR_SAMPLE_ID': "COL1",
-                         'GRID_REFERENCE': "GB123456",
+                         'COLLECTOR_SAMPLE_ID': 'COL1',
+                         'GRID_REFERENCE': 'GB123456',
                          'TIME_OF_COLLECTION': None,
-                         'DESCRIPTION_OF_COLLECTION_METHOD': "Grasped",
+                         'DESCRIPTION_OF_COLLECTION_METHOD': 'Grasped',
                          'DIFFICULT_OR_HIGH_PRIORITY_SAMPLE': None,
-                         'IDENTIFIED_HOW': "Looking",
-                         'SPECIMEN_ID_RISK': "Y",
-                         'PRESERVED_BY': "A Preserver",
-                         'PRESERVER_AFFILIATION': "Sample Preservation Society",
-                         'PRESERVATION_APPROACH': "solution",
-                         'PRESERVATIVE_SOLUTION': "ethanol",
-                         'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': "1",
-                         'DATE_OF_PRESERVATION': "1/1/2020",
-                         'SIZE_OF_TISSUE_IN_TUBE': "NOT_APPLICABLE",
-                         'TISSUE_REMOVED_FOR_BARCODING': "Y",
-                         'PLATE_ID_FOR_BARCODING': "PLATE1",
-                         'TUBE_OR_WELL_ID_FOR_BARCODING': "TUBE1",
+                         'IDENTIFIED_HOW': 'Looking',
+                         'SPECIMEN_ID_RISK': 'Y',
+                         'PRESERVED_BY': 'A Preserver',
+                         'PRESERVER_AFFILIATION': 'Sample Preservation Society',
+                         'PRESERVATION_APPROACH': 'solution',
+                         'PRESERVATIVE_SOLUTION': 'ethanol',
+                         'TIME_ELAPSED_FROM_COLLECTION_TO_PRESERVATION': '1',
+                         'DATE_OF_PRESERVATION': '1/1/2020',
+                         'SIZE_OF_TISSUE_IN_TUBE': 'NOT_APPLICABLE',
+                         'TISSUE_REMOVED_FOR_BARCODING': 'Y',
+                         'PLATE_ID_FOR_BARCODING': 'PLATE1',
+                         'TUBE_OR_WELL_ID_FOR_BARCODING': 'TUBE1',
                          'TISSUE_FOR_BARCODING': None,
-                         'BARCODE_PLATE_PRESERVATIVE': "Jelly",
-                         'PURPOSE_OF_SPECIMEN': "DNA_BARCODING_ONLY",
-                         'HAZARD_GROUP': "HG1",
-                         'REGULATORY_COMPLIANCE': "Y",
-                         'ORIGINAL_COLLECTION_DATE': "1/1/2021",
-                         'ORIGINAL_GEOGRAPHIC_LOCATION': "United Kingdom | Cambridge",
-                         'BARCODE_HUB': "London",
+                         'BARCODE_PLATE_PRESERVATIVE': 'Jelly',
+                         'PURPOSE_OF_SPECIMEN': 'DNA_BARCODING_ONLY',
+                         'HAZARD_GROUP': 'HG1',
+                         'REGULATORY_COMPLIANCE': 'Y',
+                         'ORIGINAL_COLLECTION_DATE': '1/1/2021',
+                         'ORIGINAL_GEOGRAPHIC_LOCATION': 'United Kingdom | Cambridge',
+                         'BARCODE_HUB': 'London',
                          'tolId': None,
                          'biosampleAccession': None,
                          'sraAccession': None,
@@ -834,27 +837,27 @@ class TestSubmittersController(BaseTestCase):
         }
 
         # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 63445,
-                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 63445,
+            'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'SYMBIONT': 'SYMBIONT'}
+        ]}
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/api/v1/manifests/1/fill',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -863,57 +866,57 @@ class TestSubmittersController(BaseTestCase):
     @patch('main.manifest_utils.get_ncbi_data')
     def test_fill_manifest_sample_not_in_ncbi(self, get_ncbi_data):
         mock_response_from_sts = {
-            "data": {
-                "list": [{
-                    "sample_rackid": "1234",
-                    "sample_tubeid": "5678"}]}
+            'data': {
+                'list': [{
+                    'sample_rackid': '1234',
+                    'sample_tubeid': '5678'}]}
         }
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 
         mock_response_from_sts_details = {
-            "data": {
-                "specimen_specimen_id": "SAN1234567",
-                "sample_biosample_accession": "SAMEA7701758",
-                "sample_relationship": "",
-                "gal_name": "UNIVERSITY OF OXFORD",
-                "sample_col_date": "2020-07-24",
-                "location_location": "United Kingdom | Berkshire | Wytham woods",
-                "location_lat": "51.77",
-                "location_long": "-1.339",
-                "location_habitat": "On thistle | Grassland",
-                "location_depth": "",
-                "location_elevation": "150",
-                "sample_voucherid": "NOT_APPLICABLE",
-                "sample_symbiont": "TARGET",
-                "ext_id_value_GAL_SAMPLE_ID": "Ox000701",
-                "ext_id_value_COL_SAMPLE_ID": "COL1",
-                "person_fullname_COLLECT": "Collector 1",
-                "person_fullname_IDENTIFY": "Identifier 1",
-                "institution_name_COLLECT": "University of Oxford",
-                "institution_name_IDENTIFY": "University of Oxford",
-                "specimen_bio_specimen_id": "SAMEA7701562",
-                "location_grid_reference": "GB123456",
-                "cmethod_method": "Grasped",
-                "imethod_method": "Looking",
-                "sample_specimen_risk": "Y",
-                "person_fullname_PRESERVE": "A Preserver",
-                "institution_name_PRESERVE": "Sample Preservation Society",
-                "papproach_approach": "solution",
-                "psolution_solution": "ethanol",
-                "sample_pre_elapsed": "1",
-                "sample_pre_date": "1/1/2020",
-                "tissue_size_size": "NOT_APPLICABLE",
-                "sample_tremoved": "Y",
-                "sample_bplateid": "PLATE1",
-                "sample_btubeid": "TUBE1",
-                "sample_bplate_pre": "Jelly",
-                "specimen_purpose_purpose": "DNA_BARCODING_ONLY",
-                "hazard_group_level": "HG1",
-                "sample_reg_compliance": "Y",
-                "sample_original_collection_date": "1/1/2021",
-                "sample_original_geographic_location": "United Kingdom | Cambridge",
-                "sample_barcode_hub": "London"
+            'data': {
+                'specimen_specimen_id': 'SAN1234567',
+                'sample_biosample_accession': 'SAMEA7701758',
+                'sample_relationship': '',
+                'gal_name': 'UNIVERSITY OF OXFORD',
+                'sample_col_date': '2020-07-24',
+                'location_location': 'United Kingdom | Berkshire | Wytham woods',
+                'location_lat': '51.77',
+                'location_long': '-1.339',
+                'location_habitat': 'On thistle | Grassland',
+                'location_depth': '',
+                'location_elevation': '150',
+                'sample_voucherid': 'NOT_APPLICABLE',
+                'sample_symbiont': 'TARGET',
+                'ext_id_value_GAL_SAMPLE_ID': 'Ox000701',
+                'ext_id_value_COL_SAMPLE_ID': 'COL1',
+                'person_fullname_COLLECT': 'Collector 1',
+                'person_fullname_IDENTIFY': 'Identifier 1',
+                'institution_name_COLLECT': 'University of Oxford',
+                'institution_name_IDENTIFY': 'University of Oxford',
+                'specimen_bio_specimen_id': 'SAMEA7701562',
+                'location_grid_reference': 'GB123456',
+                'cmethod_method': 'Grasped',
+                'imethod_method': 'Looking',
+                'sample_specimen_risk': 'Y',
+                'person_fullname_PRESERVE': 'A Preserver',
+                'institution_name_PRESERVE': 'Sample Preservation Society',
+                'papproach_approach': 'solution',
+                'psolution_solution': 'ethanol',
+                'sample_pre_elapsed': '1',
+                'sample_pre_date': '1/1/2020',
+                'tissue_size_size': 'NOT_APPLICABLE',
+                'sample_tremoved': 'Y',
+                'sample_bplateid': 'PLATE1',
+                'sample_btubeid': 'TUBE1',
+                'sample_bplate_pre': 'Jelly',
+                'specimen_purpose_purpose': 'DNA_BARCODING_ONLY',
+                'hazard_group_level': 'HG1',
+                'sample_reg_compliance': 'Y',
+                'sample_original_collection_date': '1/1/2021',
+                'sample_original_geographic_location': 'United Kingdom | Cambridge',
+                'sample_barcode_hub': 'London'
             }
         }
         responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
@@ -922,27 +925,27 @@ class TestSubmittersController(BaseTestCase):
         get_ncbi_data.return_value = {}
 
         # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 63445,
-                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 63445,
+            'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'SYMBIONT': 'SYMBIONT'}
+        ]}
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/api/v1/manifests/1/fill',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -950,7 +953,7 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
     def test_fill_manifest_sample_not_in_sts_2(self, get_ncbi_data):
-        mock_response_from_sts = {"data": {"list": []}}
+        mock_response_from_sts = {'data': {'list': []}}
         responses.add(responses.POST, os.environ['STS_URL'] + '/samples',
                       json=mock_response_from_sts, status=200)
 
@@ -1006,27 +1009,27 @@ class TestSubmittersController(BaseTestCase):
         }
 
         # Correct, symbiont-only JSON
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 63445,
-                     'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'SYMBIONT': 'SYMBIONT'}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 63445,
+            'SCIENTIFIC_NAME': 'Arenicola marina symbiont',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'SYMBIONT': 'SYMBIONT'}
+        ]}
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         response = self.client.open(
             '/api/v1/manifests/1/fill',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1034,44 +1037,44 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
     def test_validate_manifest_json(self, get_ncbi_data):
-        mock_response_from_ena = {"taxId": "6344",
-                                  "scientificName": "Arenicola marina",
-                                  "commonName": "lugworm",
-                                  "formalName": "true",
-                                  "rank": "species",
-                                  "division": "INV",
-                                  "lineage": "",
-                                  "geneticCode": "1",
-                                  "mitochondrialGeneticCode": "5",
-                                  "submittable": "true"}
+        mock_response_from_ena = {'taxId': '6344',
+                                  'scientificName': 'Arenicola marina',
+                                  'commonName': 'lugworm',
+                                  'formalName': 'true',
+                                  'rank': 'species',
+                                  'division': 'INV',
+                                  'lineage': '',
+                                  'geneticCode': '1',
+                                  'mitochondrialGeneticCode': '5',
+                                  'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{"taxonomyId": "6344",
-                                     "scientificName": "Arenicola marina",
-                                     "commonName": "lugworm",
-                                     "family": "Arenicolidae",
-                                     "genus": "Arenicola",
-                                     "order": "None"}]
+        mock_response_from_tolid = [{'taxonomyId': '6344',
+                                     'scientificName': 'Arenicola marina',
+                                     'commonName': 'lugworm',
+                                     'family': 'Arenicolidae',
+                                     'genus': 'Arenicola',
+                                     'order': 'None'}]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
                       json=mock_response_from_tolid, status=200)
 
         mock_response_from_tolid_specimen = [{
-            "specimenId": "SAN1234567",
-            "tolIds": [{
-                "species": {
-                    "commonName": "lugworm",
-                    "currentHighestTolidNumber": 2,
-                    "family": "Arenicolidae",
-                    "genus": "Arenicola",
-                    "kingdom": "Metazoa",
-                    "order": "Capitellida",
-                    "phylum": "Annelida",
-                    "prefix": "wuAreMari",
-                    "scientificName": "Arenicola marina",
-                    "taxaClass": "Polychaeta",
-                    "taxonomyId": 6344
+            'specimenId': 'SAN1234567',
+            'tolIds': [{
+                'species': {
+                    'commonName': 'lugworm',
+                    'currentHighestTolidNumber': 2,
+                    'family': 'Arenicolidae',
+                    'genus': 'Arenicola',
+                    'kingdom': 'Metazoa',
+                    'order': 'Capitellida',
+                    'phylum': 'Annelida',
+                    'prefix': 'wuAreMari',
+                    'scientificName': 'Arenicola marina',
+                    'taxaClass': 'Polychaeta',
+                    'taxonomyId': 6344
                 },
-                "tolId": "wuAreMari1"
+                'tolId': 'wuAreMari1'
             }]
         }]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
@@ -1132,37 +1135,37 @@ class TestSubmittersController(BaseTestCase):
             'PubDate': '1996/01/18 00: 00: 00'}
         }
 
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': ''}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'GENUS': 'Arenicola',
+            'FAMILY': 'Arenicolidae',
+            'ORDER_OR_GROUP': 'Scolecida',
+            'COMMON_NAME': 'lugworm',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': '+50.12345678',
+            'DECIMAL_LONGITUDE': '-1.98765432',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': ''}
+        ]}
 
         # Submit the manifest
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1181,7 +1184,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/validate',
             method='GET',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1191,7 +1194,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/2/validate',
             method='GET',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1200,7 +1203,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/validate',
             method='GET',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1209,17 +1212,17 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/validate',
             method='GET',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
-                    "number_of_errors": 1,
+                    'number_of_errors': 1,
                     'validations': [
-                        {"row": 1,
-                         "results": [
-                             {"field": "VOUCHER_ID",
-                              "message": "Must not be empty",
+                        {'row': 1,
+                         'results': [
+                             {'field': 'VOUCHER_ID',
+                              'message': 'Must not be empty',
                               'severity': 'ERROR'}
                          ]}
                     ]}
@@ -1228,44 +1231,44 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
     def test_submit_and_validate_manifest_json(self, get_ncbi_data):
-        mock_response_from_ena = {"taxId": "6344",
-                                  "scientificName": "Arenicola marina",
-                                  "commonName": "lugworm",
-                                  "formalName": "true",
-                                  "rank": "species",
-                                  "division": "INV",
-                                  "lineage": "",
-                                  "geneticCode": "1",
-                                  "mitochondrialGeneticCode": "5",
-                                  "submittable": "true"}
+        mock_response_from_ena = {'taxId': '6344',
+                                  'scientificName': 'Arenicola marina',
+                                  'commonName': 'lugworm',
+                                  'formalName': 'true',
+                                  'rank': 'species',
+                                  'division': 'INV',
+                                  'lineage': '',
+                                  'geneticCode': '1',
+                                  'mitochondrialGeneticCode': '5',
+                                  'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{"taxonomyId": "6344",
-                                     "scientificName": "Arenicola marina",
-                                     "commonName": "lugworm",
-                                     "family": "Arenicolidae",
-                                     "genus": "Arenicola",
-                                     "order": "None"}]
+        mock_response_from_tolid = [{'taxonomyId': '6344',
+                                     'scientificName': 'Arenicola marina',
+                                     'commonName': 'lugworm',
+                                     'family': 'Arenicolidae',
+                                     'genus': 'Arenicola',
+                                     'order': 'None'}]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
                       json=mock_response_from_tolid, status=200)
 
         mock_response_from_tolid_specimen = [{
-            "specimenId": "SAN1234567",
-            "tolIds": [{
-                "species": {
-                    "commonName": "lugworm",
-                    "currentHighestTolidNumber": 2,
-                    "family": "Arenicolidae",
-                    "genus": "Arenicola",
-                    "kingdom": "Metazoa",
-                    "order": "Capitellida",
-                    "phylum": "Annelida",
-                    "prefix": "wuAreMari",
-                    "scientificName": "Arenicola marina",
-                    "taxaClass": "Polychaeta",
-                    "taxonomyId": 6344
+            'specimenId': 'SAN1234567',
+            'tolIds': [{
+                'species': {
+                    'commonName': 'lugworm',
+                    'currentHighestTolidNumber': 2,
+                    'family': 'Arenicolidae',
+                    'genus': 'Arenicola',
+                    'kingdom': 'Metazoa',
+                    'order': 'Capitellida',
+                    'phylum': 'Annelida',
+                    'prefix': 'wuAreMari',
+                    'scientificName': 'Arenicola marina',
+                    'taxaClass': 'Polychaeta',
+                    'taxonomyId': 6344
                 },
-                "tolId": "wuAreMari1"
+                'tolId': 'wuAreMari1'
             }]
         }]
         responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
@@ -1340,7 +1343,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/validate',
             method='POST',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1350,41 +1353,41 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/validate',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert400(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': ''}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'GENUS': 'Arenicola',
+            'FAMILY': 'Arenicolidae',
+            'ORDER_OR_GROUP': 'Scolecida',
+            'COMMON_NAME': 'lugworm',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': '+50.12345678',
+            'DECIMAL_LONGITUDE': '-1.98765432',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': ''}
+        ]}
         # Not a submitter
         response = self.client.open(
             '/api/v1/manifests/validate',
             method='POST',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1393,17 +1396,17 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/validate',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
         expected = {'manifestId': 1,
-                    "number_of_errors": 1,
+                    'number_of_errors': 1,
                     'validations': [
-                        {"row": 1,
-                         "results": [
-                             {"field": "VOUCHER_ID",
-                              "message": "Must not be empty",
+                        {'row': 1,
+                         'results': [
+                             {'field': 'VOUCHER_ID',
+                              'message': 'Must not be empty',
                               'severity': 'ERROR'}
                          ]}
                     ]}
@@ -1412,75 +1415,75 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     def test_generate_ids(self):
         specimen = SubmissionsSpecimen()
-        specimen.specimen_id = "SAN1234567"
-        specimen.biosample_accession = "SAMEA12345678"
+        specimen.specimen_id = 'SAN1234567'
+        specimen.biosample_accession = 'SAMEA12345678'
         db.session.add(specimen)
         db.session.commit()
 
-        mock_response_from_ena = {"taxId": "6344",
-                                  "scientificName": "Arenicola marina",
-                                  "commonName": "lugworm",
-                                  "formalName": "true",
-                                  "rank": "species",
-                                  "division": "INV",
-                                  "lineage": "",
-                                  "geneticCode": "1",
-                                  "mitochondrialGeneticCode": "5",
-                                  "submittable": "true"}
+        mock_response_from_ena = {'taxId': '6344',
+                                  'scientificName': 'Arenicola marina',
+                                  'commonName': 'lugworm',
+                                  'formalName': 'true',
+                                  'rank': 'species',
+                                  'division': 'INV',
+                                  'lineage': '',
+                                  'geneticCode': '1',
+                                  'mitochondrialGeneticCode': '5',
+                                  'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
         mock_response_from_tolid = [{
-            "species": {
-                "commonName": "lugworm",
-                "family": "Arenicolidae",
-                "genus": "Arenicola",
-                "kingdom": "Metazoa",
-                "order": "Capitellida",
-                "phylum": "Annelida",
-                "prefix": "wuAreMari",
-                "scientificName": "Arenicola marina",
-                "taxaClass": "Polychaeta",
-                "taxonomyId": 6344
+            'species': {
+                'commonName': 'lugworm',
+                'family': 'Arenicolidae',
+                'genus': 'Arenicola',
+                'kingdom': 'Metazoa',
+                'order': 'Capitellida',
+                'phylum': 'Annelida',
+                'prefix': 'wuAreMari',
+                'scientificName': 'Arenicola marina',
+                'taxaClass': 'Polychaeta',
+                'taxonomyId': 6344
             },
-            "specimen": {
-                "specimenId": "SAN1234567"
+            'specimen': {
+                'specimenId': 'SAN1234567'
             },
-            "tolId": "wuAreMari1"
+            'tolId': 'wuAreMari1'
         }]
         responses.add(responses.POST, os.environ['TOLID_URL'] + '/tol-ids',
                       json=mock_response_from_tolid, status=200)
 
-        body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
-                ]}
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 6344,
+            'SCIENTIFIC_NAME': 'Arenicola marina',
+            'GENUS': 'Arenicola',
+            'FAMILY': 'Arenicolidae',
+            'ORDER_OR_GROUP': 'Scolecida',
+            'COMMON_NAME': 'lugworm',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': '+50.12345678',
+            'DECIMAL_LONGITUDE': '-1.98765432',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': 'voucher1'}
+        ]}
 
         # Submit the manifest
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1506,7 +1509,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/generate',
             method='PATCH',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1516,7 +1519,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/2/generate',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1525,7 +1528,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/generate',
             method='PATCH',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1534,7 +1537,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/generate',
             method='PATCH',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1603,9 +1606,9 @@ class TestSubmittersController(BaseTestCase):
                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
                         'BARCODE_HUB': None,
                         'tolId': 'wuAreMari1',
-                        'biosampleAccession': "SAMEA8521239",
-                        'sraAccession': "ERS6206028",
-                        'submissionAccession': "ERA3819349",
+                        'biosampleAccession': 'SAMEA8521239',
+                        'sraAccession': 'ERS6206028',
+                        'submissionAccession': 'ERA3819349',
                         'submissionError': None,
                         'sampleSameAs': None,
                         'sampleDerivedFrom': 'SAMEA12345678',
@@ -1616,40 +1619,40 @@ class TestSubmittersController(BaseTestCase):
     @responses.activate
     def test_submit_and_generate_manifest_json(self):
         specimen = SubmissionsSpecimen()
-        specimen.specimen_id = "SAN1234567"
-        specimen.biosample_accession = "SAMEA12345678"
+        specimen.specimen_id = 'SAN1234567'
+        specimen.biosample_accession = 'SAMEA12345678'
         db.session.add(specimen)
         db.session.commit()
 
-        mock_response_from_ena = {"taxId": "6344",
-                                  "scientificName": "Arenicola marina",
-                                  "commonName": "lugworm",
-                                  "formalName": "true",
-                                  "rank": "species",
-                                  "division": "INV",
-                                  "lineage": "",
-                                  "geneticCode": "1",
-                                  "mitochondrialGeneticCode": "5",
-                                  "submittable": "true"}
+        mock_response_from_ena = {'taxId': '6344',
+                                  'scientificName': 'Arenicola marina',
+                                  'commonName': 'lugworm',
+                                  'formalName': 'true',
+                                  'rank': 'species',
+                                  'division': 'INV',
+                                  'lineage': '',
+                                  'geneticCode': '1',
+                                  'mitochondrialGeneticCode': '5',
+                                  'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
         mock_response_from_tolid = [{
-            "species": {
-                "commonName": "lugworm",
-                "family": "Arenicolidae",
-                "genus": "Arenicola",
-                "kingdom": "Metazoa",
-                "order": "Capitellida",
-                "phylum": "Annelida",
-                "prefix": "wuAreMari",
-                "scientificName": "Arenicola marina",
-                "taxaClass": "Polychaeta",
-                "taxonomyId": 6344
+            'species': {
+                'commonName': 'lugworm',
+                'family': 'Arenicolidae',
+                'genus': 'Arenicola',
+                'kingdom': 'Metazoa',
+                'order': 'Capitellida',
+                'phylum': 'Annelida',
+                'prefix': 'wuAreMari',
+                'scientificName': 'Arenicola marina',
+                'taxaClass': 'Polychaeta',
+                'taxonomyId': 6344
             },
-            "specimen": {
-                "specimenId": "SAN1234567"
+            'specimen': {
+                'specimenId': 'SAN1234567'
             },
-            "tolId": "wuAreMari1"
+            'tolId': 'wuAreMari1'
         }]
         responses.add(responses.POST, os.environ['TOLID_URL'] + '/tol-ids',
                       json=mock_response_from_tolid, status=200)
@@ -1659,30 +1662,30 @@ class TestSubmittersController(BaseTestCase):
                       body=mock_response_from_ena, status=200)
 
         body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
-                ]}
+            {'row': 1,
+                'SPECIMEN_ID': 'SAN1234567',
+                'TAXON_ID': 6344,
+                'SCIENTIFIC_NAME': 'Arenicola marina',
+                'GENUS': 'Arenicola',
+                'FAMILY': 'Arenicolidae',
+                'ORDER_OR_GROUP': 'Scolecida',
+                'COMMON_NAME': 'lugworm',
+                'LIFESTAGE': 'ADULT',
+                'SEX': 'FEMALE',
+                'ORGANISM_PART': 'MUSCLE',
+                'GAL': 'SANGER INSTITUTE',
+                'GAL_SAMPLE_ID': 'SAN0000100',
+                'COLLECTED_BY': 'ALEX COLLECTOR',
+                'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+                'DATE_OF_COLLECTION': '2020-09-01',
+                'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+                'DECIMAL_LATITUDE': '+50.12345678',
+                'DECIMAL_LONGITUDE': '-1.98765432',
+                'HABITAT': 'Woodland',
+                'IDENTIFIED_BY': 'JO IDENTIFIER',
+                'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+                'VOUCHER_ID': 'voucher1'}
+        ]}
 
         # No authorisation token given
         response = self.client.open(
@@ -1696,7 +1699,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/generate',
             method='POST',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1705,7 +1708,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/generate',
             method='POST',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             json=body)
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1714,7 +1717,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/generate',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1783,9 +1786,9 @@ class TestSubmittersController(BaseTestCase):
                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
                         'BARCODE_HUB': None,
                         'tolId': 'wuAreMari1',
-                        'biosampleAccession': "SAMEA8521239",
-                        'sraAccession': "ERS6206028",
-                        'submissionAccession': "ERA3819349",
+                        'biosampleAccession': 'SAMEA8521239',
+                        'sraAccession': 'ERS6206028',
+                        'submissionAccession': 'ERA3819349',
                         'submissionError': None,
                         'sampleSameAs': None,
                         'sampleDerivedFrom': 'SAMEA12345678',
@@ -1808,7 +1811,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": "12345678"},
+            headers={'api-key': '12345678'},
             json=body)
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1818,7 +1821,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             data=data)
         self.assert400(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -1838,7 +1841,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             data=data)
         file.close()
         self.assert400(response,
@@ -1853,7 +1856,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": self.user1.api_key},
+            headers={'api-key': self.user1.api_key},
             data=data)
         file.close()
         self.assert403(response, 'Not received a 403 response')
@@ -1866,7 +1869,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             data=data)
         file.close()
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -2014,12 +2017,12 @@ class TestSubmittersController(BaseTestCase):
         manifest = db.session.query(SubmissionsManifest) \
             .filter(SubmissionsManifest.manifest_id == 1) \
             .one_or_none()
-        self.assertEqual("1.xlsx", manifest.excel_file)
+        self.assertEqual('1.xlsx', manifest.excel_file)
 
         # Get that from minio and check it is the same file as went in
-        dir = tempfile.TemporaryDirectory()
-        excel_utils.load_excel(manifest=manifest, dirname=dir.name, filename="test.xlsx")
-        self.assertTrue(filecmp.cmp(dir.name + "/test.xlsx",
+        dir_ = tempfile.TemporaryDirectory()
+        excel_utils.load_excel(manifest=manifest, dirname=dir_.name, filename='test.xlsx')
+        self.assertTrue(filecmp.cmp(dir_.name + '/test.xlsx',
                                     'test/test-manifest.xlsx',
                                     shallow=False))
 
@@ -2032,7 +2035,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/upload-excel',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             data=data)
         file.close()
         self.assert200(response, 'Response body is : ' + response.data.decode('utf-8'))
@@ -2045,7 +2048,7 @@ class TestSubmittersController(BaseTestCase):
         counter = 1
         for sample in manifest.samples:
             for field in SubmissionsSample.id_fields:
-                setattr(sample, field["python_name"], str(counter))
+                setattr(sample, field['python_name'], str(counter))
                 counter += 1
         # Make sure there is a None in there
         manifest.samples[0].sample_symbiont_of = None
@@ -2061,7 +2064,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/download-excel',
             method='GET',
-            headers={"api-key": "12345678"})
+            headers={'api-key': '12345678'})
         self.assert401(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
@@ -2069,7 +2072,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/999/download-excel',
             method='GET',
-            headers={"api-key": self.user3.api_key})
+            headers={'api-key': self.user3.api_key})
         self.assert404(response,
                        'Response body is : ' + response.data.decode('utf-8'))
 
@@ -2077,7 +2080,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/download-excel',
             method='GET',
-            headers={"api-key": self.user1.api_key})
+            headers={'api-key': self.user1.api_key})
         file.close()
         self.assert403(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -2085,7 +2088,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/download-excel',
             method='GET',
-            headers={"api-key": self.user3.api_key})
+            headers={'api-key': self.user3.api_key})
         file.close()
         self.assert200(response,
                        'Did not receive a 200 response')
@@ -2101,43 +2104,43 @@ class TestSubmittersController(BaseTestCase):
         # Do we have the columns filled in that we expect
         for sample in manifest.samples:
             for field in SubmissionsSample.id_fields:
-                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                column = excel_utils.find_column(sheet, field['field_name']) + 1
                 row = sample.row + 1
-                value = getattr(sample, field["python_name"])
+                value = getattr(sample, field['python_name'])
                 self.assertEqual(sheet.cell(row=row, column=column).value, value)
 
     def test_download_manifest_excel_originally_json(self):
         body = {'samples': [
-                    {'row': 1,
-                     'SPECIMEN_ID': 'SAN1234567',
-                     'TAXON_ID': 6344,
-                     'SCIENTIFIC_NAME': 'Arenicola marina',
-                     'GENUS': 'Arenicola',
-                     'FAMILY': 'Arenicolidae',
-                     'ORDER_OR_GROUP': 'Scolecida',
-                     'COMMON_NAME': 'lugworm',
-                     'LIFESTAGE': 'ADULT',
-                     'SEX': 'FEMALE',
-                     'ORGANISM_PART': 'MUSCLE',
-                     'GAL': 'SANGER INSTITUTE',
-                     'GAL_SAMPLE_ID': 'SAN0000100',
-                     'COLLECTED_BY': 'ALEX COLLECTOR',
-                     'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
-                     'DATE_OF_COLLECTION': '2020-09-01',
-                     'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
-                     'DECIMAL_LATITUDE': '+50.12345678',
-                     'DECIMAL_LONGITUDE': '-1.98765432',
-                     'HABITAT': 'Woodland',
-                     'IDENTIFIED_BY': 'JO IDENTIFIER',
-                     'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                     'VOUCHER_ID': 'voucher1'}
-                ]}
+            {'row': 1,
+                'SPECIMEN_ID': 'SAN1234567',
+                'TAXON_ID': 6344,
+                'SCIENTIFIC_NAME': 'Arenicola marina',
+                'GENUS': 'Arenicola',
+                'FAMILY': 'Arenicolidae',
+                'ORDER_OR_GROUP': 'Scolecida',
+                'COMMON_NAME': 'lugworm',
+                'LIFESTAGE': 'ADULT',
+                'SEX': 'FEMALE',
+                'ORGANISM_PART': 'MUSCLE',
+                'GAL': 'SANGER INSTITUTE',
+                'GAL_SAMPLE_ID': 'SAN0000100',
+                'COLLECTED_BY': 'ALEX COLLECTOR',
+                'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+                'DATE_OF_COLLECTION': '2020-09-01',
+                'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+                'DECIMAL_LATITUDE': '+50.12345678',
+                'DECIMAL_LONGITUDE': '-1.98765432',
+                'HABITAT': 'Woodland',
+                'IDENTIFIED_BY': 'JO IDENTIFIER',
+                'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+                'VOUCHER_ID': 'voucher1'}
+        ]}
 
         # Correct, full JSON
         response = self.client.open(
             '/api/v1/manifests',
             method='POST',
-            headers={"api-key": self.user3.api_key},
+            headers={'api-key': self.user3.api_key},
             json=body)
         self.assert200(response,
                        'Response body is : ' + response.data.decode('utf-8'))
@@ -2150,7 +2153,7 @@ class TestSubmittersController(BaseTestCase):
         counter = 1
         for sample in manifest.samples:
             for field in SubmissionsSample.id_fields:
-                setattr(sample, field["python_name"], str(counter))
+                setattr(sample, field['python_name'], str(counter))
                 counter += 1
         # Make sure there is a None in there
         manifest.samples[0].sample_symbiont_of = None
@@ -2158,7 +2161,7 @@ class TestSubmittersController(BaseTestCase):
         response = self.client.open(
             '/api/v1/manifests/1/download-excel',
             method='GET',
-            headers={"api-key": self.user3.api_key})
+            headers={'api-key': self.user3.api_key})
         self.assert200(response,
                        'Did not receive a 200 response')
         self.assertEqual('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -2173,17 +2176,17 @@ class TestSubmittersController(BaseTestCase):
         # Do we have the columns filled in that we expect
         for sample in manifest.samples:
             for field in SubmissionsSample.id_fields:
-                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                column = excel_utils.find_column(sheet, field['field_name']) + 1
                 row = sample.row + 1
-                value = getattr(sample, field["python_name"])
+                value = getattr(sample, field['python_name'])
                 self.assertEqual(sheet.cell(row=row, column=column).value, value)
 
         # Do we have the original columns in?
         for sample in manifest.samples:
             for field in SubmissionsSample.all_fields:
-                column = excel_utils.find_column(sheet, field["field_name"]) + 1
+                column = excel_utils.find_column(sheet, field['field_name']) + 1
                 row = sample.row + 1
-                value = getattr(sample, field["python_name"])
+                value = getattr(sample, field['python_name'])
                 self.assertEqual(sheet.cell(row=row, column=column).value, value)
 
 

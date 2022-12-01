@@ -6,7 +6,7 @@ from .base import Base, db
 
 
 class SubmissionsUser(Base):
-    __tablename__ = "user"
+    __tablename__ = 'user'
     user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     email = db.Column(db.String(), nullable=False, unique=True)
@@ -15,8 +15,8 @@ class SubmissionsUser(Base):
     token = db.Column(db.String(), nullable=True, unique=True)
     roles = db.relationship('SubmissionsRole', lazy=False)
 
-    def to_dict(cls):
-        return {'name': cls.name,
-                'email': cls.email,
-                'organisation': ("" if cls.organisation is None else cls.organisation),
-                'roles': cls.roles}
+    def to_dict(self):
+        return {'name': self.name,
+                'email': self.email,
+                'organisation': ('' if self.organisation is None else self.organisation),
+                'roles': self.roles}
