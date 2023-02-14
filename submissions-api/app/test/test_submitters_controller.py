@@ -1230,6 +1230,182 @@ class TestSubmittersController(BaseTestCase):
 
     @responses.activate
     @patch('main.manifest_utils.get_ncbi_data')
+    def test_validate_manifest_json_unknown_taxon(self, get_ncbi_data):
+        mock_response_from_ena = {'taxId': '32644',
+                                  'scientificName': 'unidentified',
+                                  'formalName': 'true',
+                                  'rank': 'species',
+                                  'division': 'UNK',
+                                  'lineage': '',
+                                  'geneticCode': '1',
+                                  'mitochondrialGeneticCode': '5',
+                                  'submittable': 'true'}
+        responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/32644',
+                      json=mock_response_from_ena, status=200)
+        mock_response_from_tolid = [{'taxonomyId': '32644',
+                                     'scientificName': 'unidentified',
+                                     'commonName': '',
+                                     'family': '',
+                                     'genus': '',
+                                     'order': 'None'}]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/32644',
+                      json=mock_response_from_tolid, status=200)
+
+        mock_response_from_tolid_specimen = [{
+            'specimenId': 'SAN1234567',
+            'tolIds': [{
+                'species': {
+                    'commonName': '',
+                    'currentHighestTolidNumber': 2,
+                    'family': '',
+                    'genus': '',
+                    'kingdom': '',
+                    'order': '',
+                    'phylum': '',
+                    'prefix': 'unUnkUnkn',
+                    'scientificName': 'unidentified',
+                    'taxaClass': '',
+                    'taxonomyId': 32644
+                },
+                'tolId': 'unUnkUnkn1'
+            }]
+        }]
+        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN1234567',
+                      json=mock_response_from_tolid_specimen, status=200)
+
+        mock_response_from_sts = {}  # Only interested in status codes
+        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+                      json=mock_response_from_sts, status=400)
+
+        get_ncbi_data.return_value = {32644: {
+            'TaxId': '32644',
+            'ScientificName': 'unidentified',
+            'OtherNames': {
+                'Anamorph': [],
+                'Inpart': [],
+                'Misnomer': [],
+                'Synonym': [
+                    'miscellaneous nucleic acid', 'none', 'not shown', 'not specified', 'other',
+                    'sonstige nucleic acid', 'unclassified sequence', 'unidentified organism',
+                    'unidentified root endophyte', 'unknown', 'unknown organism', 'unspecified'
+                ],
+                'GenbankSynonym': [],
+                'Teleomorph': [],
+                'Misspelling': [],
+                'CommonName': [],
+                'Name': [{'ClassCDE': 'misspelling', 'DispName': 'unknwon'}],
+                'Acronym': [],
+                'EquivalentName': [],
+                'Includes': [],
+                'GenbankAnamorph': []
+            },
+            'ParentTaxId': '12908',
+            'Rank': 'species',
+            'Division': 'Unassigned',
+            'GeneticCode': {'GCId': '1', 'GCName': 'Standard'},
+            'MitoGeneticCode': {'MGCId': '2', 'MGCName': 'Vertebrate Mitochondrial'},
+            'Lineage': 'unclassified entries; unclassified sequences',
+            'LineageEx': [
+                {'TaxId': '2787823', 'ScientificName': 'unclassified entries', 'Rank': 'no rank'},
+                {'TaxId': '12908', 'ScientificName': 'unclassified sequences', 'Rank': 'no rank'}
+            ],
+            'Properties': [{'PropName': 'pgcode', 'PropValueInt': '11'}],
+            'CreateDate': '1995/02/27 09:24:00',
+            'UpdateDate': '2019/01/28 09:36:50',
+            'PubDate': '1993/04/27 01:00:00'
+        }}
+
+        body = {'samples': [{
+            'row': 1,
+            'SPECIMEN_ID': 'SAN1234567',
+            'TAXON_ID': 32644,
+            'SCIENTIFIC_NAME': 'unidentified',
+            'GENUS': '',
+            'FAMILY': '',
+            'ORDER_OR_GROUP': '',
+            'COMMON_NAME': '',
+            'LIFESTAGE': 'ADULT',
+            'SEX': 'FEMALE',
+            'ORGANISM_PART': 'MUSCLE',
+            'GAL': 'SANGER INSTITUTE',
+            'GAL_SAMPLE_ID': 'SAN0000100',
+            'COLLECTED_BY': 'ALEX COLLECTOR',
+            'COLLECTOR_AFFILIATION': 'THE COLLECTOR INSTITUTE',
+            'DATE_OF_COLLECTION': '2020-09-01',
+            'COLLECTION_LOCATION': 'UNITED KINGDOM | DARK FOREST',
+            'DECIMAL_LATITUDE': '+50.12345678',
+            'DECIMAL_LONGITUDE': '-1.98765432',
+            'HABITAT': 'Woodland',
+            'IDENTIFIED_BY': 'JO IDENTIFIER',
+            'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
+            'VOUCHER_ID': 'voucher1'}
+        ]}
+
+        # Submit the manifest
+        response = self.client.open(
+            '/api/v1/manifests',
+            method='POST',
+            headers={'api-key': self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # No authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests/1/validate',
+            method='GET',
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Invalid authorisation token given
+        body = []
+        response = self.client.open(
+            '/api/v1/manifests/1/validate',
+            method='GET',
+            headers={'api-key': '12345678'},
+            json=body)
+        self.assert401(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Incorrect manifest ID
+        body = {}
+        response = self.client.open(
+            '/api/v1/manifests/2/validate',
+            method='GET',
+            headers={'api-key': self.user3.api_key},
+            json=body)
+        self.assert404(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Not a submitter
+        response = self.client.open(
+            '/api/v1/manifests/1/validate',
+            method='GET',
+            headers={'api-key': self.user1.api_key},
+            json=body)
+        self.assert403(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+
+        # Corect - should validate and return errors
+        response = self.client.open(
+            '/api/v1/manifests/1/validate',
+            method='GET',
+            headers={'api-key': self.user3.api_key},
+            json=body)
+        self.assert200(response,
+                       'Response body is : ' + response.data.decode('utf-8'))
+        expected = {'manifestId': 1,
+                    'number_of_errors': 0,
+                    'validations': [
+                        {'row': 1,
+                         'results': []}
+                    ]}
+        self.assertEqual(expected, response.json)
+
+    @responses.activate
+    @patch('main.manifest_utils.get_ncbi_data')
     def test_submit_and_validate_manifest_json(self, get_ncbi_data):
         mock_response_from_ena = {'taxId': '6344',
                                   'scientificName': 'Arenicola marina',
