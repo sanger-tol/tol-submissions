@@ -14,8 +14,8 @@ def build_bundle_sample_xml(manifest):
 
     filename = dir_.name + 'bundle_' + str(manifest.manifest_id) + '.xml'
     shutil.copy('main/templates/sample.xml', filename)
-    update_bundle_sample_xml(manifest, filename)
-    return filename
+    sample_count = update_bundle_sample_xml(manifest, filename)
+    return filename, sample_count
 
 
 def update_bundle_sample_xml(manifest, bundlefile):
@@ -23,7 +23,11 @@ def update_bundle_sample_xml(manifest, bundlefile):
     # print('adding sample to bundle sample xml')
     tree = ElementTree.parse(bundlefile)
     root = tree.getroot()
+    sample_count = 0
     for sample in manifest.samples:
+        if sample.taxonomy_id == 32644:
+            continue
+        sample_count += 1
         sample_alias = ElementTree.SubElement(root, 'SAMPLE')
         sample_alias.set('alias', str(sample.sample_id))
         sample_alias.set('center_name', 'SangerInstitute')
@@ -51,6 +55,7 @@ def update_bundle_sample_xml(manifest, bundlefile):
     ElementTree.dump(tree)
     tree.write(open(bundlefile, 'w'),
                encoding='unicode')
+    return sample_count
 
 
 def build_submission_xml(manifest):

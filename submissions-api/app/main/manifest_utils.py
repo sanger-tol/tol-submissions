@@ -693,7 +693,7 @@ def set_relationships_for_manifest(manifest):
     for sample in manifest.samples:
         if sample.sample_same_as is None and sample.sample_derived_from is None \
                 and sample.sample_symbiont_of is None:
-            if sample.specimen_id not in seen:
+            if sample.specimen_id not in seen and sample.taxonomy_id != 32644:
                 seen.add(sample.specimen_id)
                 new_specimen_samples.append(sample)
 
@@ -855,7 +855,13 @@ def generate_tolids_for_manifest(manifest):
 def generate_ena_ids_for_manifest(manifest):
     results = []
     error_count = 0
-    bundle_xml_file = build_bundle_sample_xml(manifest)
+    bundle_xml_file, sample_count = build_bundle_sample_xml(manifest)
+    if sample_count == 0:
+        results.append({'row': 1,
+                        'results': [{'field': 'TAXON_ID',
+                                     'message': 'All samples have unknown taxonomy ID',
+                                    'severity': 'WARNING'}]})
+        return 1, results
     submission_xml_file = build_submission_xml(manifest)
     xml_files = [('SAMPLE', open(bundle_xml_file, 'rb')),
                  ('SUBMISSION', open(submission_xml_file, 'rb'))]

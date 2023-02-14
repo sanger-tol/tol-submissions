@@ -45,7 +45,7 @@ class TestXmlUtils(BaseTestCase):
         sample.manifest = manifest
         db.session.add(manifest)
         db.session.commit()
-        filename = build_bundle_sample_xml(manifest)
+        filename, sample_count = build_bundle_sample_xml(manifest)
         f = open(filename, 'r')
         file_contents = f.read()
         f.close()
