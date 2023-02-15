@@ -91,7 +91,7 @@ def upload_manifest_excel(excel_file=None, project_name=None):  # noqa: E501
     db.session.commit()
 
     # Remove old file
-    dir.cleanup()
+    dir_.cleanup()
 
     return jsonify(manifest)
 

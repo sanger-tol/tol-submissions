@@ -2012,7 +2012,7 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual('ERA3819349', sample2.submission_accession)
         self.assertEqual(True, manifest.submission_status)
         self.assertTrue(sample.submission_error is None)
-        self.assertTrue(sample.submission_error is None)
+        self.assertTrue(sample2.submission_error is None)
 
     @responses.activate
     def test_generate_ena_ids_for_manifest_connection_failed(self):
@@ -2124,6 +2124,171 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual(None, sample.submission_accession)
         self.assertEqual(False, manifest.submission_status)
         self.assertTrue(sample.submission_error is not None)
+
+    @responses.activate
+    def test_generate_ena_ids_for_manifest_one_unknown_taxon(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+
+        sample = SubmissionsSample()
+        sample.row = 1
+        sample.specimen_id = 'specimen1234'
+        sample.taxonomy_id = 32644
+        sample.scientific_name = 'Unknown'
+        sample.family = 'Unknown'
+        sample.genus = 'Unknown'
+        sample.order_or_group = 'None'
+        sample.common_name = ''
+        sample.lifestage = 'ADULT'
+        sample.sex = 'FEMALE'
+        sample.organism_part = 'MUSCLE'
+        sample.GAL = 'Sanger Institute'
+        sample.GAL_sample_id = 'SAN000100'
+        sample.collected_by = 'ALEX COLLECTOR'
+        sample.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
+        sample.date_of_collection = '2020-09-01'
+        sample.collection_location = 'UNITED KINGDOM | DARK FOREST'
+        sample.decimal_latitude = '+50.12345678'
+        sample.decimal_longitude = '-1.98765432'
+        sample.habitat = 'WOODLAND'
+        sample.identified_by = 'JO IDENTIFIER'
+        sample.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
+        sample.voucher_id = 'voucher1'
+        sample.elevation = '1500'
+        sample.depth = '1000'
+        sample.relationship = 'child of 1234'
+        sample.manifest = manifest
+
+        sample2 = SubmissionsSample()
+        sample2.row = 2
+        sample2.specimen_id = 'specimen5678'
+        sample2.taxonomy_id = 6344
+        sample2.scientific_name = 'Arenicola marina'
+        sample2.family = 'Arenicolidae'
+        sample2.genus = 'Arenicola'
+        sample2.order_or_group = 'None'
+        sample2.common_name = 'lugworm'
+        sample2.lifestage = 'ADULT'
+        sample2.sex = 'FEMALE'
+        sample2.organism_part = 'THORAX'
+        sample2.GAL = 'Sanger Institute'
+        sample2.GAL_sample_id = 'SAN000100'
+        sample2.collected_by = 'ALEX COLLECTOR'
+        sample2.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
+        sample2.date_of_collection = '2020-09-01'
+        sample2.collection_location = 'UNITED KINGDOM | DARK FOREST'
+        sample2.decimal_latitude = '+50.12345678'
+        sample2.decimal_longitude = '-1.98765432'
+        sample2.habitat = 'WOODLAND'
+        sample2.identified_by = 'JO IDENTIFIER'
+        sample2.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
+        sample2.voucher_id = 'voucher1'
+        sample2.elevation = '1500'
+        sample2.depth = '1000'
+        sample2.relationship = 'child of 1234'
+        sample2.manifest = manifest
+        db.session.add(manifest)
+        db.session.commit()
+
+        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028B" alias="' + str(sample2.sample_id) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239B" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
+        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+                      body=mock_response_from_ena, status=200)
+
+        number_of_errors, results = generate_ena_ids_for_manifest(manifest)
+
+        self.assertEqual(0, number_of_errors)
+        self.assertEqual([], results)
+        self.assertIsNone(sample.biosample_accession)
+        self.assertIsNone(sample.sra_accession)
+        self.assertIsNone(sample.submission_accession)
+        self.assertEqual('SAMEA8521239B', sample2.biosample_accession)
+        self.assertEqual('ERS6206028B', sample2.sra_accession)
+        self.assertEqual('ERA3819349', sample2.submission_accession)
+        self.assertEqual(True, manifest.submission_status)
+        self.assertTrue(sample.submission_error is None)
+        self.assertTrue(sample2.submission_error is None)
+
+    def test_generate_ena_ids_for_manifest_all_unknown_taxa(self):
+        manifest = SubmissionsManifest()
+        manifest.user = self.user1
+
+        sample = SubmissionsSample()
+        sample.row = 1
+        sample.specimen_id = 'specimen1234'
+        sample.taxonomy_id = 32644
+        sample.scientific_name = 'Unknown'
+        sample.family = 'Unknown'
+        sample.genus = 'Unknown'
+        sample.order_or_group = 'None'
+        sample.common_name = ''
+        sample.lifestage = 'ADULT'
+        sample.sex = 'FEMALE'
+        sample.organism_part = 'MUSCLE'
+        sample.GAL = 'Sanger Institute'
+        sample.GAL_sample_id = 'SAN000100'
+        sample.collected_by = 'ALEX COLLECTOR'
+        sample.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
+        sample.date_of_collection = '2020-09-01'
+        sample.collection_location = 'UNITED KINGDOM | DARK FOREST'
+        sample.decimal_latitude = '+50.12345678'
+        sample.decimal_longitude = '-1.98765432'
+        sample.habitat = 'WOODLAND'
+        sample.identified_by = 'JO IDENTIFIER'
+        sample.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
+        sample.voucher_id = 'voucher1'
+        sample.elevation = '1500'
+        sample.depth = '1000'
+        sample.relationship = 'child of 1234'
+        sample.manifest = manifest
+
+        sample2 = SubmissionsSample()
+        sample2.row = 2
+        sample2.specimen_id = 'specimen5678'
+        sample2.taxonomy_id = 32644
+        sample2.scientific_name = 'Unknown'
+        sample2.family = 'Unknown'
+        sample2.genus = 'Unknown'
+        sample2.order_or_group = 'None'
+        sample2.common_name = ''
+        sample2.lifestage = 'ADULT'
+        sample2.sex = 'FEMALE'
+        sample2.organism_part = 'THORAX'
+        sample2.GAL = 'Sanger Institute'
+        sample2.GAL_sample_id = 'SAN000100'
+        sample2.collected_by = 'ALEX COLLECTOR'
+        sample2.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
+        sample2.date_of_collection = '2020-09-01'
+        sample2.collection_location = 'UNITED KINGDOM | DARK FOREST'
+        sample2.decimal_latitude = '+50.12345678'
+        sample2.decimal_longitude = '-1.98765432'
+        sample2.habitat = 'WOODLAND'
+        sample2.identified_by = 'JO IDENTIFIER'
+        sample2.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
+        sample2.voucher_id = 'voucher1'
+        sample2.elevation = '1500'
+        sample2.depth = '1000'
+        sample2.relationship = 'child of 1234'
+        sample2.manifest = manifest
+        db.session.add(manifest)
+        db.session.commit()
+
+        number_of_errors, results = generate_ena_ids_for_manifest(manifest)
+
+        expected = [{'row': 1,
+                     'results': [{'field': 'TAXON_ID',
+                                  'message': 'All samples have unknown taxonomy ID',
+                                  'severity': 'WARNING'}]}]
+        self.assertEqual(1, number_of_errors)
+        self.assertEqual(expected, results)
+        self.assertIsNone(sample.biosample_accession)
+        self.assertIsNone(sample.sra_accession)
+        self.assertIsNone(sample.submission_accession)
+        self.assertIsNone(sample2.biosample_accession)
+        self.assertIsNone(sample2.sra_accession)
+        self.assertIsNone(sample2.submission_accession)
+        self.assertIsNone(manifest.submission_status)
+        self.assertTrue(sample.submission_error is None)
+        self.assertTrue(sample2.submission_error is None)
 
 
 if __name__ == '__main__':
