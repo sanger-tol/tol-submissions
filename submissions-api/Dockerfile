@@ -22,3 +22,6 @@ RUN pip3 --no-cache-dir install 'connexion[swagger-ui]'
 
 COPY ./app /app
 COPY ./migrations /migrations
+
+RUN echo "uwsgi_read_timeout 300s;" > /etc/nginx/conf.d/custom_timeout.conf
+RUN echo -e "client_max_body_size 5m;\nproxy_read_timeout 300;\nproxy_connect_timeout 300;\nproxy_send_timeout 300;" > /etc/nginx/conf.d/custom_timeout.conf
