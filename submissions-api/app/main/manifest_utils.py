@@ -40,6 +40,12 @@ def create_manifest_from_json(json, user):
             setattr(sample, field['python_name'], value)
             ignore_fields.append(field['field_name'])
 
+        # Special treatment for tolid/public_name which only comes filled in
+        # for taxon 32644
+            if s.get('public_name') is not None:
+                sample.tolid = s.get('public_name')
+                ignore_fields.append('public_name')
+
         # Extra fields
         for field_name in s:
             if field_name not in ignore_fields:
@@ -693,7 +699,7 @@ def set_relationships_for_manifest(manifest):
     for sample in manifest.samples:
         if sample.sample_same_as is None and sample.sample_derived_from is None \
                 and sample.sample_symbiont_of is None:
-            if sample.specimen_id not in seen and sample.taxonomy_id != 32644:
+            if sample.specimen_id not in seen:
                 seen.add(sample.specimen_id)
                 new_specimen_samples.append(sample)
 
@@ -811,7 +817,7 @@ def generate_tolids_for_manifest(manifest):
     # List of taxon-specimen pairs
     taxon_specimens = []
     for sample in manifest.samples:
-        if not sample.is_symbiont():
+        if not sample.is_symbiont() and sample.taxonomy_id != 32644:
             taxon_specimen = {'taxonomyId': sample.taxonomy_id,
                               'specimenId': sample.specimen_id}
             if taxon_specimen not in taxon_specimens:

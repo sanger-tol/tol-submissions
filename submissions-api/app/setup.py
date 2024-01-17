@@ -15,7 +15,6 @@ VERSION = '1.1.0'
 # prerequisite: setuptools
 # http://pypi.python.org/pypi/setuptools
 
-REQUIRES = ['connexion']
 
 setup(
     name=NAME,
@@ -24,7 +23,6 @@ setup(
     author_email='',
     url='',
     keywords=['Swagger', 'Tree of Life public name API'],
-    install_requires=REQUIRES,
     packages=find_packages(),
     package_data={'': ['swagger/swagger.yaml']},
     include_package_data=True,

@@ -25,8 +25,6 @@ def update_bundle_sample_xml(manifest, bundlefile):
     root = tree.getroot()
     sample_count = 0
     for sample in manifest.samples:
-        if sample.taxonomy_id == 32644:
-            continue
         sample_count += 1
         sample_alias = ElementTree.SubElement(root, 'SAMPLE')
         sample_alias.set('alias', str(sample.sample_id))

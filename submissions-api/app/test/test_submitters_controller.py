@@ -1338,7 +1338,8 @@ class TestSubmittersController(BaseTestCase):
             'HABITAT': 'Woodland',
             'IDENTIFIED_BY': 'JO IDENTIFIER',
             'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-            'VOUCHER_ID': 'voucher1'}
+            'VOUCHER_ID': 'voucher1',
+            'public_name': 'TEST1'}
         ]}
 
         # Submit the manifest
@@ -1978,6 +1979,10 @@ class TestSubmittersController(BaseTestCase):
         specimen.specimen_id = 'SAN1234567'
         specimen.biosample_accession = 'SAMEA12345678'
         db.session.add(specimen)
+        specimen = SubmissionsSpecimen()
+        specimen.specimen_id = 'SAN7654321'
+        specimen.biosample_accession = 'SAMEA87654321'
+        db.session.add(specimen)
         db.session.commit()
 
         mock_response_from_ena = {'taxId': '6344',
@@ -2021,28 +2026,11 @@ class TestSubmittersController(BaseTestCase):
                 'specimenId': 'SAN1234567'
             },
             'tolId': 'wuAreMari1'
-        }, {
-            'species': {
-                'commonName': '',
-                'family': '',
-                'genus': '',
-                'kingdom': '',
-                'order': '',
-                'phylum': '',
-                'prefix': 'unUnkUnkn',
-                'scientificName': 'unidentified',
-                'taxaClass': '',
-                'taxonomyId': 32644
-            },
-            'specimen': {
-                'specimenId': 'SAN7654321'
-            },
-            'tolId': 'unUnkUnkn1'
         }]
         responses.add(responses.POST, os.environ['TOLID_URL'] + '/tol-ids',
                       json=mock_response_from_tolid, status=200)
 
-        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
+        mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SAMPLE accession="ERS6206028" alias="' + str(2) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521240" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
         responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
@@ -2073,7 +2061,8 @@ class TestSubmittersController(BaseTestCase):
                 'HABITAT': 'Woodland',
                 'IDENTIFIED_BY': 'JO IDENTIFIER',
                 'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                'VOUCHER_ID': 'voucher1'},
+                'VOUCHER_ID': 'voucher1',
+                'public_name': 'TEST1-ignored'},
             {'row': 2,
                 'SPECIMEN_ID': 'SAN7654321',
                 'TAXON_ID': 32644,
@@ -2096,7 +2085,8 @@ class TestSubmittersController(BaseTestCase):
                 'HABITAT': 'Woodland',
                 'IDENTIFIED_BY': 'JO IDENTIFIER',
                 'IDENTIFIER_AFFILIATION': 'THE IDENTIFIER INSTITUTE',
-                'VOUCHER_ID': 'voucher1'}
+                'VOUCHER_ID': 'voucher1',
+                'public_name': 'TEST2'}
         ]}
 
         # Correct - should validate and return errors
@@ -2239,13 +2229,13 @@ class TestSubmittersController(BaseTestCase):
                         'ORIGINAL_COLLECTION_DATE': None,
                         'ORIGINAL_GEOGRAPHIC_LOCATION': None,
                         'BARCODE_HUB': None,
-                        'tolId': 'unUnkUnkn1',
-                        'biosampleAccession': None,
-                        'sraAccession': None,
-                        'submissionAccession': None,
+                        'tolId': 'TEST2',
+                        'biosampleAccession': 'SAMEA8521240',
+                        'sraAccession': 'ERS6206028',
+                        'submissionAccession': 'ERA3819349',
                         'submissionError': None,
                         'sampleSameAs': None,
-                        'sampleDerivedFrom': None,
+                        'sampleDerivedFrom': 'SAMEA87654321',
                         'sampleSymbiontOf': None}
                     ]}
         self.assertEqual(expected, response.json)
