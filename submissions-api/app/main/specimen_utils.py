@@ -20,7 +20,7 @@ def process_specimen_sts(specimen_sts):
 
 def get_specimen_sts(specimen_id):
     response = requests.get(
-        os.environ['STS_URL'] + '/specimens',
+        os.getenv('STS_URL', '') + '/specimens',
         params={'specimen_id': specimen_id},
         headers={'Project': 'ALL',
                  'Authorization': os.getenv('STS_API_KEY')}
@@ -37,7 +37,7 @@ def get_specimen_sts(specimen_id):
 
 def get_biospecimen_sts(biospecimen_id):
     response = requests.get(
-        os.environ['STS_URL'] + '/specimens',
+        os.getenv('STS_URL', '') + '/specimens',
         params={'bio_specimen_id': biospecimen_id},
         headers={'Project': 'ALL',
                  'Authorization': os.getenv('STS_API_KEY')}

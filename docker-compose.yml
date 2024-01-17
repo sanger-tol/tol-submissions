@@ -24,11 +24,6 @@ services:
     platform: linux/amd64
     environment:
       - DB_URI
-      - MINIO_URI
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
-      - MINIO_BUCKET
-      - MINIO_SECURE
       - ELIXIR_CLIENT_ID
       - ELIXIR_CLIENT_SECRET
       - ELIXIR_REDIRECT_URI
@@ -64,46 +59,6 @@ services:
     volumes:
       - './submissions-ui/app:/usr/src/app'
       - '/usr/src/app/node_modules'
-
-  submissions-minio:
-      image: minio/minio
-      environment:
-          - MINIO_ACCESS_KEY
-          - MINIO_SECRET_KEY
-      ports:
-          - 9000:9000
-      command: server /minio-data/data
-
-  submissions-api-test:
-    image: submissions-api
-    command: dockerize
-        -wait tcp://submissions-db:5432 -timeout 10s
-        bash -c "pytest -v"
-    environment:
-      - DB_URI
-      - MINIO_URI
-      - MINIO_ACCESS_KEY
-      - MINIO_SECRET_KEY
-      - MINIO_BUCKET
-      - MINIO_SECURE
-      - ELIXIR_CLIENT_ID
-      - ELIXIR_CLIENT_SECRET
-      - ELIXIR_REDIRECT_URI
-      - ELIXIR_JWK
-      - TOLID_URL
-      - TOLID_API_KEY
-      - ENA_URL
-      - ENA_USERNAME
-      - ENA_PASSWORD
-      - ENA_CONTACT_NAME
-      - ENA_CONTACT_EMAIL
-      - STS_URL
-      - STS_API_KEY
-      - NIH_API_KEY
-    depends_on:
-      - submissions-db
-      - submissions-api
-      - submissions-minio
 
   submissions-ui-test:
     image: submissions-ui
@@ -144,3 +99,28 @@ services:
       - BACKUP_SCHEDULE
       - RESTORE_FILE_PREFIX
       - FLASK_ENV
+
+  submissions-python-db:
+    image: postgres:12
+    environment:
+      - POSTGRES_USER=test-user
+      - POSTGRES_PASSWORD=test-password
+      - POSTGRES_DB=test-db
+  
+  submissions-python-unit-test:
+    build:
+      context: submissions-api
+      dockerfile: Dockerfile.test
+    command: pytest -v unit
+
+  submissions-python-system-test:
+    build:
+      context: submissions-api
+      dockerfile: Dockerfile.test
+    command: pytest -v system
+    environment:
+      - DB_URI=postgresql://test-user:test-password@submissions-python-db:5432/test-db
+      - API_PATH
+      - API_TOKEN
+    depends_on:
+      - submissions-python-db

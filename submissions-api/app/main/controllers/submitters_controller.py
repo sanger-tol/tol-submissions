@@ -3,13 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 import os
-import tempfile
 
 import connexion
 
-from flask import jsonify, send_from_directory
+from flask import jsonify
 
-import main.excel_utils as excel_utils
 import main.manifest_utils as manifest_utils
 from main.model import SubmissionsManifest, SubmissionsRole, \
     SubmissionsSample, SubmissionsUser, db
@@ -47,52 +45,6 @@ def upload_manifest_json(body={}, excel_file=None):  # noqa: E501
     manifest = manifest_utils.create_manifest_from_json(body, user)
     db.session.add(manifest)
     db.session.commit()
-    return jsonify(manifest)
-
-
-def upload_manifest_excel(excel_file=None, project_name=None):  # noqa: E501
-    role = db.session.query(SubmissionsRole) \
-        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
-        .filter(SubmissionsRole.user_id == connexion.context['user']) \
-        .one_or_none()
-    if role is None:
-        return jsonify({'detail': 'User does not have permission to use this function'}), 403
-
-    user = db.session.query(SubmissionsUser) \
-        .filter(SubmissionsUser.user_id == connexion.context['user']) \
-        .one_or_none()
-    uploaded_file = connexion.request.files['excelFile']
-
-    # Save to a temporary location
-    dir_ = tempfile.TemporaryDirectory()
-    uploaded_file.save(dir_.name + '/manifest.xlsx')
-
-    # Do the validation
-    manifest = excel_utils.read_excel(dirname=dir_.name,
-                                      filename='manifest.xlsx',
-                                      user=user,
-                                      project_name=project_name)
-
-    # Quickly check for required fields - reject if any missing
-    number_of_errors, validation_results = manifest_utils.validate_manifest(manifest, full=False)
-    if number_of_errors > 0:
-        return jsonify({'manifestId': manifest.manifest_id,
-                        'number_of_errors': number_of_errors,
-                        'validations': validation_results}), 400
-
-    # Passed the basic checks so save it
-    db.session.add(manifest)
-    db.session.commit()
-
-    # Save the manifest Excel file for returning at a later date
-    excel_utils.save_excel(dirname=dir_.name,
-                           filename='manifest.xlsx',
-                           manifest=manifest)
-    db.session.commit()
-
-    # Remove old file
-    dir_.cleanup()
-
     return jsonify(manifest)
 
 
@@ -134,7 +86,7 @@ def fill_manifest(manifest_id=None):
         # Call out to STS for the sample data. No this is a bit of a fudge because we have to
         # choose a sample from the specimen which only really works if we don't resample the
         # same specimen.
-        response = requests.post(os.environ['STS_URL'] + '/samples',
+        response = requests.post(os.getenv('STS_URL') + '/samples',
                                  json={'specimen_specimen_id': sample.specimen_id},
                                  headers={'Project': 'ALL',
                                           'Authorization': os.getenv('STS_API_KEY')})
@@ -149,7 +101,7 @@ def fill_manifest(manifest_id=None):
         # another endpoint which does have the details
         rack_id = samples[0].get('sample_rackid', None)
         tube_id = samples[0].get('sample_tubeid', None)
-        response = requests.get(os.environ['STS_URL'] + '/samples/detail',
+        response = requests.get(os.getenv('STS_URL') + '/samples/detail',
                                 params={'rack_id': rack_id,
                                         'tube_id': tube_id},
                                 headers={'Project': 'ALL',
@@ -290,34 +242,3 @@ def submit_and_generate_manifest_json(body=None):
                         'validations': validation_results})
 
     return jsonify(manifest)
-
-
-def download_manifest_excel(manifest_id=None):
-    role = db.session.query(SubmissionsRole) \
-        .filter(or_(SubmissionsRole.role == 'submitter', SubmissionsRole.role == 'admin')) \
-        .filter(SubmissionsRole.user_id == connexion.context['user']) \
-        .one_or_none()
-    if role is None:
-        return jsonify({'detail': 'User does not have permission to use this function'}), 403
-
-    # Does the manifest exist?
-    manifest = db.session.query(SubmissionsManifest) \
-        .filter(SubmissionsManifest.manifest_id == manifest_id) \
-        .one_or_none()
-    if manifest is None:
-        return jsonify({'detail': 'Manifest does not exist'}), 404
-
-    # Bring out of S3
-    dir_ = tempfile.TemporaryDirectory()
-    filename = 'manifest.xlsx'
-    if not excel_utils.load_excel(manifest=manifest, dirname=dir_.name, filename=filename):
-        # This manifest was not loaded by Excel - create an Excel file
-        excel_utils.create_excel(manifest=manifest, dirname=dir_.name, filename=filename)
-
-    # Add the columns
-    excel_utils.add_columns(manifest=manifest, fields=SubmissionsSample.id_fields,
-                            dirname=dir_.name, filename=filename)
-
-    # Stream out the Excel file
-    return send_from_directory(dir_.name, filename=filename,
-                               as_attachment=True)

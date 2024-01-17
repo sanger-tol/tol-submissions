@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 import os
-from test import BaseTestCase
+from test.system import BaseTestCase
 
 from main.specimen_utils import get_biospecimen_sts, get_specimen_sts
 
@@ -17,7 +17,7 @@ class TestSpecimenUtils(BaseTestCase):
     @responses.activate
     def test_get_specimen_sts(self):
         specimen_id = 'a_great_specimen_id'
-        url = os.environ['STS_URL'] + '/specimens?specimen_id=' + specimen_id
+        url = os.getenv('STS_URL', '') + '/specimens?specimen_id=' + specimen_id
 
         # no elements in list
         mock_no_elements = {
@@ -81,7 +81,7 @@ class TestSpecimenUtils(BaseTestCase):
     @responses.activate
     def test_get_biospecimen_sts(self):
         biospecimen_id = 'a_great_biospecimen_id'
-        url = os.environ['STS_URL'] + '/specimens?bio_specimen_id=' + biospecimen_id
+        url = os.getenv('STS_URL', '') + '/specimens?bio_specimen_id=' + biospecimen_id
 
         # no elements in list
         mock_no_elements = {

@@ -5,7 +5,7 @@
 from __future__ import absolute_import
 
 import os
-from test import BaseTestCase
+from test.system import BaseTestCase
 
 from main.model import SubmissionsManifest, SubmissionsSample, db
 from main.xml_utils import build_bundle_sample_xml, build_submission_xml
@@ -60,7 +60,7 @@ class TestXmlUtils(BaseTestCase):
         f = open(filename, 'r')
         file_contents = f.read()
         f.close()
-        expected = '<SUBMISSION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ftp://ftp.sra.ebi.ac.uk/meta/xsd/sra_1_5/SRA.submission.xsd"><CONTACTS><CONTACT name="' + os.getenv("ENA_CONTACT_NAME") + '" inform_on_error="' + os.getenv("ENA_CONTACT_EMAIL") + '" inform_on_status="' + os.getenv("ENA_CONTACT_EMAIL") + '" /></CONTACTS><ACTIONS><ACTION><ADD /></ACTION><ACTION><RELEASE /></ACTION></ACTIONS></SUBMISSION>'  # noqa
+        expected = '<SUBMISSION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ftp://ftp.sra.ebi.ac.uk/meta/xsd/sra_1_5/SRA.submission.xsd"><CONTACTS><CONTACT name="' + os.getenv("ENA_CONTACT_NAME", '') + '" inform_on_error="' + os.getenv("ENA_CONTACT_EMAIL", '') + '" inform_on_status="' + os.getenv("ENA_CONTACT_EMAIL", '') + '" /></CONTACTS><ACTIONS><ACTION><ADD /></ACTION><ACTION><RELEASE /></ACTION></ACTIONS></SUBMISSION>'  # noqa
         self.assertEqual(
             file_contents.replace('\n', '').replace('&lt;', '<').replace('&gt;', '>'),
             expected

@@ -9,11 +9,13 @@ import xml.etree.ElementTree as ElementTree
 
 
 def build_bundle_sample_xml(manifest):
+    __location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
     """build structure and save to file bundle_file_subfix.xml"""
     dir_ = tempfile.TemporaryDirectory()
 
     filename = dir_.name + 'bundle_' + str(manifest.manifest_id) + '.xml'
-    shutil.copy('main/templates/sample.xml', filename)
+    shutil.copy(os.path.join(__location__, 'templates/sample.xml'), filename)
     sample_count = update_bundle_sample_xml(manifest, filename)
     return filename, sample_count
 
@@ -58,7 +60,9 @@ def update_bundle_sample_xml(manifest, bundlefile):
 
 def build_submission_xml(manifest):
     # build submission XML
-    tree = ElementTree.parse('main/templates/submission.xml')
+    __location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    tree = ElementTree.parse(os.path.join(__location__, 'templates/submission.xml'))
     root = tree.getroot()
     # set submission attributes
     # root.set('submission_date', datetime.utcnow()
@@ -69,9 +73,9 @@ def build_submission_xml(manifest):
 
     # set copo sra contacts
     copo_contact = ElementTree.SubElement(contacts, 'CONTACT')
-    copo_contact.set('name', os.getenv('ENA_CONTACT_NAME'))
-    copo_contact.set('inform_on_error', os.getenv('ENA_CONTACT_EMAIL'))
-    copo_contact.set('inform_on_status', os.getenv('ENA_CONTACT_EMAIL'))
+    copo_contact.set('name', os.getenv('ENA_CONTACT_NAME', ''))
+    copo_contact.set('inform_on_error', os.getenv('ENA_CONTACT_EMAIL', ''))
+    copo_contact.set('inform_on_status', os.getenv('ENA_CONTACT_EMAIL', ''))
     ElementTree.dump(tree)
     dir_ = tempfile.TemporaryDirectory()
 
