@@ -93,7 +93,7 @@ tolcore:
   deployment:
     environment: "dev"
   db:
-    enabled: true
+    enabled: false
     fullname: "submissions-db"
     user: ""
     password: ""
