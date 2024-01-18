@@ -40,6 +40,12 @@ def create_manifest_from_json(json, user):
             setattr(sample, field['python_name'], value)
             ignore_fields.append(field['field_name'])
 
+        # Special treatment for tolid/public_name which only comes filled in
+        # for taxon 32644
+            if s.get('public_name') is not None:
+                sample.tolid = s.get('public_name')
+                ignore_fields.append('public_name')
+
         # Extra fields
         for field_name in s:
             if field_name not in ignore_fields:
@@ -270,7 +276,7 @@ def validate_sts_rack_plate_tube_well(sample):
         # Cannot do this check
         return results
 
-    response = requests.get(os.environ['STS_URL'] + '/samples/detail',
+    response = requests.get(os.getenv('STS_URL', '') + '/samples/detail',
                             params={'rack_id': sample.rack_or_plate_id,
                                     'tube_id': sample.tube_or_well_id},
                             headers={'Project': 'ALL',
@@ -295,7 +301,7 @@ def validate_sts_rack_plate_tube_well(sample):
 
 def validate_species_known_in_tolid(sample):
     results = []
-    response = requests.get(os.environ['TOLID_URL'] + '/species/'
+    response = requests.get(os.getenv('TOLID_URL', '') + '/species/'
                             + str(sample.taxonomy_id))
     if (response.status_code == 404):
         results.append({'field': 'TAXON_ID',
@@ -405,7 +411,7 @@ def validate_specimen_against_tolid(sample):
     if sample.is_symbiont():
         return results
 
-    response = requests.get(os.environ['TOLID_URL'] + '/specimens/'
+    response = requests.get(os.getenv('TOLID_URL', '') + '/specimens/'
                             + str(sample.specimen_id))
     if (response.status_code == 404):
         # Haven't used this Specimen ID before - nothing to check
@@ -693,7 +699,7 @@ def set_relationships_for_manifest(manifest):
     for sample in manifest.samples:
         if sample.sample_same_as is None and sample.sample_derived_from is None \
                 and sample.sample_symbiont_of is None:
-            if sample.specimen_id not in seen and sample.taxonomy_id != 32644:
+            if sample.specimen_id not in seen:
                 seen.add(sample.specimen_id)
                 new_specimen_samples.append(sample)
 
@@ -811,13 +817,13 @@ def generate_tolids_for_manifest(manifest):
     # List of taxon-specimen pairs
     taxon_specimens = []
     for sample in manifest.samples:
-        if not sample.is_symbiont():
+        if not sample.is_symbiont() and sample.taxonomy_id != 32644:
             taxon_specimen = {'taxonomyId': sample.taxonomy_id,
                               'specimenId': sample.specimen_id}
             if taxon_specimen not in taxon_specimens:
                 taxon_specimens.append(taxon_specimen)
 
-    response = requests.post(os.environ['TOLID_URL'] + '/tol-ids',
+    response = requests.post(os.getenv('TOLID_URL', '') + '/tol-ids',
                              json=taxon_specimens,
                              headers={'api-key': os.getenv('TOLID_API_KEY')})
     if (response.status_code != 200):
@@ -865,10 +871,10 @@ def generate_ena_ids_for_manifest(manifest):
     submission_xml_file = build_submission_xml(manifest)
     xml_files = [('SAMPLE', open(bundle_xml_file, 'rb')),
                  ('SUBMISSION', open(submission_xml_file, 'rb'))]
-    response = requests.post(os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+    response = requests.post(os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                              files=xml_files,
-                             auth=HTTPBasicAuth(os.environ['ENA_USERNAME'],
-                                                os.environ['ENA_PASSWORD']))
+                             auth=HTTPBasicAuth(os.getenv('ENA_USERNAME'),
+                                                os.getenv('ENA_PASSWORD')))
 
     if (response.status_code != 200):
         results.append({'row': 1,

@@ -73,50 +73,6 @@ paths:
         "403":
           description: user not authorised to use this function
       x-openapi-router-controller: main.controllers.submitters_controller
-  /manifests/upload-excel:
-    post:
-      security:
-        - ApiKeyAuth: []
-      tags:
-      - submitters
-      summary: Upload an excel manifest
-      description: |
-        Uploads an Excel manifest to this service
-      operationId: upload_manifest_excel
-      parameters:
-        - name: projectName
-          in: query
-          description: the name of the project
-          required: false
-          style: form
-          explode: true
-          schema:
-            type: string
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              x-body-name: excelFile
-              type: object
-              properties:
-                excelFile:
-                  type: string
-                  format: binary
-              required:
-                - excelFile
-      responses:
-        "200":
-          description: manifest created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Manifest'
-                x-content-type: application/json
-        "400":
-          description: invalid input, object invalid, or item already exists
-        "403":
-          description: user not authorised to use this function
-      x-openapi-router-controller: main.controllers.submitters_controller
   /manifests/validate:
     post:
       security:
@@ -282,38 +238,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/ManifestValidationResult'
                 x-content-type: application/json
-        "403":
-          description: user not authorised to use this function
-        "404":
-          description: manifest does not exist
-      x-openapi-router-controller: main.controllers.submitters_controller
-  /manifests/{manifestId}/download-excel:
-    get:
-      security:
-        - ApiKeyAuth: []
-      tags:
-      - submitters
-      summary: Downloads an excel file for the manifest, with ID columns filled in
-      description: |
-        Will use original manifest excel file, if manifest was uploaded from Excel
-      operationId: download_manifest_excel
-      parameters:
-      - name: manifestId
-        in: path
-        description: a manifest ID (given when manifest created)
-        required: true
-        style: simple
-        explode: true
-        schema:
-          type: integer
-      responses:
-        "200":
-          description: An Excel file, with the IDs filled in (if generate endpoint has been called previously)
-          content:
-            application/vnd.openxmlformats-officedocument.spreadsheetml.sheet:
-              schema:
-                type: string
-                format: binary
         "403":
           description: user not authorised to use this function
         "404":

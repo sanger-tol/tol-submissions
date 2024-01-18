@@ -6,7 +6,7 @@ from __future__ import absolute_import
 
 import json
 import os
-from test import BaseTestCase
+from test.system import BaseTestCase
 from unittest.mock import patch
 
 from main.manifest_utils import generate_ena_ids_for_manifest, generate_tolids_for_manifest, \
@@ -415,7 +415,7 @@ class TestManifestUtils(BaseTestCase):
                                      'family': 'Arenicolidae',
                                      'genus': 'Arenicola',
                                      'order': 'None'}]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
                       json=mock_response_from_tolid, status=200)
 
         mock_response_from_tolid_specimen = [{
@@ -437,11 +437,11 @@ class TestManifestUtils(BaseTestCase):
                 'tolId': 'wuAreMari1'
             }]
         }]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0000100',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0000100',
                       json=mock_response_from_tolid_specimen, status=200)
 
         mock_response_from_sts = {}  # Only interested in status codes
-        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
                       json=mock_response_from_sts, status=400)
 
         get_ncbi_data.return_value = {6344: {
@@ -841,7 +841,7 @@ class TestManifestUtils(BaseTestCase):
                                      'family': 'Arenicolidae',
                                      'genus': 'Arenicola',
                                      'order': 'None'}]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
                       json=mock_response_from_tolid, status=200)
 
         sample = SubmissionsSample()
@@ -880,7 +880,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_tolid_species_missing(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
                       json=mock_response_from_tolid, status=404)
 
         sample = SubmissionsSample()
@@ -921,7 +921,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_tolid_cant_communicate(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/species/6344',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
                       json=mock_response_from_tolid, status=500)
 
         sample = SubmissionsSample()
@@ -1378,7 +1378,7 @@ class TestManifestUtils(BaseTestCase):
                 'tolId': 'wuAreMari1'
             }]
         }]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0001234',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
                       json=mock_response_from_tolid, status=200)
 
         sample = SubmissionsSample()
@@ -1394,7 +1394,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_specimen_tolid_species_missing(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0001234',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
                       json=mock_response_from_tolid, status=404)
 
         sample = SubmissionsSample()
@@ -1408,7 +1408,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_specimen_tolid_cant_communicate(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0001234',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
                       json=mock_response_from_tolid, status=500)
 
         sample = SubmissionsSample()
@@ -1459,7 +1459,7 @@ class TestManifestUtils(BaseTestCase):
                 'tolId': 'wuAreMari1'
             }]
         }]
-        responses.add(responses.GET, os.environ['TOLID_URL'] + '/specimens/SAN0001234',
+        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
                       json=mock_response_from_tolid, status=200)
         sample = SubmissionsSample()
         sample.specimen_id = 'SAN0001234'
@@ -1484,7 +1484,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_rack_plate_tube_well_sts_exists(self):
         mock_response_from_sts = {}  # Only interested in status codes
-        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
                       json=mock_response_from_sts, status=200)
 
         sample = SubmissionsSample()
@@ -1501,7 +1501,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_rack_plate_tube_well_sts_not_exists(self):
         mock_response_from_sts = {}  # Only interested in status codes
-        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
                       json=mock_response_from_sts, status=400)
 
         sample = SubmissionsSample()
@@ -1516,7 +1516,7 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_rack_plate_tube_well_sts_cant_communicate(self):
         mock_response_from_sts = {}  # Only interested in status codes
-        responses.add(responses.GET, os.environ['STS_URL'] + '/samples/detail',
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
                       json=mock_response_from_sts, status=500)
 
         sample = SubmissionsSample()
@@ -1550,7 +1550,7 @@ class TestManifestUtils(BaseTestCase):
             },
             'tolId': 'wuAreMari1'
         }]
-        responses.add(responses.POST, os.environ['TOLID_URL'] + '/tol-ids',
+        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
                       json=mock_response_from_tolid, status=200)
 
         manifest = SubmissionsManifest()
@@ -1643,7 +1643,7 @@ class TestManifestUtils(BaseTestCase):
             },
             'requestId': 1
         }]
-        responses.add(responses.POST, os.environ['TOLID_URL'] + '/tol-ids',
+        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
                       json=mock_response_from_tolid, status=200)
 
         manifest = SubmissionsManifest()
@@ -1840,7 +1840,7 @@ class TestManifestUtils(BaseTestCase):
         sample.manifest = manifest
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
         # mock specimen not found
@@ -1849,7 +1849,8 @@ class TestManifestUtils(BaseTestCase):
                 'list': []
             }
         })
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id=specimen1234',
+        responses.add(responses.GET, os.getenv('STS_URL', '')
+                      + '/specimens?specimen_id=specimen1234',
                       body=mock_response_from_sts, status=200)
 
         error_count, results = set_relationships_for_manifest(manifest)
@@ -1913,11 +1914,12 @@ class TestManifestUtils(BaseTestCase):
                 'list': []
             }
         })
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id=specimen1234',
+        responses.add(responses.GET, os.getenv('STS_URL', '')
+                      + '/specimens?specimen_id=specimen1234',
                       body=mock_response_from_sts, status=200)
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=403)
 
         error_count, results = set_relationships_for_manifest(manifest)
@@ -1997,7 +1999,7 @@ class TestManifestUtils(BaseTestCase):
         db.session.commit()
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(sample.sample_id) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SAMPLE accession="ERS6206028B" alias="' + str(sample2.sample_id) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239B" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
@@ -2052,7 +2054,7 @@ class TestManifestUtils(BaseTestCase):
         db.session.commit()
 
         mock_response_from_ena = ''  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=404)
 
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
@@ -2108,7 +2110,7 @@ class TestManifestUtils(BaseTestCase):
         db.session.commit()
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T15:48:38.322+01:00" submissionFile="tmpqj34wkifsubmission_2.xml" success="false"><SAMPLE alias="' + str(manifest.samples[0].sample_id) + '" status="PRIVATE"/><SUBMISSION alias="SUBMISSION-07-04-2021-15:48:38:302"/><MESSAGES><ERROR>In sample, alias:"' + str(manifest.samples[0].sample_id) + '", accession:"". The object being added already exists in the submission account with accession: "ERS6206044".</ERROR></MESSAGES><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
@@ -2157,6 +2159,7 @@ class TestManifestUtils(BaseTestCase):
         sample.elevation = '1500'
         sample.depth = '1000'
         sample.relationship = 'child of 1234'
+        sample.tolid = 'TEST'
         sample.manifest = manifest
 
         sample2 = SubmissionsSample()
@@ -2191,7 +2194,7 @@ class TestManifestUtils(BaseTestCase):
         db.session.commit()
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028B" alias="' + str(sample2.sample_id) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239B" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
-        responses.add(responses.POST, os.environ['ENA_URL'] + '/ena/submit/drop-box/submit/',
+        responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
                       body=mock_response_from_ena, status=200)
 
         number_of_errors, results = generate_ena_ids_for_manifest(manifest)
@@ -2205,88 +2208,6 @@ class TestManifestUtils(BaseTestCase):
         self.assertEqual('ERS6206028B', sample2.sra_accession)
         self.assertEqual('ERA3819349', sample2.submission_accession)
         self.assertEqual(True, manifest.submission_status)
-        self.assertTrue(sample.submission_error is None)
-        self.assertTrue(sample2.submission_error is None)
-
-    def test_generate_ena_ids_for_manifest_all_unknown_taxa(self):
-        manifest = SubmissionsManifest()
-        manifest.user = self.user1
-
-        sample = SubmissionsSample()
-        sample.row = 1
-        sample.specimen_id = 'specimen1234'
-        sample.taxonomy_id = 32644
-        sample.scientific_name = 'Unknown'
-        sample.family = 'Unknown'
-        sample.genus = 'Unknown'
-        sample.order_or_group = 'None'
-        sample.common_name = ''
-        sample.lifestage = 'ADULT'
-        sample.sex = 'FEMALE'
-        sample.organism_part = 'MUSCLE'
-        sample.GAL = 'Sanger Institute'
-        sample.GAL_sample_id = 'SAN000100'
-        sample.collected_by = 'ALEX COLLECTOR'
-        sample.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
-        sample.date_of_collection = '2020-09-01'
-        sample.collection_location = 'UNITED KINGDOM | DARK FOREST'
-        sample.decimal_latitude = '+50.12345678'
-        sample.decimal_longitude = '-1.98765432'
-        sample.habitat = 'WOODLAND'
-        sample.identified_by = 'JO IDENTIFIER'
-        sample.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
-        sample.voucher_id = 'voucher1'
-        sample.elevation = '1500'
-        sample.depth = '1000'
-        sample.relationship = 'child of 1234'
-        sample.manifest = manifest
-
-        sample2 = SubmissionsSample()
-        sample2.row = 2
-        sample2.specimen_id = 'specimen5678'
-        sample2.taxonomy_id = 32644
-        sample2.scientific_name = 'Unknown'
-        sample2.family = 'Unknown'
-        sample2.genus = 'Unknown'
-        sample2.order_or_group = 'None'
-        sample2.common_name = ''
-        sample2.lifestage = 'ADULT'
-        sample2.sex = 'FEMALE'
-        sample2.organism_part = 'THORAX'
-        sample2.GAL = 'Sanger Institute'
-        sample2.GAL_sample_id = 'SAN000100'
-        sample2.collected_by = 'ALEX COLLECTOR'
-        sample2.collector_affiliation = 'THE COLLECTOR INSTUTUTE'
-        sample2.date_of_collection = '2020-09-01'
-        sample2.collection_location = 'UNITED KINGDOM | DARK FOREST'
-        sample2.decimal_latitude = '+50.12345678'
-        sample2.decimal_longitude = '-1.98765432'
-        sample2.habitat = 'WOODLAND'
-        sample2.identified_by = 'JO IDENTIFIER'
-        sample2.identifier_affiliation = 'THE IDENTIFIER INSTITUTE'
-        sample2.voucher_id = 'voucher1'
-        sample2.elevation = '1500'
-        sample2.depth = '1000'
-        sample2.relationship = 'child of 1234'
-        sample2.manifest = manifest
-        db.session.add(manifest)
-        db.session.commit()
-
-        number_of_errors, results = generate_ena_ids_for_manifest(manifest)
-
-        expected = [{'row': 1,
-                     'results': [{'field': 'TAXON_ID',
-                                  'message': 'All samples have unknown taxonomy ID',
-                                  'severity': 'WARNING'}]}]
-        self.assertEqual(1, number_of_errors)
-        self.assertEqual(expected, results)
-        self.assertIsNone(sample.biosample_accession)
-        self.assertIsNone(sample.sra_accession)
-        self.assertIsNone(sample.submission_accession)
-        self.assertIsNone(sample2.biosample_accession)
-        self.assertIsNone(sample2.sra_accession)
-        self.assertIsNone(sample2.submission_accession)
-        self.assertIsNone(manifest.submission_status)
         self.assertTrue(sample.submission_error is None)
         self.assertTrue(sample2.submission_error is None)
 

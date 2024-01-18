@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2023 Genome Research Ltd.
+# 
+# SPDX-License-Identifier: MIT
+
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.25.0
+ignore: {}
+patch: {}
+exclude:
+  global:
+    - submissions-api/app/test/system/__init__.py
+    - submissions-api/app/main/xml_utils.py
+    - submissions-api/app/main/manifest_utils.py
+    - submissions-api/app/run.py
+    - submissions-ui/app/src/services/http/config.ts

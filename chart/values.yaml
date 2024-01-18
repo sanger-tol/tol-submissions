@@ -93,13 +93,13 @@ tolcore:
   deployment:
     environment: "dev"
   db:
+    enabled: false
     fullname: "submissions-db"
     user: ""
     password: ""
     name: ""
     host: ""
     port: "" # specify as a string
-    create_local: ""
   dbutils:
     image:
       repository: ""
@@ -112,11 +112,6 @@ tolcore:
     fullname: "submissions-api"
     probe_url: '/api/v1/ui'
     extra_env:
-      MINIO_URI: minio.uri
-      MINIO_ACCESS_KEY: minio.access_key
-      MINIO_SECRET_KEY: minio.secret_key
-      MINIO_BUCKET: minio.bucket
-      MINIO_SECURE: minio.secure
       TOLID_URL: public_url.tolid
       TOLID_API_KEY: keys.tolid
       ENA_URL: public_url.ena
@@ -136,12 +131,6 @@ tolcore:
   ui:
     fullname: "submissions-ui"
     probe_url: '/'
-  minio:
-    uri: ""
-    access_key: ""
-    secret_key: ""
-    bucket: ""
-    secure: ""
   backup:
     uri: ""
     access_key: ""

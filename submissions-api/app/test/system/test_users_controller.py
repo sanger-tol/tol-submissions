@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 
 import os
-from test import BaseTestCase
+from test.system import BaseTestCase
 
 from flask import json
 
@@ -142,7 +142,7 @@ class TestUsersController(BaseTestCase):
         # obviously invalid specimen ID
         invalid_specimen_id = 'doesntMatterAtAll'
         # mock STS Call
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id='
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/specimens?specimen_id='
                       + invalid_specimen_id,
                       json={'data': {'list': []}},
                       status=200)
@@ -164,7 +164,7 @@ class TestUsersController(BaseTestCase):
             'thing3',
         ]
         # mock STS Call
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?specimen_id='
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/specimens?specimen_id='
                       + present_specimen_id,
                       json={'data': {'list': [
                           {'specimen_id': present_specimen_id,
@@ -207,7 +207,7 @@ class TestUsersController(BaseTestCase):
         # obviously invalid biospecimen ID
         invalid_biospecimen_id = 'andNothingElseMatters'
         # mock STS Call
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?bio_specimen_id='
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/specimens?bio_specimen_id='
                       + invalid_biospecimen_id,
                       json={'data': {'list': []}},
                       status=200)
@@ -229,7 +229,7 @@ class TestUsersController(BaseTestCase):
             'another3',
         ]
         # mock STS Call
-        responses.add(responses.GET, os.environ['STS_URL'] + '/specimens?bio_specimen_id='
+        responses.add(responses.GET, os.getenv('STS_URL', '') + '/specimens?bio_specimen_id='
                       + present_biospecimen_id,
                       json={'data': {'list': [
                           {'specimen_id': present_specimen_id,
