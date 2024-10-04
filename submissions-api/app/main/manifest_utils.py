@@ -414,11 +414,12 @@ def validate_specimen_against_tolid(sample):
     if sample.is_symbiont():
         return results
 
-    f = {'and_': {'specimen_id': sample.specimen_id}}
+    f = {'and_': {'specimen_id': {'eq': {'value': sample.specimen_id}}}}
     response = requests.get(
         os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+        headers={'token': os.getenv('TOLID_API_KEY')},
         params={
-            'filter': json.dumps(f)
+            'filter': json.dumps(f, separators=(',', ':'))
         }
     )
     if (response.status_code != 200):

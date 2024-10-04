@@ -29,6 +29,7 @@ services:
       - ELIXIR_REDIRECT_URI
       - ELIXIR_JWK
       - TOLID_URL
+      - TOLID_API_PATH
       - TOLID_API_KEY
       - ENA_URL
       - ENA_USERNAME
