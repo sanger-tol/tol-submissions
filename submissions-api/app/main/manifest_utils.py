@@ -517,7 +517,7 @@ def get_ena_checklist():
                                    'Clipperton Island', 'Cocos Islands', 'Colombia', 'Comoros',
                                    'Cook Islands', 'Coral Sea Islands', 'Costa Rica',
                                    "Cote d'Ivoire", 'Croatia', 'Cuba', 'Curacao', 'Cyprus',
-                                   'Czech Republic', 'Democratic Republic of the Congo',
+                                   'Czechia', 'Democratic Republic of the Congo',
                                    'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic',
                                    'East Timor', 'Ecuador', 'Egypt', 'El Salvador',
                                    'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia',
