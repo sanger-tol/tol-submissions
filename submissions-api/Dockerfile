@@ -20,6 +20,12 @@ RUN python3 setup.py install
 RUN pip3 --no-cache-dir install -r requirements.txt
 RUN pip3 --no-cache-dir install 'connexion[swagger-ui]'
 
+# install internal certificates
+RUN pip install --upgrade certifi
+COPY cacert.pem /
+RUN cat /cacert.pem >> /usr/local/lib/python3.10/site-packages/certifi/cacert.pem
+ENV REQUESTS_CA_BUNDLE=/usr/local/lib/python3.10/site-packages/certifi/cacert.pem
+
 COPY ./app /app
 COPY ./migrations /migrations
 
