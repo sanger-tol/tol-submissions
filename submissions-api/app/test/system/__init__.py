@@ -24,6 +24,7 @@ class BaseTestCase(TestCase):
         self.maxDiff = None
         os.environ['STS_URL'] = 'http://sts'
         os.environ['TOLID_URL'] = 'http://tolid'
+        os.environ['TOLID_API_PATH'] = '/api/v3'
         os.environ['ENA_URL'] = 'http://ena'
 
         db.create_all()

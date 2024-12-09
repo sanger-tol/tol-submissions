@@ -1044,36 +1044,50 @@ class TestSubmittersController(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{'taxonomyId': '6344',
-                                     'scientificName': 'Arenicola marina',
-                                     'commonName': 'lugworm',
-                                     'family': 'Arenicolidae',
-                                     'genus': 'Arenicola',
-                                     'order': 'None'}]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=200)
-
-        mock_response_from_tolid_specimen = [{
-            'specimenId': 'SAN1234567',
-            'tolIds': [{
-                'species': {
-                    'commonName': 'lugworm',
-                    'currentHighestTolidNumber': 2,
+        mock_response_from_tolid = {
+            'data': {
+                'attributes': {
+                    'common_name': 'lugworm',
                     'family': 'Arenicolidae',
                     'genus': 'Arenicola',
                     'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
+                    'name': 'Arenicola marina',
                     'phylum': 'Annelida',
                     'prefix': 'wuAreMari',
-                    'scientificName': 'Arenicola marina',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6344
+                    'tax_class': 'Polychaeta',
+                    'tax_order': 'None'
                 },
-                'tolId': 'wuAreMari1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN1234567',
-                      json=mock_response_from_tolid_specimen, status=200)
+                'id': '6344',
+                'type': 'species'
+            }
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=200
+        )
+
+        mock_response_from_tolid_specimen = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6344,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid_specimen, status=200
+        )
 
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
@@ -1237,36 +1251,50 @@ class TestSubmittersController(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/32644',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{'taxonomyId': '32644',
-                                     'scientificName': 'unidentified',
-                                     'commonName': '',
-                                     'family': '',
-                                     'genus': '',
-                                     'order': 'None'}]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/32644',
-                      json=mock_response_from_tolid, status=200)
-
-        mock_response_from_tolid_specimen = [{
-            'specimenId': 'SAN1234567',
-            'tolIds': [{
-                'species': {
-                    'commonName': '',
-                    'currentHighestTolidNumber': 2,
+        mock_response_from_tolid = {
+            'data': {
+                'attributes': {
+                    'common_name': 'unknown',
                     'family': '',
                     'genus': '',
                     'kingdom': '',
-                    'order': '',
+                    'name': 'unknown',
                     'phylum': '',
-                    'prefix': 'unUnkUnkn',
-                    'scientificName': 'unidentified',
-                    'taxaClass': '',
-                    'taxonomyId': 32644
+                    'prefix': '',
+                    'tax_class': '',
+                    'tax_order': ''
                 },
-                'tolId': 'unUnkUnkn1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN1234567',
-                      json=mock_response_from_tolid_specimen, status=200)
+                'id': '32644',
+                'type': 'species'
+            }
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/32644',
+            json=mock_response_from_tolid, status=200
+        )
+
+        mock_response_from_tolid_specimen = {
+            'data': [
+                {
+                    'id': 'unUnkUnkn1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 32644,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid_specimen, status=200
+        )
 
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
@@ -1415,36 +1443,50 @@ class TestSubmittersController(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{'taxonomyId': '6344',
-                                     'scientificName': 'Arenicola marina',
-                                     'commonName': 'lugworm',
-                                     'family': 'Arenicolidae',
-                                     'genus': 'Arenicola',
-                                     'order': 'None'}]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=200)
-
-        mock_response_from_tolid_specimen = [{
-            'specimenId': 'SAN1234567',
-            'tolIds': [{
-                'species': {
-                    'commonName': 'lugworm',
-                    'currentHighestTolidNumber': 2,
+        mock_response_from_tolid = {
+            'data': {
+                'attributes': {
+                    'common_name': 'lugworm',
                     'family': 'Arenicolidae',
                     'genus': 'Arenicola',
                     'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
+                    'name': 'Arenicola marina',
                     'phylum': 'Annelida',
                     'prefix': 'wuAreMari',
-                    'scientificName': 'Arenicola marina',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6344
+                    'tax_class': 'Polychaeta',
+                    'tax_order': 'None'
                 },
-                'tolId': 'wuAreMari1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN1234567',
-                      json=mock_response_from_tolid_specimen, status=200)
+                'id': '6344',
+                'type': 'species'
+            }
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=200
+        )
+
+        mock_response_from_tolid_specimen = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6344,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid_specimen, status=200
+        )
 
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
@@ -1604,26 +1646,23 @@ class TestSubmittersController(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{
-            'species': {
-                'commonName': 'lugworm',
-                'family': 'Arenicolidae',
-                'genus': 'Arenicola',
-                'kingdom': 'Metazoa',
-                'order': 'Capitellida',
-                'phylum': 'Annelida',
-                'prefix': 'wuAreMari',
-                'scientificName': 'Arenicola marina',
-                'taxaClass': 'Polychaeta',
-                'taxonomyId': 6344
-            },
-            'specimen': {
-                'specimenId': 'SAN1234567'
-            },
-            'tolId': 'wuAreMari1'
-        }]
-        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'type': 'specimen',
+                    'attributes': {
+                        'requested_taxonomy_id': 6344,
+                        'specimen_id': 'SAN1234567'
+                    }
+                }
+            ]
+        }
+        responses.add(
+            responses.POST,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/request/create',
+            json=mock_response_from_tolid, status=200
+        )
 
         body = {'samples': [{
             'row': 1,
@@ -1808,26 +1847,23 @@ class TestSubmittersController(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{
-            'species': {
-                'commonName': 'lugworm',
-                'family': 'Arenicolidae',
-                'genus': 'Arenicola',
-                'kingdom': 'Metazoa',
-                'order': 'Capitellida',
-                'phylum': 'Annelida',
-                'prefix': 'wuAreMari',
-                'scientificName': 'Arenicola marina',
-                'taxaClass': 'Polychaeta',
-                'taxonomyId': 6344
-            },
-            'specimen': {
-                'specimenId': 'SAN1234567'
-            },
-            'tolId': 'wuAreMari1'
-        }]
-        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'type': 'specimen',
+                    'attributes': {
+                        'requested_taxonomy_id': 6344,
+                        'specimen_id': 'SAN1234567'
+                    }
+                }
+            ]
+        }
+        responses.add(
+            responses.POST,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/request/create',
+            json=mock_response_from_tolid, status=200
+        )
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
         responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',
@@ -2004,26 +2040,23 @@ class TestSubmittersController(BaseTestCase):
                                   'binomial': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/32644',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{
-            'species': {
-                'commonName': 'lugworm',
-                'family': 'Arenicolidae',
-                'genus': 'Arenicola',
-                'kingdom': 'Metazoa',
-                'order': 'Capitellida',
-                'phylum': 'Annelida',
-                'prefix': 'wuAreMari',
-                'scientificName': 'Arenicola marina',
-                'taxaClass': 'Polychaeta',
-                'taxonomyId': 6344
-            },
-            'specimen': {
-                'specimenId': 'SAN1234567'
-            },
-            'tolId': 'wuAreMari1'
-        }]
-        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'type': 'specimen',
+                    'attributes': {
+                        'requested_taxonomy_id': 6344,
+                        'specimen_id': 'SAN1234567'
+                    }
+                }
+            ]
+        }
+        responses.add(
+            responses.POST,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/request/create',
+            json=mock_response_from_tolid, status=200
+        )
 
         mock_response_from_ena = '<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type="text/xsl" href="receipt.xsl"?><RECEIPT receiptDate="2021-04-07T12:47:39.998+01:00" submissionFile="tmphz9luulrsubmission_3.xml" success="true"><SAMPLE accession="ERS6206028" alias="' + str(1) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521239" type="biosample"/></SAMPLE><SAMPLE accession="ERS6206028" alias="' + str(2) + '" status="PRIVATE"><EXT_ID accession="SAMEA8521240" type="biosample"/></SAMPLE><SUBMISSION accession="ERA3819349" alias="SUBMISSION-07-04-2021-12:47:36:825"/><ACTIONS>ADD</ACTIONS></RECEIPT>'  # noqa
         responses.add(responses.POST, os.getenv('ENA_URL', '') + '/ena/submit/drop-box/submit/',

@@ -409,36 +409,50 @@ class TestManifestUtils(BaseTestCase):
                                   'submittable': 'true'}
         responses.add(responses.GET, 'https://www.ebi.ac.uk/ena/taxonomy/rest/tax-id/6344',
                       json=mock_response_from_ena, status=200)
-        mock_response_from_tolid = [{'taxonomyId': '6344',
-                                     'scientificName': 'Arenicola marina',
-                                     'commonName': 'lugworm',
-                                     'family': 'Arenicolidae',
-                                     'genus': 'Arenicola',
-                                     'order': 'None'}]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=200)
-
-        mock_response_from_tolid_specimen = [{
-            'specimenId': 'SAN0000100',
-            'tolIds': [{
-                'species': {
-                    'commonName': 'lugworm',
-                    'currentHighestTolidNumber': 2,
+        mock_response_from_tolid = {
+            'data': {
+                'attributes': {
+                    'common_name': 'lugworm',
                     'family': 'Arenicolidae',
                     'genus': 'Arenicola',
                     'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
+                    'name': 'Arenicola marina',
                     'phylum': 'Annelida',
                     'prefix': 'wuAreMari',
-                    'scientificName': 'Arenicola marina',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6344
+                    'tax_class': 'Polychaeta',
+                    'tax_order': 'None'
                 },
-                'tolId': 'wuAreMari1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0000100',
-                      json=mock_response_from_tolid_specimen, status=200)
+                'id': '6344',
+                'type': 'species'
+            }
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=200
+        )
+
+        mock_response_from_tolid_specimen = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6344,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid_specimen, status=200
+        )
 
         mock_response_from_sts = {}  # Only interested in status codes
         responses.add(responses.GET, os.getenv('STS_URL', '') + '/samples/detail',
@@ -531,6 +545,7 @@ class TestManifestUtils(BaseTestCase):
         db.session.add(self.sample1)
 
         number_of_errors, results = validate_manifest(self.manifest1)
+        print(results)
         self.assertEqual(number_of_errors, 0)
         self.assertEqual(len(results), 1)
         self.assertEqual(len(results[0]['results']), 0)
@@ -835,14 +850,28 @@ class TestManifestUtils(BaseTestCase):
     # The real version of this does a call to the ToLID service. We mock that call here
     @responses.activate
     def test_validate_tolid_correct(self):
-        mock_response_from_tolid = [{'taxonomyId': '6344',
-                                     'scientificName': 'Arenicola marina',
-                                     'commonName': 'lugworm',
-                                     'family': 'Arenicolidae',
-                                     'genus': 'Arenicola',
-                                     'order': 'None'}]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': {
+                'attributes': {
+                    'common_name': 'lugworm',
+                    'family': 'Arenicolidae',
+                    'genus': 'Arenicola',
+                    'kingdom': 'Metazoa',
+                    'name': 'Arenicola marina',
+                    'phylum': 'Annelida',
+                    'prefix': 'wuAreMari',
+                    'tax_class': 'Polychaeta',
+                    'tax_order': 'None'
+                },
+                'id': '6344',
+                'type': 'species'
+            }
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=200
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'specimen1234'
@@ -880,8 +909,11 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_tolid_species_missing(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=404)
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=404
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'specimen1234'
@@ -921,8 +953,11 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_tolid_cant_communicate(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/species/6344',
-                      json=mock_response_from_tolid, status=500)
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/species/6344',
+            json=mock_response_from_tolid, status=500
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'specimen1234'
@@ -1359,27 +1394,27 @@ class TestManifestUtils(BaseTestCase):
 
     @responses.activate
     def test_validate_specimen_tolid_correct(self):
-        mock_response_from_tolid = [{
-            'specimenId': 'SAN0001234',
-            'tolIds': [{
-                'species': {
-                    'commonName': 'lugworm',
-                    'currentHighestTolidNumber': 2,
-                    'family': 'Arenicolidae',
-                    'genus': 'Arenicola',
-                    'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
-                    'phylum': 'Annelida',
-                    'prefix': 'wuAreMari',
-                    'scientificName': 'Arenicola marina',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6344
-                },
-                'tolId': 'wuAreMari1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6344,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid, status=200
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'SAN0001234'
@@ -1393,9 +1428,14 @@ class TestManifestUtils(BaseTestCase):
     # The real version of this does a call to the ToLID service. We mock that call here
     @responses.activate
     def test_validate_specimen_tolid_species_missing(self):
-        mock_response_from_tolid = []
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
-                      json=mock_response_from_tolid, status=404)
+        mock_response_from_tolid = {
+            'data': []
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid, status=200
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'SAN0001234'
@@ -1408,8 +1448,11 @@ class TestManifestUtils(BaseTestCase):
     @responses.activate
     def test_validate_specimen_tolid_cant_communicate(self):
         mock_response_from_tolid = []
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
-                      json=mock_response_from_tolid, status=500)
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid, status=500
+        )
 
         sample = SubmissionsSample()
         sample.specimen_id = 'SAN0001234'
@@ -1425,42 +1468,39 @@ class TestManifestUtils(BaseTestCase):
     # The real version of this does a call to the ToLID service. We mock that call here
     @responses.activate
     def test_validate_specimen_tolid_taxon_mismatch(self):
-        mock_response_from_tolid = [{
-            'specimenId': 'SAN0001234',
-            'tolIds': [{
-                'species': {
-                    'commonName': 'lugworm',
-                    'currentHighestTolidNumber': 2,
-                    'family': 'Arenicolidae',
-                    'genus': 'Arenicola',
-                    'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
-                    'phylum': 'Annelida',
-                    'prefix': 'wuAreMari',
-                    'scientificName': 'Arenicola marina',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6344
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6344,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
                 },
-                'tolId': 'wuAreMari1'
-            }, {
-                'species': {
-                    'commonName': 'pugworm',
-                    'currentHighestTolidNumber': 2,
-                    'family': 'Arenicolidae',
-                    'genus': 'Arenicola',
-                    'kingdom': 'Metazoa',
-                    'order': 'Capitellida',
-                    'phylum': 'Annelida',
-                    'prefix': 'wuAreMarp',
-                    'scientificName': 'Arenicola marinp',
-                    'taxaClass': 'Polychaeta',
-                    'taxonomyId': 6355
-                },
-                'tolId': 'wuAreMari1'
-            }]
-        }]
-        responses.add(responses.GET, os.getenv('TOLID_URL', '') + '/specimens/SAN0001234',
-                      json=mock_response_from_tolid, status=200)
+                {
+                    'id': 'wuAreMarp1',
+                    'relationships': {
+                        'species': {
+                            'data': {
+                                'id': 6355,
+                                'type': 'species'
+                            }
+                        }
+                    },
+                    'type': 'specimen'
+                }
+            ]
+        }
+        responses.add(
+            responses.GET,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+            json=mock_response_from_tolid, status=200
+        )
         sample = SubmissionsSample()
         sample.specimen_id = 'SAN0001234'
         sample.taxonomy_id = 6366
@@ -1532,26 +1572,23 @@ class TestManifestUtils(BaseTestCase):
 
     @responses.activate
     def test_generate_tolids_for_manifest(self):
-        mock_response_from_tolid = [{
-            'species': {
-                'commonName': 'lugworm',
-                'family': 'Arenicolidae',
-                'genus': 'Arenicola',
-                'kingdom': 'Metazoa',
-                'order': 'Capitellida',
-                'phylum': 'Annelida',
-                'prefix': 'wuAreMari',
-                'scientificName': 'Arenicola marina',
-                'taxaClass': 'Polychaeta',
-                'taxonomyId': 6344
-            },
-            'specimen': {
-                'specimenId': 'specimen1234'
-            },
-            'tolId': 'wuAreMari1'
-        }]
-        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': 'wuAreMari1',
+                    'type': 'specimen',
+                    'attributes': {
+                        'requested_taxonomy_id': 6344,
+                        'specimen_id': 'specimen1234'
+                    }
+                }
+            ]
+        }
+        responses.add(
+            responses.POST,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/request/create',
+            json=mock_response_from_tolid, status=200
+        )
 
         manifest = SubmissionsManifest()
         manifest.user = self.user1
@@ -1625,26 +1662,23 @@ class TestManifestUtils(BaseTestCase):
 
     @responses.activate
     def test_generate_tolids_for_manifest_failure(self):
-        mock_response_from_tolid = [{
-            'species': {
-                'commonName': 'lugworm',
-                'family': 'Arenicolidae',
-                'genus': 'Arenicola',
-                'kingdom': 'Metazoa',
-                'order': 'Capitellida',
-                'phylum': 'Annelida',
-                'prefix': 'wuAreMari',
-                'scientificName': 'Arenicola marina',
-                'taxaClass': 'Polychaeta',
-                'taxonomyId': 6344
-            },
-            'specimen': {
-                'specimenId': 'specimen1234'
-            },
-            'requestId': 1
-        }]
-        responses.add(responses.POST, os.getenv('TOLID_URL', '') + '/tol-ids',
-                      json=mock_response_from_tolid, status=200)
+        mock_response_from_tolid = {
+            'data': [
+                {
+                    'id': '1',
+                    'type': 'request',
+                    'attributes': {
+                        'requested_taxonomy_id': 6344,
+                        'specimen_id': 'specimen1234'
+                    }
+                }
+            ]
+        }
+        responses.add(
+            responses.POST,
+            os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/request/create',
+            json=mock_response_from_tolid, status=200
+        )
 
         manifest = SubmissionsManifest()
         manifest.user = self.user1

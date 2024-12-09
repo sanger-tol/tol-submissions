@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM python:3.8
+FROM python:3.10
 
 WORKDIR /app
 
@@ -16,6 +16,12 @@ ENV DOCKERIZE_VERSION v0.6.0
 RUN wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
     && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz
+
+# install internal certificates
+RUN pip install --upgrade certifi
+COPY cacert.pem /
+RUN cat /cacert.pem >> /usr/local/lib/python3.10/site-packages/certifi/cacert.pem
+ENV REQUESTS_CA_BUNDLE=/usr/local/lib/python3.10/site-packages/certifi/cacert.pem
 
 COPY ./app/setup.py .
 RUN python3 setup.py install

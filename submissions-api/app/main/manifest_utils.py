@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
+import json
 import logging
 import os
 import re
@@ -301,8 +302,10 @@ def validate_sts_rack_plate_tube_well(sample):
 
 def validate_species_known_in_tolid(sample):
     results = []
-    response = requests.get(os.getenv('TOLID_URL', '') + '/species/'
-                            + str(sample.taxonomy_id))
+    response = requests.get(
+        os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '')
+        + f'/species/{str(sample.taxonomy_id)}'
+    )
     if (response.status_code == 404):
         results.append({'field': 'TAXON_ID',
                         'message': 'Species not known in the ToLID service',
@@ -411,12 +414,14 @@ def validate_specimen_against_tolid(sample):
     if sample.is_symbiont():
         return results
 
-    response = requests.get(os.getenv('TOLID_URL', '') + '/specimens/'
-                            + str(sample.specimen_id))
-    if (response.status_code == 404):
-        # Haven't used this Specimen ID before - nothing to check
-        return results
-
+    f = {'and_': {'specimen_id': {'eq': {'value': sample.specimen_id}}}}
+    response = requests.get(
+        os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '') + '/specimen',
+        headers={'token': os.getenv('TOLID_API_KEY')},
+        params={
+            'filter': json.dumps(f, separators=(',', ':'))
+        }
+    )
     if (response.status_code != 200):
         results.append({'field': 'SPECIMEN_ID',
                         'message': 'Communication failed with the ToLID service: status code '
@@ -424,10 +429,14 @@ def validate_specimen_against_tolid(sample):
                         'severity': 'ERROR'})
         return results
 
-    tolids = response.json()[0]['tolIds']
+    tolids = response.json().get('data')
+    if (len(tolids) == 0):
+        # Haven't used this Specimen ID before - nothing to check
+        return results
+
     taxons = set()
     for tolid in tolids:
-        taxons.add(tolid['species']['taxonomyId'])
+        taxons.add(tolid['relationships']['species']['data']['id'])
 
     # Has this taxonomy ID been used before?
     if sample.taxonomy_id not in taxons:
@@ -818,31 +827,39 @@ def generate_tolids_for_manifest(manifest):
     taxon_specimens = []
     for sample in manifest.samples:
         if not sample.is_symbiont() and sample.taxonomy_id != 32644:
-            taxon_specimen = {'taxonomyId': sample.taxonomy_id,
-                              'specimenId': sample.specimen_id}
+            taxon_specimen = {'requested_taxonomy_id': sample.taxonomy_id,
+                              'specimen_id': sample.specimen_id}
             if taxon_specimen not in taxon_specimens:
                 taxon_specimens.append(taxon_specimen)
 
-    response = requests.post(os.getenv('TOLID_URL', '') + '/tol-ids',
+    tolid_url = os.getenv('TOLID_URL', '') + os.getenv('TOLID_API_PATH', '')
+    response = requests.post(tolid_url + '/request/create',
                              json=taxon_specimens,
-                             headers={'api-key': os.getenv('TOLID_API_KEY')})
+                             headers={'token': os.getenv('TOLID_API_KEY')})
     if (response.status_code != 200):
+        logging.warning(response.text)
         results.append({'row': sample.row,
                         'results': [{'field': 'TAXON_ID',
                                      'message': 'Cannot connect to ToLID service',
                                      'severity': 'ERROR'}]})
         return 1, results
 
-    for tolid in response.json():
+    for tolid_or_request in response.json().get('data', []):
+        atts = tolid_or_request.get('attributes')
+        if atts is None:
+            continue
+        taxonomy_id = atts.get('requested_taxonomy_id')
+        specimen_id = atts.get('specimen_id')
+        type_ = tolid_or_request.get('type')
         samples_to_update = db.session.query(SubmissionsSample) \
             .filter(SubmissionsSample.manifest == manifest) \
-            .filter(SubmissionsSample.specimen_id == tolid['specimen']['specimenId']) \
-            .filter(SubmissionsSample.taxonomy_id == tolid['species']['taxonomyId']) \
+            .filter(SubmissionsSample.specimen_id == specimen_id) \
+            .filter(SubmissionsSample.taxonomy_id == taxonomy_id) \
             .order_by(SubmissionsSample.row) \
             .all()
         for sample_to_update in samples_to_update:
-            if 'tolId' in tolid:
-                sample_to_update.tolid = tolid['tolId']
+            if type_ == 'specimen':
+                sample_to_update.tolid = tolid_or_request.get('id')
             else:
                 # ToLID not been assigned - a request must have been generated
                 results.append({'row': sample_to_update.row,

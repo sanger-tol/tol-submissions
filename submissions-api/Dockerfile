@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-FROM tiangolo/uwsgi-nginx-flask:python3.8
+FROM gitlab-registry.internal.sanger.ac.uk/tol/tol-core/api-base:1.0.0
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV UWSGI_CHEAPER 4
@@ -19,6 +19,12 @@ RUN python3 setup.py install
 
 RUN pip3 --no-cache-dir install -r requirements.txt
 RUN pip3 --no-cache-dir install 'connexion[swagger-ui]'
+
+# install internal certificates
+RUN pip install --upgrade certifi
+COPY cacert.pem /
+RUN cat /cacert.pem >> /usr/local/lib/python3.10/site-packages/certifi/cacert.pem
+ENV REQUESTS_CA_BUNDLE=/usr/local/lib/python3.10/site-packages/certifi/cacert.pem
 
 COPY ./app /app
 COPY ./migrations /migrations
