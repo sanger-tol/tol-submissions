@@ -113,7 +113,7 @@ tolcore:
     probe_url: '/api/v1/ui'
     extra_env:
       TOLID_URL: public_url.tolid
-      TOLID_API_PATH: tolid.api.path
+      TOLID_API_PATH: tolid.api_path
       TOLID_API_KEY: keys.tolid
       ENA_URL: public_url.ena
       ENA_USERNAME: ena.username
