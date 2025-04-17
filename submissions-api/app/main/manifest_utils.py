@@ -681,11 +681,14 @@ def generate_tolids_for_manifest(manifest):
                              json=taxon_specimens,
                              headers={'token': os.getenv('TOLID_API_KEY')})
     if (response.status_code != 200):
-        logging.warning(response.text)
-        results.append({'row': sample.row,
-                        'results': [{'field': 'TAXON_ID',
-                                     'message': 'Cannot connect to ToLID service',
-                                     'severity': 'ERROR'}]})
+        results.append({
+            'row': sample.row,
+            'results': [{
+                'field': 'TAXON_ID',
+                'message': f'Cannot connect to ToLID service: {response.text}',
+                'severity': 'ERROR'
+            }]
+        })
         return 1, results
 
     for tolid_or_request in response.json().get('data', []):

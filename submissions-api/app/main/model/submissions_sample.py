@@ -171,7 +171,10 @@ class SubmissionsSample(Base):
         if self.relationship is not None:
             ret = ret | self.__convert_to_ena_format('relationship', self.relationship)
         if self.symbiont is not None:
-            ret = ret | {'value': 'Y' if self.symbiont == 'SYMBIONT' else 'N'}
+            ret = ret | self.__convert_to_ena_format(
+                'symbiont',
+                'Y' if self.symbiont == 'SYMBIONT' else 'N'
+            )
         ret = ret | self.__convert_to_ena_format(
             'collecting institution',
             self.collector_affiliation
