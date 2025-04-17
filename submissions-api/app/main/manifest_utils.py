@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ElementTree
 
 from Bio import Entrez
 
+from main.ena_utils import get_ena_checklist
 from main.model import SubmissionsManifest, SubmissionsSample, SubmissionsSampleField, \
     SubmissionsSpecimen, db
 from main.specimen_utils import get_specimen_sts
@@ -480,170 +481,13 @@ def validate_against_ena_checklist(sample):
 
         # Check against allowed values
         if 'allowed_values' in ena_checklist[check] and check in ena_fields:
-            if ena_fields[check]['value'].lower() not in \
-                    [x.lower() for x in ena_checklist[check]['allowed_values']]:
+            if ena_fields[check]['value'] not in \
+                    ena_checklist[check]['allowed_values']:
                 results.append({'field': field_name,
                                 'message': 'Must be in allowed values',
                                 'severity': 'ERROR'})
 
     return results
-
-
-def get_ena_checklist():
-    return {'organism part': {'mandatory': True,
-                              'field': 'ORGANISM_PART'},
-            'lifestage': {'mandatory': True,
-                          'field': 'LIFESTAGE',
-                          'allowed_values': ['adult', 'egg', 'embryo', 'gametophyte', 'juvenile',
-                                             'larva', 'not applicable', 'not collected',
-                                             'not provided', 'pupa', 'spore-bearing structure',
-                                             'sporophyte', 'vegetative cell',
-                                             'vegetative structure', 'zygote']},
-            'project name': {'mandatory': True},
-            # 'tolid': {'mandatory': True,
-            #           'regex': r'(^[a-z]{1}[A-Z]{1}[a-z]{2}[A-Z]{1}[a-z]{2}[0-9]*$)|(^[a-z]{2}[A-Z]{1}[a-z]{2}[A-Z]{1}[a-z]{3}[0-9]*$)'},  # noqa
-            'collected by': {'mandatory': True,
-                             'field': 'COLLECTED_BY'},
-            'collection date': {'mandatory': True,
-                                'field': 'DATE_OF_COLLECTION',
-                                'regex': r'(^[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?(/[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?)?$)|(^not collected$)|(^not provided$)|(^restricted access$)'},  # noqa
-            'geographic location (country and/or sea)': {
-                'mandatory': True,
-                'field': 'COLLECTION_LOCATION',
-                'allowed_values': ['Afghanistan', 'Albania', 'Algeria', 'American Samoa',
-                                   'Andorra', 'Angola', 'Anguilla', 'Antarctica',
-                                   'Antigua and Barbuda', 'Arctic Ocean', 'Argentina', 'Armenia',
-                                   'Aruba', 'Ashmore and Cartier Islands', 'Atlantic Ocean',
-                                   'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain',
-                                   'Baker Island', 'Baltic Sea', 'Bangladesh', 'Barbados',
-                                   'Bassas da India', 'Belarus', 'Belgium', 'Belize', 'Benin',
-                                   'Bermuda', 'Bhutan', 'Bolivia', 'Borneo',
-                                   'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island',
-                                   'Brazil', 'British Virgin Islands', 'Brunei', 'Bulgaria',
-                                   'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada',
-                                   'Cape Verde', 'Cayman Islands', 'Central African Republic',
-                                   'Chad', 'Chile', 'China', 'Christmas Island',
-                                   'Clipperton Island', 'Cocos Islands', 'Colombia', 'Comoros',
-                                   'Cook Islands', 'Coral Sea Islands', 'Costa Rica',
-                                   "Cote d'Ivoire", 'Croatia', 'Cuba', 'Curacao', 'Cyprus',
-                                   'Czechia', 'Democratic Republic of the Congo',
-                                   'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic',
-                                   'East Timor', 'Ecuador', 'Egypt', 'El Salvador',
-                                   'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia',
-                                   'Europa Island', 'Falkland Islands (Islas Malvinas)',
-                                   'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana',
-                                   'French Polynesia', 'French Southern and Antarctic Lands',
-                                   'Gabon', 'Gambia', 'Gaza Strip', 'Georgia', 'Germany',
-                                   'Ghana', 'Gibraltar', 'Glorioso Islands', 'Greece',
-                                   'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala',
-                                   'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti',
-                                   'Heard Island and McDonald Islands', 'Honduras', 'Hong Kong',
-                                   'Howland Island', 'Hungary', 'Iceland', 'India',
-                                   'Indian Ocean', 'Indonesia', 'Iran', 'Iraq', 'Ireland',
-                                   'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Jan Mayen',
-                                   'Japan', 'Jarvis Island', 'Jersey', 'Johnston Atoll',
-                                   'Jordan', 'Juan de Nova Island', 'Kazakhstan', 'Kenya',
-                                   'Kerguelen Archipelago', 'Kingman Reef', 'Kiribati', 'Kosovo',
-                                   'Kuwait', 'Kyrgyzstan', 'Laos', 'Latvia', 'Lebanon',
-                                   'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania',
-                                   'Luxembourg', 'Macau', 'Macedonia', 'Madagascar', 'Malawi',
-                                   'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands',
-                                   'Martinique', 'Mauritania', 'Mauritius', 'Mayotte',
-                                   'Mediterranean Sea', 'Mexico', 'Micronesia', 'Midway Islands',
-                                   'Moldova', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat',
-                                   'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru',
-                                   'Navassa Island', 'Nepal', 'Netherlands', 'New Caledonia',
-                                   'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue',
-                                   'Norfolk Island', 'North Korea', 'North Sea',
-                                   'Northern Mariana Islands', 'Norway', 'Oman', 'Pacific Ocean',
-                                   'Pakistan', 'Palau', 'Palmyra Atoll', 'Panama',
-                                   'Papua New Guinea', 'Paracel Islands', 'Paraguay', 'Peru',
-                                   'Philippines', 'Pitcairn Islands', 'Poland', 'Portugal',
-                                   'Puerto Rico', 'Qatar', 'Republic of the Congo', 'Reunion',
-                                   'Romania', 'Ross Sea', 'Russia', 'Rwanda', 'Saint Helena',
-                                   'Saint Kitts and Nevis', 'Saint Lucia',
-                                   'Saint Pierre and Miquelon',
-                                   'Saint Vincent and the Grenadines', 'Samoa', 'San Marino',
-                                   'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia',
-                                   'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten',
-                                   'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia',
-                                   'South Africa',
-                                   'South Georgia and the South Sandwich Islands', 'South Korea',
-                                   'Southern Ocean', 'Spain', 'Spratly Islands', 'Sri Lanka',
-                                   'Sudan', 'Suriname', 'Svalbard', 'Swaziland', 'Sweden',
-                                   'Switzerland', 'Syria', 'Taiwan', 'Tajikistan', 'Tanzania',
-                                   'Tasman Sea', 'Thailand', 'Togo', 'Tokelau', 'Tonga',
-                                   'Trinidad and Tobago', 'Tromelin Island', 'Tunisia',
-                                   'Turkey', 'Turkmenistan', 'Turks and Caicos Islands',
-                                   'Tuvalu', 'USA', 'Uganda', 'Ukraine', 'United Arab Emirates',
-                                   'United Kingdom', 'Uruguay', 'Uzbekistan', 'Vanuatu',
-                                   'Venezuela', 'Viet Nam', 'Virgin Islands', 'Wake Island',
-                                   'Wallis and Futuna', 'West Bank', 'Western Sahara', 'Yemen',
-                                   'Zambia', 'Zimbabwe', 'not applicable', 'not collected',
-                                   'not provided', 'restricted access']},
-                'geographic location (latitude)': {'mandatory': True,
-                                                   'field': 'DECIMAL_LATITUDE',
-                                                   'regex': r'(^[+-]?[0-9]+.?[0-9]{0,8}$)|(^not collected$)|(^not provided$)|(^restricted access$)'},  # noqa
-                'geographic location (longitude)': {'mandatory': True,
-                                                    'field': 'DECIMAL_LONGITUDE',
-                                                    'regex': r'(^[+-]?[0-9]+.?[0-9]{0,8}$)|(^not collected$)|(^not provided$)|(^restricted access$)'},  # noqa
-                'geographic location (region and locality)': {'mandatory': True,
-                                                              'field': 'COLLECTION_LOCATION'},
-                'identified_by': {'mandatory': True,
-                                  'field': 'IDENTIFIED_BY'},
-                'geographic location (depth)': {'mandatory': False,
-                                                'field': 'DEPTH',
-                                                'regex': r'(0|((0\.)|([1-9][0-9]*\.?))[0-9]*)([Ee][+-]?[0-9]+)?'},  # noqa
-                'geographic location (elevation)': {'mandatory': False,
-                                                    'field': 'ELEVATION',
-                                                    'regex': r'[+-]?(0|((0\.)|([1-9][0-9]*\.?))[0-9]*)([Ee][+-]?[0-9]+)?'},  # noqa
-                'habitat': {'mandatory': True,
-                            'field': 'HABITAT'},
-                'identifier_affiliation': {'mandatory': True,
-                                           'field': 'IDENTIFIER_AFFILIATION'},
-                'original collection date': {'mandatory': False,
-                                             'field': 'ORIGINAL_COLLECTION_DATE',
-                                             'regex': r'^[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?(/[0-9]{4}(-[0-9]{2}(-[0-9]{2}(T[0-9]{2}:[0-9]{2}(:[0-9]{2})?Z?([+-][0-9]{1,2})?)?)?)?)?$'},  # noqa
-                'original geographic location': {'mandatory': False,
-                                                 'field': 'ORIGINAL_GEOGRAPHIC_LOCATION'},
-                'sample derived from': {'mandatory': False,
-                                        'regex': r'(^[ESD]R[SR]\d{6,}(,[ESD]R[SR]\d{6,})*$)|(^SAM[END][AG]?\d+(,SAM[END][AG]?\d+)*$)|(^EGA[NR]\d{11}(,EGA[NR]\d{11})*$)|(^[ESD]R[SR]\d{6,}-[ESD]R[SR]\d{6,}$)|(^SAM[END][AG]?\d+-SAM[END][AG]?\d+$)|(^EGA[NR]\d{11}-EGA[NR]\d{11}$)'},  # noqa
-                'sample same as': {'mandatory': False,
-                                   'regex': r'(^[ESD]RS\d{6,}(,[ESD]RS\d{6,})*$)|(^SAM[END][AG]?\d+(,SAM[END][AG]?\d+)*$)|(^EGAN\d{11}(,EGAN\d{11})*$)'},  # noqa
-                'sample symbiont of': {'mandatory': False,
-                                       'regex': r'(^[ESD]RS\d{6,}$)|(^SAM[END][AG]?\d+$)|(^EGAN\d{11}$)'},  # noqa
-                'sex': {'mandatory': True,
-                        'field': 'SEX'},
-                'relationship': {'mandatory': False,
-                                 'field': 'RELATIONSHIP'},
-                'symbiont': {'mandatory': False,
-                             'field': 'SYMBIONT',
-                             'allowed_values': ['N', 'Y']},
-                'collecting institution': {'mandatory': True,
-                                           'field': 'COLLECTOR_AFFILIATION'},
-                'GAL': {'mandatory': True,
-                        'field': 'GAL',
-                        'allowed_values': [
-                            'Dalhousie University', 'Earlham Institute',
-                            'Geomar Helmholtz Centre', 'Marine Biological Association',
-                            'Natural History Museum', 'Nova Southeastern University',
-                            'Portland State University', 'Queen Mary University of London',
-                            'Royal Botanic Garden Edinburgh', 'Royal Botanic Gardens Kew',
-                            'Sanger Institute', 'Senckenberg Research Institute',
-                            'The Sainsbury Laboratory', 'University of British Columbia',
-                            'University of California', 'University of Cambridge',
-                            'University of Derby', 'University of Edinburgh',
-                            'University of Oregon', 'University of Oxford',
-                            'University of Rhode Island', 'University of Vienna (Cephalopod)',
-                            'University of Vienna (Mollusc)']},
-                'specimen_voucher': {'mandatory': True,
-                                     'field': 'VOUCHER_ID'},
-                'specimen_id': {'mandatory': True,
-                                'field': 'SPECIMEN_ID'},
-                'GAL_sample_id': {'mandatory': True,
-                                  'field': 'GAL_SAMPLE_ID'},
-                'culture_or_strain_id': {'mandatory': False,
-                                         'field': 'CULTURE_OR_STRAIN_ID'}}
 
 
 def validate_ena_submittable(sample):
