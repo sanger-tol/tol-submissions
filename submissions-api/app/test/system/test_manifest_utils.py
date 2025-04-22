@@ -209,7 +209,6 @@ class TestManifestUtils(BaseTestCase):
 
         # ERGA - in ERGA project
         self.manifest1.project_name = 'ERGA'
-        print(self.sample1.manifest.project_name)
         results = validate_specimen_id(self.sample1)
         self.assertEqual(results, [])
 
@@ -545,7 +544,6 @@ class TestManifestUtils(BaseTestCase):
         db.session.add(self.sample1)
 
         number_of_errors, results = validate_manifest(self.manifest1)
-        print(results)
         self.assertEqual(number_of_errors, 0)
         self.assertEqual(len(results), 1)
         self.assertEqual(len(results[0]['results']), 0)
@@ -620,7 +618,6 @@ class TestManifestUtils(BaseTestCase):
                      'severity': 'ERROR'},
                     {'field': 'GAL_SAMPLE_ID', 'message': 'Must not be empty',
                      'severity': 'ERROR'}]
-
         self.assertEqual(results, expected)
 
     def test_validate_against_ena_checklist_pass(self):

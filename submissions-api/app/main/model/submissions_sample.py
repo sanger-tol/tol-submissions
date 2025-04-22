@@ -5,6 +5,7 @@
 import re
 
 from .base import Base, db
+from ..ena_utils import get_ena_checklist
 
 
 class SubmissionsSample(Base):
@@ -103,53 +104,90 @@ class SubmissionsSample(Base):
     def to_ena_dict(self):
         # Listed in the order they appear on the ENA checklist
         ret = {'ENA-CHECKLIST': {'value': 'ERC000053'}}
-        ret['organism part'] = {'value': self.organism_part.replace('_', ' ')}
-        ret['lifestage'] = {
-            'value': 'spore-bearing structure' if self.lifestage == 'SPORE_BEARING_STRUCTURE'
-            else self.lifestage.replace('_', ' ')}
-        ret['project name'] = {'value': self.manifest.project_name}
-        ret['tolid'] = {'value': self.tolid}
-        ret['collected by'] = {'value': self.collected_by.replace('_', ' ')}
-        ret['collection date'] = {'value': self.date_of_collection.replace('_', ' ').lower()}
-        ret['geographic location (country and/or sea)'] = {
-            'value': self.collection_country().replace('_', ' ')}
-        ret['geographic location (latitude)'] = {'value': self.decimal_latitude.replace('_', ' ').lower(),  # noqa
-                                                 'units': 'DD'}
-        ret['geographic location (longitude)'] = {'value': self.decimal_longitude.replace('_', ' ').lower(),  # noqa
-                                                  'units': 'DD'}
-        ret['geographic location (region and locality)'] = {
-            'value': self.collection_region().replace('_', ' ')}
-        ret['identified_by'] = {'value': self.identified_by.replace('_', ' ')}
+        ret = ret | self.__convert_to_ena_format('organism part', self.organism_part)
+        ret = ret | self.__convert_to_ena_format('lifestage', self.lifestage)
+        ret = ret | self.__convert_to_ena_format('project name', self.manifest.project_name)
+        ret = ret | self.__convert_to_ena_format('tolid', self.tolid)
+        ret = ret | self.__convert_to_ena_format('collected_by', self.collected_by)
+        ret = ret | self.__convert_to_ena_format('collection date', self.date_of_collection)
+        ret = ret | self.__convert_to_ena_format(
+            'geographic location (country and/or sea)',
+            self.collection_country()
+        )
+        ret = ret | self.__convert_to_ena_format(
+            'geographic location (latitude)',
+            self.decimal_latitude, 'DD'
+        )
+        ret = ret | self.__convert_to_ena_format(
+            'geographic location (longitude)',
+            self.decimal_longitude,
+            'DD'
+        )
+        ret = ret | self.__convert_to_ena_format(
+            'geographic location (region and locality)',
+            self.collection_region()
+        )
+        ret = ret | self.__convert_to_ena_format('identified_by', self.identified_by)
         if self.depth is not None:
-            ret['geographic location (depth)'] = {'value': self.depth,
-                                                  'units': 'm'}
+            ret = ret | self.__convert_to_ena_format(
+                'geographic location (depth)',
+                self.depth,
+                'm'
+            )
         if self.elevation is not None:
-            ret['geographic location (elevation)'] = {'value': self.elevation,
-                                                      'units': 'm'}
-        ret['habitat'] = {'value': self.habitat.replace('_', ' ')}
-        ret['identifier_affiliation'] = {'value': self.identifier_affiliation.replace('_', ' ')}
+            ret = ret | self.__convert_to_ena_format(
+                'geographic location (elevation)',
+                self.elevation,
+                'm'
+            )
+        ret = ret | self.__convert_to_ena_format('habitat', self.habitat)
+        ret = ret | self.__convert_to_ena_format(
+            'identifier_affiliation',
+            self.identifier_affiliation
+        )
         if self.original_collection_date is not None:
-            ret['original collection date'] = {'value': self.original_collection_date}
+            ret = ret | self.__convert_to_ena_format(
+                'original collection date',
+                self.original_collection_date
+            )
         if self.original_geographic_location is not None:
-            ret['original geographic location'] = {'value': self.original_geographic_location.replace('_', ' ')}  # noqa
+            ret = ret | self.__convert_to_ena_format(
+                'original geographic location',
+                self.original_geographic_location
+            )
         if self.sample_derived_from is not None:
-            ret['sample derived from'] = {'value': self.sample_derived_from}
+            ret = ret | self.__convert_to_ena_format(
+                'sample derived from',
+                self.sample_derived_from
+            )
         if self.sample_same_as is not None:
-            ret['sample same as'] = {'value': self.sample_same_as}
+            ret = ret | self.__convert_to_ena_format('sample same as', self.sample_same_as)
         if self.sample_symbiont_of is not None:
-            ret['sample symbiont of'] = {'value': self.sample_symbiont_of}
-        ret['sex'] = {'value': self.sex.replace('_', ' ')}
+            ret = ret | self.__convert_to_ena_format(
+                'sample symbiont of',
+                self.sample_symbiont_of
+            )
+        ret = ret | self.__convert_to_ena_format('sex', self.sex)
         if self.relationship is not None:
-            ret['relationship'] = {'value': self.relationship.replace('_', ' ')}
+            ret = ret | self.__convert_to_ena_format('relationship', self.relationship)
         if self.symbiont is not None:
-            ret['symbiont'] = {'value': 'Y' if self.symbiont == 'SYMBIONT' else 'N'}
-        ret['collecting institution'] = {'value': self.collector_affiliation.replace('_', ' ')}
-        ret['GAL'] = {'value': self.GAL.replace('_', ' ')}
-        ret['specimen_voucher'] = {'value': self.voucher_id.replace('_', ' ')}
-        ret['specimen_id'] = {'value': self.specimen_id.replace('_', ' ')}
-        ret['GAL_sample_id'] = {'value': self.GAL_sample_id.replace('_', ' ')}
+            ret = ret | self.__convert_to_ena_format(
+                'symbiont',
+                'Y' if self.symbiont == 'SYMBIONT' else 'N'
+            )
+        ret = ret | self.__convert_to_ena_format(
+            'collecting institution',
+            self.collector_affiliation
+        )
+        ret = ret | self.__convert_to_ena_format('GAL', self.GAL)
+        ret = ret | self.__convert_to_ena_format('specimen_voucher', self.voucher_id)
+        ret = ret | self.__convert_to_ena_format('specimen_id', self.specimen_id)
+        ret = ret | self.__convert_to_ena_format('GAL_sample_id', self.GAL_sample_id)
         if self.culture_or_strain_id is not None:
-            ret['culture_or_strain_id'] = {'value': self.culture_or_strain_id.replace('_', ' ')}
+            ret = ret | self.__convert_to_ena_format(
+                'culture or strain id',
+                self.culture_or_strain_id
+            )
         return ret
 
     def is_symbiont(self):
@@ -483,3 +521,33 @@ class SubmissionsSample(Base):
         'UNIVERSITY OF VIENNA (CEPHALOPOD)': [{'prefix': 'VIEC'}],
         'UNIVERSITY OF ORGEON': [{'prefix': 'UOREG'}]
     }
+
+    def __convert_to_ena_format(self, ena_field_name, value, units: str | None = None):
+        if value is None:
+            return {}
+        # Special case for lifestage
+        if ena_field_name == 'lifestage' and value == 'SPORE_BEARING_STRUCTURE':
+            return 'spore-bearing structure'
+
+        # Remove underscores and replace with spaces
+        value = value.replace('_', ' ')
+
+        # Lowercase certain fields
+        if ena_field_name in ['collection date', 'geographic location (latitude)',
+                              'geographic location (longitude)']:
+            value = value.lower()
+
+        # Convert to value as in ENA checklist
+        ena_checklist = get_ena_checklist()
+        if ena_field_name in ena_checklist and 'allowed_values' in ena_checklist[ena_field_name]:
+            lookup_dict = {
+                val.lower(): val
+                for val in ena_checklist[ena_field_name]['allowed_values']
+            }
+            if value.lower() in lookup_dict:
+                value = lookup_dict[value.lower()]
+
+        # Some need units
+        if units is not None:
+            return {ena_field_name: {'value': value, 'units': units}}
+        return {ena_field_name: {'value': value}}

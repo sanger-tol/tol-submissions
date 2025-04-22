@@ -65,15 +65,16 @@ class TestSubmissionsSample(BaseTestCase):
         sample.depth = '1000'
         sample.relationship = 'child of 1234'
         sample.manifest = manifest
+        sample.tolid = 'abCdeFghi1'
 
         expected = {'ENA-CHECKLIST': {'value': 'ERC000053'},
                     'organism part': {'value': 'MUSCLE'},
-                    'lifestage': {'value': 'ADULT'},
+                    'lifestage': {'value': 'adult'},
                     'project name': {'value': 'AwesomeProject'},
-                    'tolid': {'value': None},
-                    'collected by': {'value': 'ALEX COLLECTOR'},
+                    'tolid': {'value': 'abCdeFghi1'},
+                    'collected_by': {'value': 'ALEX COLLECTOR'},
                     'collection date': {'value': '2020-09-01'},
-                    'geographic location (country and/or sea)': {'value': 'UNITED KINGDOM'},
+                    'geographic location (country and/or sea)': {'value': 'United Kingdom'},
                     'geographic location (latitude)': {'units': 'DD', 'value': '+50.12345678'},
                     'geographic location (longitude)': {'units': 'DD', 'value': '-1.98765432'},
                     'geographic location (region and locality)': {'value': 'DARK FOREST'},
