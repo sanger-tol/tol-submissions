@@ -399,7 +399,7 @@ class SubmissionsSample(Base):
                   {'python_name': 'size_of_tissue_in_tube',
                    'field_name': 'SIZE_OF_TISSUE_IN_TUBE',
                    'required': False,
-                   'allowed_values': ['VS', 'S', 'M', 'L', 'SINGLE_CELL', 'NOT_COLLECTED',
+                   'allowed_values': ['MICRO', 'VS', 'S', 'M', 'L', 'SINGLE_CELL', 'NOT_COLLECTED',
                                       'NOT_APPLICABLE', 'NOT_PROVIDED'],
                    'sts_api_name': 'tissue_size_size'},
                   {'python_name': 'tissue_removed_for_barcoding',
