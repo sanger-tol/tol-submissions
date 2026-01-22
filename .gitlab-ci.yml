@@ -4,8 +4,9 @@
 
 include:
   - project: 'tol/tol-core'
-    ref: v1.3.8
+    ref: v1.7.7
     file: '/gitlab/app.yml'
 
 variables:
   APP_NAME: "submissions"
+  DISABLE_UI_LINT: "true"
