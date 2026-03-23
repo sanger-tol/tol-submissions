@@ -527,7 +527,7 @@ class SubmissionsSample(Base):
             return {}
         # Special case for lifestage
         if ena_field_name == 'lifestage' and value == 'SPORE_BEARING_STRUCTURE':
-            return 'spore-bearing structure'
+            return {ena_field_name: {'value': 'spore-bearing structure'}}
 
         # Remove underscores and replace with spaces
         value = value.replace('_', ' ')
