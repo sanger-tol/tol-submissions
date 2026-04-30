@@ -100,14 +100,8 @@ tolcore:
     name: ""
     host: ""
     port: "" # specify as a string
-  dbutils:
-    image:
-      repository: ""
-      tag: ""
   schemaspy:
-    image:
-      repository: ""
-      tag: ""
+    enabled: true
   api:
     fullname: "submissions-api"
     probe_url: '/api/v1/ui'

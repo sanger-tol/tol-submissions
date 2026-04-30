@@ -7,7 +7,7 @@ version: '3.1'
 
 services:
   submissions-db:
-    image: postgres:11
+    image: postgres:14
     environment:
       - POSTGRES_USER
       - POSTGRES_PASSWORD
@@ -84,7 +84,7 @@ services:
       - ./submissions-api/migrations/alembic/versions:/migrations/alembic/versions
 
   submissions-dbutils:
-    image: gitlab-registry.internal.sanger.ac.uk/tol/tol-core/dbutils:1.0.2
+    image: gitlab-registry.internal.sanger.ac.uk/tol/tol-core/dbutils:1.0.10
     restart: always
     environment:
       - POSTGRES_USER
